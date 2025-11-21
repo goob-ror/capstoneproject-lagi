@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Istok+Web:ital,wght@0,400;0,700;1,400;1,700&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+        body {
+            background-color: #B6FF8C;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        button {
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+        }
+
+        .container {
+            background-color: #FFFFFF;
+            border-radius: 25px;
+            width: 500px;
+            height: 450px;
+            padding: 30px 30px 30px 30px;
+        }
+
+        .rows-one {
+            width: 100%;
+            display: flex;
+        }
+
+        .logo {
+            width: 100%;
+            margin-left: -21px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .logo img {
+            width: 76px;
+            height: 74px;
+        }
+
+        .rows-two {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            margin: 20px 0 0 0;
+            padding: 0;
+            text-align: center;
+        }
+
+        .title {
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        .title h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-style: normal;
+            font-weight: 700;
+            font-size: 24px;
+            line-height: 36px;
+            color: #515151;
+            margin: 0;
+            padding: 0;
+        }
+
+        .sub-title {
+            width: 100%;
+            margin: -5px 0 0 0;
+            padding: 0;
+        }
+
+        .sub-title p {
+            font-family: 'Istok Web', sans-serif;
+            font-style: normal;
+            font-weight: 400;
+            font-size: 16px;
+            line-height: 24px;
+            color: #515151;
+            margin: 0;
+            padding: 0;
+        }
+
+        .rows-three {
+            width: auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        label {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            color: #515151;
+            font-size: 14px;
+            line-height: 10px;
+        }
+
+        .input {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input input {
+            width: 29.5rem;
+            height: 40px;
+            border-radius: 6px;
+            border: 1px solid #D4D4D4;
+            padding: 0 12px;
+            font-family: 'Montserrat', sans-serif;
+            font-style: normal;
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 24px;
+            color: #D4D4D4;
+            margin: 6px 0 0 0;
+        }
+
+        .password a {
+            font-family: 'Istok Web', sans-serif;
+            font-style: normal;
+            font-weight: 400;
+            font-size: 12px;
+            line-height: 18px;
+            color: #919191;
+            text-decoration: none;
+            margin: 0 0 0 0;
+        }
+
+        .username, .password {
+            margin: 0 0 15px 0;
+        }
+
+        .password {
+            margin: 0 0 40px 0;
+        }
+
+        .button {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+        }
+
+        .button button {
+            width: 250px;
+            height: 35px;
+            border-radius: 10px;
+            margin: 0 0 -10px 0;
+            background-color: #22C55E;
+            border: none;
+            cursor: pointer;
+            font-family: 'Istok Web', sans-serif;
+            font-style: normal;
+            font-weight: 700;
+            font-size: 16px;
+            line-height: 24px;
+            color: #FFFFFF;
+        }
+
+        .button p {
+            font-family: 'Montserrat', sans-serif;
+            font-style: normal;
+            font-weight: 500;
+            color: #515151;
+            font-size: 14px;
+        }
+
+        .register {
+            color: #22C55E;
+            text-decoration: none;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 500;
+        }
+
+        .register p {
+            font-family: 'Montserrat', sans-serif;
+            font-style: normal;
+            font-weight: 400;
+            font-size: 12px;
+            line-height: 18px;
+            color: #919191;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="rows-one">
+            <div class="return-button">
+                <button>
+                    <svg width="13" height="21" viewBox="0 0 13 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M10.3333 20.6667L0 10.3333L10.3333 1.90735e-06L12.9167 2.58334L5.16667 10.3333L12.9167 18.0833L10.3333 20.6667Z" fill="#22C55E"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="logo">
+                <img src="images/logo-withText.png" alt="logo">
+            </div>
+        </div>
+        <div class="rows-two">
+            <div class="title">
+                <h1>Selamat Datang!</h1>
+            </div>
+            <div class="sub-title">
+                <p>Login untuk mengakses akun Anda</p>
+            </div>
+        </div>
+        <div class="rows-three">
+            <div class="input">
+                <form action="/login" method="post">
+                    <div class="username">
+                        <label for="username">Username</label>
+                        <input type="text" name="username" placeholder="Masukkan username Anda" required>
+                    </div>
+                    <div class="password">
+                        <label for="password">Password</label>
+                        <input type="password" name="password" placeholder="Masukkan password Anda" required>
+                        <a href="#">Lupa password?</a>
+                    </div>
+                    <div class="button">
+                        <button type="submit">LOGIN</button>
+                        <p>Belum punya akun? <a class="register" href="/register">Register!</a></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
