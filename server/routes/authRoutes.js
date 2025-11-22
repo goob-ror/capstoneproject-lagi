@@ -50,7 +50,7 @@ router.post('/login', async (req, res) => {
     );
 
     if (users.length === 0) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.status(401).json({ message: 'Usename atau password salah!' });
     }
 
     const user = users[0];
@@ -58,7 +58,7 @@ router.post('/login', async (req, res) => {
     // Check password
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.status(401).json({ message: 'Username atau password salah!' });
     }
 
     // Check if approved
