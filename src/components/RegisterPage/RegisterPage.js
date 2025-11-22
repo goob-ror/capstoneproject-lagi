@@ -1,10 +1,31 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import RegisterPresenter from '../../presenters/RegisterPresenter';
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
     username: '',
     password: ''
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
+
+  const [presenter] = useState(() => new RegisterPresenter({
+    setLoading,
+    setError: (msg) => setError(msg),
+    clearError: () => setError(''),
+    onRegisterSuccess: () => navigate('/waiting-approval'),
+    navigateToLogin: () => navigate('/login')
+  }));
+
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => setError(''), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
 
   const handleChange = (e) => {
     setFormData({
@@ -15,7 +36,7 @@ const RegisterPage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Register attempt:', formData);
+    presenter.handleRegister(formData);
   };
 
   const handleBack = () => {
@@ -32,6 +53,16 @@ const RegisterPage = () => {
       height: '500px',
       borderRadius: '25px',
       backgroundColor: '#FFFFFF'
+    },
+    errorMessage: {
+      backgroundColor: '#FEE2E2',
+      border: '1px solid #FCA5A5',
+      color: '#991B1B',
+      padding: '10px',
+      borderRadius: '6px',
+      marginBottom: '15px',
+      fontSize: '14px',
+      fontFamily: "'Montserrat', sans-serif"
     },
     imageContainer: {
       backgroundImage: 'url("/images/mothers-health.png")',
@@ -103,7 +134,6 @@ const RegisterPage = () => {
       fontWeight: '400',
       fontSize: '14px',
       lineHeight: '24px',
-      color: '#D4D4D4',
       margin: '6px 0 0 0'
     },
     passwordLink: {
@@ -120,7 +150,41 @@ const RegisterPage = () => {
       margin: '0 0 15px 0'
     },
     password: {
-      margin: '0 0 40px 0'
+      margin: '0 0 40px 0',
+      position: 'relative'
+    },
+    passwordInputWrapper: {
+      position: 'relative',
+      display: 'flex',
+      alignItems: 'center'
+    },
+    passwordToggle: {
+      position: 'absolute',
+      right: '12px',
+      top: '50%',
+      transform: 'translateY(-40%)',
+      background: 'none',
+      border: 'none',
+      cursor: 'pointer',
+      padding: '5px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      color: '#919191'
+    },
+    inputFieldWithIcon: {
+      width: '29.5rem',
+      height: '40px',
+      borderRadius: '6px',
+      border: '1px solid #D4D4D4',
+      padding: '0 45px 0 12px',
+      fontFamily: "'Montserrat', sans-serif",
+      fontStyle: 'normal',
+      fontWeight: '400',
+      fontSize: '14px',
+      lineHeight: '24px',
+      color: '#515151',
+      margin: '6px 0 0 0'
     },
     button: {
       width: '100%',
@@ -181,6 +245,7 @@ const RegisterPage = () => {
             <p style={styles.logoP}>Buat akun untuk mulai mendata pasien di Puskesmas Palaran</p>
           </div>
           <form onSubmit={handleSubmit} style={styles.form}>
+            {error && <div style={styles.errorMessage}>{error}</div>}
             <div style={styles.username}>
               <label htmlFor="username" style={styles.label}>Username</label>
               <input 
@@ -196,21 +261,43 @@ const RegisterPage = () => {
             </div>
             <div style={styles.password}>
               <label htmlFor="password" style={styles.label}>Password</label>
-              <input 
-                type="password" 
-                id="password"
-                name="password" 
-                placeholder="Masukkan password Anda" 
-                value={formData.password}
-                onChange={handleChange}
-                required 
-                style={styles.inputField}
-              />
-              <a href="#" style={styles.passwordLink}>Lupa password?</a>
+              <div style={styles.passwordInputWrapper}>
+                <input 
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  name="password" 
+                  placeholder="Masukkan password Anda (min. 6 karakter)" 
+                  value={formData.password}
+                  onChange={handleChange}
+                  required 
+                  style={styles.inputFieldWithIcon}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={styles.passwordToggle}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  ) : (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  )}
+                </button>
+              </div>
             </div>
             <div style={styles.button}>
-              <button type="submit" style={styles.loginButton}>LOGIN</button>
-              <p style={styles.buttonP}>Sudah punya akun? <a className="register" href="/login" style={styles.register}>Login!</a></p>
+              <button type="submit" style={styles.loginButton} disabled={loading}>
+                {loading ? 'LOADING...' : 'REGISTER'}
+              </button>
+              <p style={styles.buttonP}>
+                Sudah punya akun? <a className="register" href="/login" style={styles.register}>Login!</a>
+              </p>
             </div>
           </form>
         </div>
