@@ -3,6 +3,7 @@ import LoginPage from './components/LoginPage/LoginPage';
 import RegisterPage from './components/RegisterPage/RegisterPage';
 import WaitingApprovalPage from './components/AuthPage/AuthPage';
 import Dashboard from './components/Dashboard/Dashboard';
+import OfflineIndicator from './components/OfflineIndicator/OfflineIndicator';
 import AuthModel from './models/AuthModel';
 import './App.css';
 
@@ -16,6 +17,7 @@ function App() {
   return (
     <Router>
       <div className="App">
+        <OfflineIndicator />
         <Routes>
           <Route path="/" element={<Navigate to="/login" />} />
           <Route path="/login" element={<LoginPage />} />

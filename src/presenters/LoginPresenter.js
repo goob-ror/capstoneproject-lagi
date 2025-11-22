@@ -1,4 +1,5 @@
 import AuthModel from '../models/AuthModel';
+import indexedDBService from '../services/indexedDBService';
 
 class LoginPresenter {
   constructor(view) {
@@ -13,8 +14,20 @@ class LoginPresenter {
 
       const data = await this.model.login(username, password);
 
-      this.model.saveToken(data.token);
-      this.model.saveUser(data.user);
+      await this.model.saveToken(data.token);
+      await this.model.saveUser(data.user);
+
+      // Save session to IndexedDB for offline access
+      try {
+        await indexedDBService.saveSession({
+          token: data.token,
+          user: data.user,
+          username: username
+        });
+      } catch (dbError) {
+        console.warn('Failed to save session to IndexedDB:', dbError);
+        // Don't block login if IndexedDB fails
+      }
 
       this.view.onLoginSuccess();
     } catch (error) {

@@ -277,6 +277,7 @@ const LoginPage = () => {
                 placeholder="Masukkan username Anda" 
                 value={formData.username}
                 onChange={handleChange}
+                autoComplete="username"
                 required 
                 style={styles.inputField}
               />
@@ -291,6 +292,7 @@ const LoginPage = () => {
                   placeholder="Masukkan password Anda" 
                   value={formData.password}
                   onChange={handleChange}
+                  autoComplete="current-password"
                   required 
                   style={styles.inputFieldWithIcon}
                 />
@@ -312,7 +314,7 @@ const LoginPage = () => {
                   )}
                 </button>
               </div>
-              <a href="#" style={styles.passwordLink}>Lupa password?</a>
+              <button type="button" onClick={(e) => e.preventDefault()} style={{...styles.passwordLink, background: 'none', border: 'none', padding: 0, cursor: 'pointer'}}>Lupa password?</button>
             </div>
             <div style={styles.button}>
               <button type="submit" style={styles.loginButton} disabled={loading}>

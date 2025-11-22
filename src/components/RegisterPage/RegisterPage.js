@@ -255,6 +255,7 @@ const RegisterPage = () => {
                 placeholder="Masukkan username Anda" 
                 value={formData.username}
                 onChange={handleChange}
+                autoComplete="username"
                 required 
                 style={styles.inputField}
               />
@@ -269,6 +270,7 @@ const RegisterPage = () => {
                   placeholder="Masukkan password Anda (min. 6 karakter)" 
                   value={formData.password}
                   onChange={handleChange}
+                  autoComplete="new-password"
                   required 
                   style={styles.inputFieldWithIcon}
                 />
