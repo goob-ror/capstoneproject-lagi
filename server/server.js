@@ -4,6 +4,8 @@ require('dotenv').config();
 
 const authRoutes = require('./routes/authRoutes');
 const ibuRoutes = require('./routes/ibuRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
+const auth = require('./middleware/auth');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -18,6 +20,7 @@ app.use(express.static(path.join(__dirname, '../build')));
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/ibu', ibuRoutes);
+app.use('/api/dashboard', auth, dashboardRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

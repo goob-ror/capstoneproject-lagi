@@ -1,4 +1,5 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 import LoginPage from './components/LoginPage/LoginPage';
 import RegisterPage from './components/RegisterPage/RegisterPage';
 import WaitingApprovalPage from './components/AuthPage/AuthPage';
@@ -13,26 +14,49 @@ const ProtectedRoute = ({ children }) => {
   return authModel.isAuthenticated() ? children : <Navigate to="/login" />;
 };
 
+// Layout wrapper to handle body classes
+function AppLayout() {
+  const location = useLocation();
+  
+  useEffect(() => {
+    // Remove all body classes
+    document.body.className = '';
+    
+    // Add appropriate class based on route
+    if (location.pathname === '/dashboard') {
+      document.body.classList.add('dashboard-page');
+    } else {
+      document.body.classList.add('login-page');
+    }
+  }, [location]);
+  
+  const isDashboard = location.pathname === '/dashboard';
+  
+  return (
+    <div className={isDashboard ? 'App' : 'App centered'}>
+      <OfflineIndicator />
+      <Routes>
+        <Route path="/" element={<Navigate to="/login" />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/waiting-approval" element={<WaitingApprovalPage />} />
+        <Route 
+          path="/dashboard" 
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } 
+        />
+      </Routes>
+    </div>
+  );
+}
+
 function App() {
   return (
     <Router>
-      <div className="App">
-        <OfflineIndicator />
-        <Routes>
-          <Route path="/" element={<Navigate to="/login" />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/waiting-approval" element={<WaitingApprovalPage />} />
-          <Route 
-            path="/dashboard" 
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            } 
-          />
-        </Routes>
-      </div>
+      <AppLayout />
     </Router>
   );
 }
