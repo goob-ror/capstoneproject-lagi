@@ -40,12 +40,18 @@ function registerValidSW(swUrl, config) {
         installingWorker.onstatechange = () => {
           if (installingWorker.state === 'installed') {
             if (navigator.serviceWorker.controller) {
-              console.log('New content is available; please refresh.');
+              // New content available - automatically activate
+              console.log('[PWA] New content available, activating...');
+              if (installingWorker.state === 'installed') {
+                // Tell the new service worker to skip waiting
+                installingWorker.postMessage({ type: 'SKIP_WAITING' });
+              }
               if (config && config.onUpdate) {
                 config.onUpdate(registration);
               }
             } else {
-              console.log('Content is cached for offline use.');
+              // Content cached for first time
+              console.log('[PWA] Content cached for offline use');
               if (config && config.onSuccess) {
                 config.onSuccess(registration);
               }
@@ -55,7 +61,7 @@ function registerValidSW(swUrl, config) {
       };
     })
     .catch((error) => {
-      console.error('Error during service worker registration:', error);
+      console.error('[PWA] Service worker registration failed:', error);
     });
 }
 

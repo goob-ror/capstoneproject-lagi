@@ -1,5 +1,5 @@
 import AuthModel from '../models/AuthModel';
-import indexedDBService from '../services/indexedDBService';
+import sessionManager from '../services/sessionManager';
 
 class LoginPresenter {
   constructor(view) {
@@ -14,15 +14,29 @@ class LoginPresenter {
 
       const data = await this.model.login(username, password);
 
-      await this.model.saveToken(data.token);
-      await this.model.saveUser(data.user);
+      // Check if this is an offline login
+      if (data.offline) {
+        // Restore from cached session to localStorage only (no IndexedDB write)
+        sessionManager.saveToLocalStorage(data.token, data.user);
+        this.view.setError('⚠️ Logged in offline mode. Some features may be limited.');
+        setTimeout(() => this.view.onLoginSuccess(), 1500);
+        return;
+      }
 
-      // Save session to IndexedDB for offline access
+      // Online login - save to localStorage
+      sessionManager.saveToLocalStorage(data.token, data.user);
+
+      // Save complete session to IndexedDB ONLY when online
       try {
-        await indexedDBService.saveSession({
+        // Hash password for offline validation
+        const passwordHash = await this.model.hashPassword(password);
+        
+        // sessionManager will only save if online
+        await sessionManager.saveSession({
           token: data.token,
           user: data.user,
-          username: username
+          username: username,
+          passwordHash: passwordHash
         });
       } catch (dbError) {
         console.warn('Failed to save session to IndexedDB:', dbError);

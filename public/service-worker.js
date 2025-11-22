@@ -1,131 +1,228 @@
 /* eslint-disable no-restricted-globals */
 
-const CACHE_NAME = 'ibundacare-v2'; // Updated to force cache refresh
-const urlsToCache = [
+const CACHE_NAME = 'ibundacare-v3'; // Updated for enhanced caching
+const RUNTIME_CACHE = 'ibundacare-runtime-v3';
+
+// Core files to cache immediately
+const CORE_CACHE_FILES = [
   '/',
   '/index.html',
-  '/static/css/main.css',
-  '/static/js/main.js',
-  '/images/logo-withText.png',
-  '/images/logo-noText.png',
-  '/images/mothers-health.png',
-  '/manifest.json'
+  '/manifest.json',
+  '/favicon.ico'
 ];
 
-// Install event - cache resources
+// Images to cache
+const IMAGE_CACHE_FILES = [
+  '/images/logo-withText.png',
+  '/images/logo-noText.png',
+  '/images/mothers-health.png'
+];
+
+// Install event - cache core resources
 self.addEventListener('install', (event) => {
+  console.log('[ServiceWorker] Installing...');
+  
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('Opened cache');
-        return cache.addAll(urlsToCache.map(url => new Request(url, { cache: 'reload' })))
-          .catch((error) => {
-            console.error('Failed to cache:', error);
+        console.log('[ServiceWorker] Caching core files');
+        // Cache core files first
+        return cache.addAll(CORE_CACHE_FILES)
+          .then(() => {
+            // Then cache images (don't fail if images fail)
+            return cache.addAll(IMAGE_CACHE_FILES).catch((error) => {
+              console.warn('[ServiceWorker] Some images failed to cache:', error);
+            });
           });
       })
+      .then(() => {
+        console.log('[ServiceWorker] Core files cached successfully');
+        self.skipWaiting();
+      })
+      .catch((error) => {
+        console.error('[ServiceWorker] Cache installation failed:', error);
+      })
   );
-  self.skipWaiting();
 });
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
+  console.log('[ServiceWorker] Activating...');
+  
+  const currentCaches = [CACHE_NAME, RUNTIME_CACHE];
+  
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('Deleting old cache:', cacheName);
+          if (!currentCaches.includes(cacheName)) {
+            console.log('[ServiceWorker] Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
       );
+    }).then(() => {
+      console.log('[ServiceWorker] Activated successfully');
+      return self.clients.claim();
     })
   );
-  self.clients.claim();
 });
 
-// Fetch event - serve from cache, fallback to network
+// Fetch event - intelligent caching strategy
 self.addEventListener('fetch', (event) => {
   const { request } = event;
+  const url = new URL(request.url);
 
   // Skip cross-origin requests
-  if (!request.url.startsWith(self.location.origin)) {
+  if (url.origin !== self.location.origin) {
     return;
   }
 
   // API requests - Network first, then cache
-  if (request.url.includes('/api/')) {
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          // Clone the response
-          const responseToCache = response.clone();
-          
-          // Cache successful GET requests
-          if (request.method === 'GET' && response.status === 200) {
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(request, responseToCache);
-            });
-          }
-          
-          return response;
-        })
-        .catch(() => {
-          // If network fails, try cache
-          return caches.match(request).then((cachedResponse) => {
-            if (cachedResponse) {
-              return cachedResponse;
-            }
-            // Return offline response
-            return new Response(
-              JSON.stringify({ 
-                error: 'Offline', 
-                message: 'You are currently offline. Please check your connection.' 
-              }),
-              {
-                status: 503,
-                statusText: 'Service Unavailable',
-                headers: new Headers({
-                  'Content-Type': 'application/json'
-                })
-              }
-            );
-          });
-        })
-    );
+  if (url.pathname.startsWith('/api/')) {
+    event.respondWith(networkFirstStrategy(request));
     return;
   }
 
-  // Static assets - Cache first, then network
-  event.respondWith(
-    caches.match(request)
-      .then((cachedResponse) => {
-        if (cachedResponse) {
-          return cachedResponse;
-        }
+  // Navigation requests (pages) - Network first, fallback to cache
+  if (request.mode === 'navigate') {
+    event.respondWith(navigationStrategy(request));
+    return;
+  }
 
-        return fetch(request).then((response) => {
-          // Don't cache non-successful responses
-          if (!response || response.status !== 200 || response.type === 'error') {
-            return response;
-          }
+  // Static assets (JS, CSS, images) - Cache first, then network
+  if (isStaticAsset(url.pathname)) {
+    event.respondWith(cacheFirstStrategy(request));
+    return;
+  }
 
-          const responseToCache = response.clone();
+  // Default: Network first
+  event.respondWith(networkFirstStrategy(request));
+});
 
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(request, responseToCache);
-          });
+// Network first strategy (for API calls)
+async function networkFirstStrategy(request) {
+  try {
+    const networkResponse = await fetch(request);
+    
+    // Cache successful GET requests
+    if (request.method === 'GET' && networkResponse.status === 200) {
+      const cache = await caches.open(RUNTIME_CACHE);
+      cache.put(request, networkResponse.clone());
+    }
+    
+    return networkResponse;
+  } catch (error) {
+    // Network failed, try cache
+    const cachedResponse = await caches.match(request);
+    
+    if (cachedResponse) {
+      console.log('[ServiceWorker] Serving from cache (offline):', request.url);
+      return cachedResponse;
+    }
+    
+    // Return offline response for API calls
+    return new Response(
+      JSON.stringify({ 
+        error: 'Offline', 
+        message: 'You are currently offline. Please check your connection.' 
+      }),
+      {
+        status: 503,
+        statusText: 'Service Unavailable',
+        headers: { 'Content-Type': 'application/json' }
+      }
+    );
+  }
+}
 
-          return response;
-        });
+// Cache first strategy (for static assets)
+async function cacheFirstStrategy(request) {
+  const cachedResponse = await caches.match(request);
+  
+  if (cachedResponse) {
+    // Return cached version immediately
+    // Update cache in background
+    updateCache(request);
+    return cachedResponse;
+  }
+  
+  // Not in cache, fetch from network
+  try {
+    const networkResponse = await fetch(request);
+    
+    if (networkResponse.status === 200) {
+      const cache = await caches.open(RUNTIME_CACHE);
+      cache.put(request, networkResponse.clone());
+    }
+    
+    return networkResponse;
+  } catch (error) {
+    console.error('[ServiceWorker] Fetch failed:', error);
+    throw error;
+  }
+}
+
+// Navigation strategy (for page requests)
+async function navigationStrategy(request) {
+  try {
+    // Try network first
+    const networkResponse = await fetch(request);
+    
+    // Cache the page
+    const cache = await caches.open(RUNTIME_CACHE);
+    cache.put(request, networkResponse.clone());
+    
+    return networkResponse;
+  } catch (error) {
+    // Network failed, serve cached index.html
+    console.log('[ServiceWorker] Serving cached index.html for navigation');
+    const cachedResponse = await caches.match('/index.html');
+    
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+    
+    // No cache available
+    return new Response('Offline - No cached version available', {
+      status: 503,
+      statusText: 'Service Unavailable'
+    });
+  }
+}
+
+// Update cache in background
+async function updateCache(request) {
+  try {
+    const networkResponse = await fetch(request);
+    if (networkResponse.status === 200) {
+      const cache = await caches.open(RUNTIME_CACHE);
+      cache.put(request, networkResponse);
+    }
+  } catch (error) {
+    // Silently fail - we already have cached version
+  }
+}
+
+// Check if URL is a static asset
+function isStaticAsset(pathname) {
+  const staticExtensions = ['.js', '.css', '.png', '.jpg', '.jpeg', '.svg', '.gif', '.woff', '.woff2', '.ttf', '.ico'];
+  return staticExtensions.some(ext => pathname.endsWith(ext));
+}
+
+// Message handler - for communication with the app
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+  
+  if (event.data && event.data.type === 'CACHE_URLS') {
+    event.waitUntil(
+      caches.open(RUNTIME_CACHE).then((cache) => {
+        return cache.addAll(event.data.urls);
       })
-      .catch(() => {
-        // Return offline page for navigation requests
-        if (request.mode === 'navigate') {
-          return caches.match('/index.html');
-        }
-      })
-  );
+    );
+  }
 });
 
 // Background sync for offline actions (future enhancement)
@@ -137,7 +234,7 @@ self.addEventListener('sync', (event) => {
 
 async function syncData() {
   // Implement data synchronization logic here
-  console.log('Syncing data...');
+  console.log('[ServiceWorker] Syncing data...');
 }
 
 // Push notifications (future enhancement)

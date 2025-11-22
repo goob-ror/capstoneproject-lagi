@@ -64,6 +64,16 @@ const LoginPage = () => {
       fontSize: '14px',
       fontFamily: "'Montserrat', sans-serif"
     },
+    warningMessage: {
+      backgroundColor: '#FEF3C7',
+      border: '1px solid #FCD34D',
+      color: '#92400E',
+      padding: '10px',
+      borderRadius: '6px',
+      marginBottom: '15px',
+      fontSize: '14px',
+      fontFamily: "'Montserrat', sans-serif"
+    },
     rowsOne: {
       width: '100%',
       display: 'flex'
@@ -266,7 +276,11 @@ const LoginPage = () => {
       
       <div style={styles.rowsThree}>
         <div style={styles.input}>
-          {error && <div style={styles.errorMessage}>{error}</div>}
+          {error && (
+            <div style={error.includes('⚠️') ? styles.warningMessage : styles.errorMessage}>
+              {error}
+            </div>
+          )}
           <form onSubmit={handleSubmit}>
             <div style={styles.username}>
               <label htmlFor="username" style={styles.label}>Username</label>
