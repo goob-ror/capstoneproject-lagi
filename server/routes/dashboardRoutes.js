@@ -108,18 +108,36 @@ router.get('/age-distribution', async (req, res) => {
   }
 });
 
-// Get Jumlah Kunjungan ANC per Bulan (Stacked Bar)
+// Get Jumlah Kunjungan ANC per Bulan (Stacked Bar) - Last 6 months including current
 router.get('/anc-per-month', async (req, res) => {
   try {
     const [results] = await db.query(`
+      WITH RECURSIVE months AS (
+        SELECT DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 5 MONTH), '%Y-%m') as month
+        UNION ALL
+        SELECT DATE_FORMAT(DATE_ADD(STR_TO_DATE(CONCAT(month, '-01'), '%Y-%m-%d'), INTERVAL 1 MONTH), '%Y-%m')
+        FROM months
+        WHERE month < DATE_FORMAT(CURDATE(), '%Y-%m')
+      ),
+      visit_types AS (
+        SELECT 'K1' as jenis_kunjungan
+        UNION SELECT 'K2'
+        UNION SELECT 'K3'
+        UNION SELECT 'K4'
+        UNION SELECT 'K5'
+        UNION SELECT 'K6'
+      )
       SELECT 
-        DATE_FORMAT(tanggal_kunjungan, '%Y-%m') as month,
-        jenis_kunjungan,
-        COUNT(*) as count
-      FROM antenatal_care
-      WHERE tanggal_kunjungan >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
-      GROUP BY month, jenis_kunjungan
-      ORDER BY month, jenis_kunjungan
+        m.month,
+        vt.jenis_kunjungan,
+        COALESCE(COUNT(anc.id), 0) as count
+      FROM months m
+      CROSS JOIN visit_types vt
+      LEFT JOIN antenatal_care anc 
+        ON DATE_FORMAT(anc.tanggal_kunjungan, '%Y-%m') = m.month
+        AND anc.jenis_kunjungan = vt.jenis_kunjungan
+      GROUP BY m.month, vt.jenis_kunjungan
+      ORDER BY m.month, vt.jenis_kunjungan
     `);
     res.json(results);
   } catch (error) {
@@ -133,29 +151,62 @@ router.get('/immunization-coverage', async (req, res) => {
   try {
     const [results] = await db.query(`
       SELECT 
-        COALESCE(i.kelurahan, 'Tidak Diketahui') as kelurahan,
-        COUNT(DISTINCT CASE WHEN anc.status_imunisasi_tt IS NOT NULL THEN k.id END) as tt_count,
-        COUNT(DISTINCT CASE WHEN anc.beri_tablet_fe = 1 THEN k.id END) as fe_count,
-        COUNT(DISTINCT k.id) as total_ibu
+        COALESCE(i.kelurahan, 'Lainnya') as kelurahan,
+        
+        -- 1. Total Ibu Hamil per Kelurahan
+        COUNT(DISTINCT i.id) as total_ibu,
+
+        -- 2. Hitung Ibu yang Lulus Fe 90 (Minimal 3x kunjungan dapat Fe)
+        SUM(CASE WHEN stats.jumlah_visit_fe >= 3 THEN 1 ELSE 0 END) as fe90_count,
+
+        -- 3. Hitung Ibu yang sudah Skrining TT (Minimal 1x ada data TT)
+        SUM(CASE WHEN stats.jumlah_visit_tt >= 1 THEN 1 ELSE 0 END) as tt_covered_count
+
       FROM ibu i
       JOIN kehamilan k ON i.id = k.forkey_ibu
-      LEFT JOIN antenatal_care anc ON k.id = anc.forkey_hamil
+      
+      -- SUBQUERY: Hitung statistik per kehamilan dulu
+      LEFT JOIN (
+        SELECT 
+          forkey_hamil,
+          -- Hitung berapa kali dapat Fe (Asumsi 1x = 30 butir, butuh 3x untuk 90)
+          SUM(CASE WHEN beri_tablet_fe = 1 THEN 1 ELSE 0 END) as jumlah_visit_fe,
+          -- Hitung berapa kali ada status TT
+          SUM(CASE WHEN status_imunisasi_tt IS NOT NULL THEN 1 ELSE 0 END) as jumlah_visit_tt
+        FROM antenatal_care
+        GROUP BY forkey_hamil
+      ) stats ON k.id = stats.forkey_hamil
+
       WHERE k.status_kehamilan = 'Hamil'
       GROUP BY i.kelurahan
-      ORDER BY kelurahan
+      ORDER BY i.kelurahan ASC
     `);
     
-    // Calculate percentages
-    const formatted = results.map(row => ({
-      kelurahan: row.kelurahan,
-      tt_percentage: row.total_ibu > 0 ? Math.round((row.tt_count / row.total_ibu) * 100) : 0,
-      fe_percentage: row.total_ibu > 0 ? Math.round((row.fe_count / row.total_ibu) * 100) : 0
-    }));
+    // Kalkulasi Persentase
+    const formatted = results.map(row => {
+      const total = Number(row.total_ibu);
+      const fe90 = Number(row.fe90_count);
+      const tt = Number(row.tt_covered_count);
+
+      return {
+        kelurahan: row.kelurahan,
+        total_ibu: total,
+        
+        // Persentase Fe 90
+        fe_percentage: total > 0 ? Math.round((fe90 / total) * 100) : 0,
+        fe_count_real: fe90, // Data mentah untuk tooltip (opsional)
+
+        // Persentase TT
+        tt_percentage: total > 0 ? Math.round((tt / total) * 100) : 0,
+        tt_count_real: tt    // Data mentah untuk tooltip (opsional)
+      };
+    });
     
     res.json(formatted);
+
   } catch (error) {
-    console.error('Error fetching immunization coverage:', error);
-    res.status(500).json({ message: 'Failed to fetch immunization coverage' });
+    console.error('Error fetching coverage:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 });
 
@@ -181,7 +232,7 @@ router.get('/risk-distribution', async (req, res) => {
   }
 });
 
-// Get Nearing Due Dates (Table) - Sorted by nearest, includes overdue
+// Get Nearing Due Dates (Table) - Sorted by nearest due date (soonest first)
 router.get('/nearing-due-dates', async (req, res) => {
   try {
     const [results] = await db.query(`
@@ -203,7 +254,7 @@ router.get('/nearing-due-dates', async (req, res) => {
       JOIN ibu i ON k.forkey_ibu = i.id
       WHERE k.status_kehamilan = 'Hamil'
       AND k.taksiran_persalinan IS NOT NULL
-      ORDER BY ABS(DATEDIFF(k.taksiran_persalinan, CURDATE())) ASC, k.taksiran_persalinan ASC
+      ORDER BY k.taksiran_persalinan ASC
     `);
     res.json(results);
   } catch (error) {

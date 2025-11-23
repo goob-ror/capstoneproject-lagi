@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import RegisterPresenter from '../../presenters/RegisterPresenter';
+import RegisterPresenter from './RegisterPage-presenter';
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({

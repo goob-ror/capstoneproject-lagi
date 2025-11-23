@@ -136,6 +136,19 @@ class DashboardModel {
       throw error;
     }
   }
+
+  getUser() {
+    const user = localStorage.getItem('user');
+    return user ? JSON.parse(user) : null;
+  }
+
+  removeToken() {
+    localStorage.removeItem('token');
+  }
+
+  removeUser() {
+    localStorage.removeItem('user');
+  }
 }
 
 export default DashboardModel;

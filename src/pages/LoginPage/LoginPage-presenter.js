@@ -1,10 +1,10 @@
-import AuthModel from '../models/AuthModel';
-import sessionManager from '../services/sessionManager';
+import LoginPageModel from './LoginPage-model';
+import sessionManager from '../../services/sessionManager';
 
 class LoginPresenter {
   constructor(view) {
     this.view = view;
-    this.model = new AuthModel();
+    this.model = new LoginPageModel();
   }
 
   async handleLogin(username, password) {

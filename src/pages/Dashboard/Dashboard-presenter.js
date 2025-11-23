@@ -1,4 +1,4 @@
-import DashboardModel from '../models/DashboardModel';
+import DashboardModel from './Dashboard-model';
 
 class DashboardPresenter {
   constructor(view) {
@@ -11,7 +11,6 @@ class DashboardPresenter {
       this.view.setLoading(true);
       this.view.clearError();
 
-      // Fetch all dashboard data in parallel
       const [
         stats,
         ibuByKelurahan,
@@ -46,6 +45,8 @@ class DashboardPresenter {
   }
 
   handleLogout() {
+    this.model.removeToken();
+    this.model.removeUser();
     this.view.onLogout();
   }
 

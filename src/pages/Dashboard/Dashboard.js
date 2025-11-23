@@ -2,17 +2,13 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Chart as ChartJS, ArcElement, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import { Pie, Bar } from 'react-chartjs-2';
-import DashboardPresenter from '../../presenters/DashboardPresenter';
-import AuthModel from '../../models/AuthModel';
+import DashboardPresenter from './Dashboard-presenter';
 import './Dashboard.css';
 
-// Register ChartJS components
 ChartJS.register(ArcElement, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const authModel = new AuthModel();
-  const user = authModel.getUser();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -23,6 +19,7 @@ const Dashboard = () => {
   const [immunizationCoverage, setImmunizationCoverage] = useState(null);
   const [riskDistribution, setRiskDistribution] = useState(null);
   const [nearingDueDates, setNearingDueDates] = useState(null);
+  const [user, setUser] = useState(null);
 
   const [presenter] = useState(() => new DashboardPresenter({
     setLoading,
@@ -35,14 +32,12 @@ const Dashboard = () => {
     displayImmunizationCoverage: (data) => setImmunizationCoverage(data),
     displayRiskDistribution: (data) => setRiskDistribution(data),
     displayNearingDueDates: (data) => setNearingDueDates(data),
-    onLogout: () => {
-      authModel.removeToken();
-      authModel.removeUser();
-      navigate('/login');
-    }
+    onLogout: () => navigate('/login')
   }));
 
   useEffect(() => {
+    const userData = presenter.model.getUser();
+    setUser(userData);
     presenter.loadDashboardData();
   }, [presenter]);
 
@@ -54,7 +49,6 @@ const Dashboard = () => {
     presenter.handleRefresh();
   };
 
-  // Function to format time until due date
   const formatDueDate = (daysUntilDue) => {
     if (daysUntilDue < 0) {
       return { text: 'Terlewatkan', color: 'overdue' };
@@ -71,7 +65,6 @@ const Dashboard = () => {
     }
   };
 
-  // Chart: Ibu Hamil by Kelurahan
   const ibuByKelurahanChart = ibuByKelurahan ? {
     labels: ibuByKelurahan.map(item => item.kelurahan),
     datasets: [{
@@ -82,7 +75,6 @@ const Dashboard = () => {
     }]
   } : null;
 
-  // Chart: Age Distribution
   const ageDistributionChart = ageDistribution ? {
     labels: ageDistribution.map(item => item.age_group),
     datasets: [{
@@ -93,7 +85,6 @@ const Dashboard = () => {
     }]
   } : null;
 
-  // Chart: ANC Per Month (Stacked)
   const ancPerMonthChart = ancPerMonth ? (() => {
     const months = [...new Set(ancPerMonth.map(item => item.month))];
     const visitTypes = ['K1', 'K2', 'K3', 'K4', 'K5', 'K6'];
@@ -118,7 +109,6 @@ const Dashboard = () => {
     };
   })() : null;
 
-  // Chart: Immunization Coverage
   const immunizationChart = immunizationCoverage ? {
     labels: immunizationCoverage.map(item => item.kelurahan),
     datasets: [
@@ -137,7 +127,6 @@ const Dashboard = () => {
     ]
   } : null;
 
-  // Chart: Risk Distribution (Pie)
   const riskDistributionChart = riskDistribution ? {
     labels: riskDistribution.map(item => item.risk_category),
     datasets: [{
@@ -211,7 +200,6 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard-container">
-      {/* Sidebar */}
       <aside className="sidebar">
         <div className="sidebar-header">
           <img src="/images/logo-withText.png" alt="iBundaCare Logo" className="sidebar-logo" />
@@ -264,7 +252,6 @@ const Dashboard = () => {
         </div>
       </aside>
 
-      {/* Main Content */}
       <main className="main-content">
         <div className="content-header">
           <div>
@@ -285,7 +272,6 @@ const Dashboard = () => {
           </div>
         )}
 
-        {/* 4 Badge Statistics */}
         {stats && (
           <div className="stats-grid">
             <div className="stat-card stat-success">
@@ -338,10 +324,8 @@ const Dashboard = () => {
           </div>
         )}
 
-        {/* Charts Layout: 2x2 Grid + Pie Chart */}
         <div className="dashboard-layout">
           <div className="charts-section">
-            {/* Chart 1: Ibu Hamil by Kelurahan */}
             {ibuByKelurahanChart && (
               <div className="chart-card">
                 <h3 className="chart-title">Jumlah Ibu Hamil per Kelurahan</h3>
@@ -351,7 +335,6 @@ const Dashboard = () => {
               </div>
             )}
 
-            {/* Chart 2: Age Distribution */}
             {ageDistributionChart && (
               <div className="chart-card">
                 <h3 className="chart-title">Distribusi Umur Ibu Hamil</h3>
@@ -361,7 +344,6 @@ const Dashboard = () => {
               </div>
             )}
 
-            {/* Chart 3: ANC Per Month (Stacked) */}
             {ancPerMonthChart && (
               <div className="chart-card">
                 <h3 className="chart-title">Kunjungan ANC per Bulan</h3>
@@ -371,7 +353,6 @@ const Dashboard = () => {
               </div>
             )}
 
-            {/* Chart 4: Immunization Coverage */}
             {immunizationChart && (
               <div className="chart-card">
                 <h3 className="chart-title">Cakupan Imunisasi TT/Fe 90 per Kelurahan</h3>
@@ -382,7 +363,6 @@ const Dashboard = () => {
             )}
           </div>
 
-          {/* Pie Chart Section */}
           <div className="pie-section">
             {riskDistributionChart && (
               <div className="chart-card">
@@ -395,7 +375,6 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Table: Nearing Due Dates */}
         <div className="table-section">
           <h3 className="table-title">Daftar Ibu Hamil - Taksiran Persalinan (Diurutkan dari Terdekat)</h3>
           <div className="table-container">

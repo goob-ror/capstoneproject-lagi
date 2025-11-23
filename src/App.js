@@ -1,11 +1,11 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
-import LoginPage from './components/LoginPage/LoginPage';
-import RegisterPage from './components/RegisterPage/RegisterPage';
-import WaitingApprovalPage from './components/AuthPage/AuthPage';
-import Dashboard from './components/Dashboard/Dashboard';
+import LoginPage from './pages/LoginPage/LoginPage';
+import RegisterPage from './pages/RegisterPage/RegisterPage';
+import WaitingApprovalPage from './pages/AuthPage/AuthPage';
+import Dashboard from './pages/Dashboard/Dashboard';
 import OfflineIndicator from './components/OfflineIndicator/OfflineIndicator';
-import AuthModel from './models/AuthModel';
+import AuthModel from './services/AuthModel';
 import './App.css';
 
 // Protected Route Component

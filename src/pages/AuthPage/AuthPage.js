@@ -1,6 +1,6 @@
 import React from 'react';
 
-const WaitingApprovalPage = () => {
+const AuthPage = () => {
   const styles = {
     container: {
       width: '100%',
@@ -87,4 +87,4 @@ const WaitingApprovalPage = () => {
   );
 };
 
-export default WaitingApprovalPage;
+export default AuthPage;

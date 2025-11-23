@@ -1,9 +1,9 @@
-import AuthModel from '../models/AuthModel';
+import RegisterPageModel from './RegisterPage-model';
 
 class RegisterPresenter {
   constructor(view) {
     this.view = view;
-    this.model = new AuthModel();
+    this.model = new RegisterPageModel();
   }
 
   async handleRegister(userData) {
@@ -11,7 +11,6 @@ class RegisterPresenter {
       this.view.setLoading(true);
       this.view.clearError();
 
-      // Validate inputs
       if (!userData.username || !userData.password) {
         throw new Error('Username and password are required');
       }
