@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LoginPresenter from './LoginPage-presenter';
+import './LoginPage.css';
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -45,245 +46,40 @@ const LoginPage = () => {
     presenter.handleLogin(formData.username, formData.password);
   };
 
-  const styles = {
-    container: {
-      backgroundColor: '#FFFFFF',
-      borderRadius: '25px',
-      width: '500px',
-      height: '450px',
-      padding: '30px 30px 30px 30px',
-      position: 'relative'
-    },
-    errorMessage: {
-      backgroundColor: '#FEE2E2',
-      border: '1px solid #FCA5A5',
-      color: '#991B1B',
-      padding: '10px',
-      borderRadius: '6px',
-      marginBottom: '15px',
-      fontSize: '14px',
-      fontFamily: "'Montserrat', sans-serif"
-    },
-    warningMessage: {
-      backgroundColor: '#FEF3C7',
-      border: '1px solid #FCD34D',
-      color: '#92400E',
-      padding: '10px',
-      borderRadius: '6px',
-      marginBottom: '15px',
-      fontSize: '14px',
-      fontFamily: "'Montserrat', sans-serif"
-    },
-    rowsOne: {
-      width: '100%',
-      display: 'flex'
-    },
-    logo: {
-      width: '100%',
-      marginLeft: '-21px',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center'
-    },
-    logoImg: {
-      width: '76px',
-      height: '74px'
-    },
-    rowsTwo: {
-      width: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      margin: '20px 0 0 0',
-      padding: '0',
-      textAlign: 'center'
-    },
-    title: {
-      width: '100%',
-      margin: '0',
-      padding: '0'
-    },
-    titleH1: {
-      fontFamily: "'Montserrat', sans-serif",
-      fontStyle: 'normal',
-      fontWeight: '700',
-      fontSize: '24px',
-      lineHeight: '36px',
-      color: '#515151',
-      margin: '0',
-      padding: '0'
-    },
-    subTitle: {
-      width: '100%',
-      margin: '-5px 0 0 0',
-      padding: '0'
-    },
-    subTitleP: {
-      fontFamily: "'Istok Web', sans-serif",
-      fontStyle: 'normal',
-      fontWeight: '400',
-      fontSize: '16px',
-      lineHeight: '24px',
-      color: '#515151',
-      margin: '0',
-      padding: '0'
-    },
-    rowsThree: {
-      width: 'auto',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center'
-    },
-    label: {
-      fontFamily: "'Montserrat', sans-serif",
-      fontWeight: '600',
-      color: '#515151',
-      fontSize: '14px',
-      lineHeight: '10px'
-    },
-    input: {
-      width: '100%',
-      display: 'flex',
-      flexDirection: 'column'
-    },
-    inputField: {
-      width: '29.5rem',
-      height: '40px',
-      borderRadius: '6px',
-      border: '1px solid #D4D4D4',
-      padding: '0 12px',
-      fontFamily: "'Montserrat', sans-serif",
-      fontStyle: 'normal',
-      fontWeight: '400',
-      fontSize: '14px',
-      lineHeight: '24px',
-      margin: '6px 0 0 0'
-    },
-    passwordLink: {
-      fontFamily: "'Istok Web', sans-serif",
-      fontStyle: 'normal',
-      fontWeight: '400',
-      fontSize: '12px',
-      lineHeight: '18px',
-      color: '#919191',
-      textDecoration: 'none',
-      margin: '0 0 0 0'
-    },
-    username: {
-      margin: '0 0 15px 0'
-    },
-    password: {
-      margin: '0 0 40px 0',
-      position: 'relative'
-    },
-    passwordInputWrapper: {
-      position: 'relative',
-      display: 'flex',
-      alignItems: 'center'
-    },
-    passwordToggle: {
-      position: 'absolute',
-      right: '12px',
-      top: '50%',
-      transform: 'translateY(-40%)',
-      background: 'none',
-      border: 'none',
-      cursor: 'pointer',
-      padding: '5px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      color: '#919191'
-    },
-    inputFieldWithIcon: {
-      width: '29.5rem',
-      height: '40px',
-      borderRadius: '6px',
-      border: '1px solid #D4D4D4',
-      padding: '0 45px 0 12px',
-      fontFamily: "'Montserrat', sans-serif",
-      fontStyle: 'normal',
-      fontWeight: '400',
-      fontSize: '14px',
-      lineHeight: '24px',
-      color: '#515151',
-      margin: '6px 0 0 0'
-    },
-    button: {
-      width: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center',
-      margin: '0'
-    },
-    loginButton: {
-      width: '250px',
-      height: '35px',
-      borderRadius: '10px',
-      margin: '0 0 -10px 0',
-      backgroundColor: '#22C55E',
-      border: 'none',
-      cursor: 'pointer',
-      fontFamily: "'Istok Web', sans-serif",
-      fontStyle: 'normal',
-      fontWeight: '700',
-      fontSize: '16px',
-      lineHeight: '24px',
-      color: '#FFFFFF'
-    },
-    buttonP: {
-      fontFamily: "'Montserrat', sans-serif",
-      fontStyle: 'normal',
-      fontWeight: '500',
-      color: '#515151',
-      fontSize: '14px'
-    },
-    buttonBack: {
-        padding: '20px',
-        margin: '0 0 0 -20px'
-    },
-    register: {
-      color: '#22C55E',
-      textDecoration: 'none',
-      fontFamily: "'Montserrat', sans-serif",
-      fontWeight: '500'
-    }
-  };
-
   return (
-    <div style={styles.container}>
-      <div style={styles.rowsOne}>
+    <div className="login-container">
+      <div className="login-row-one">
         <div className="return-button">
-          <button style={styles.buttonBack} type="button" aria-label="Go back" onClick={handleBack}>
+          <button type="button" aria-label="Go back" onClick={handleBack}>
             <svg width="13" height="21" viewBox="0 0 13 21" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path fillRule="evenodd" clipRule="evenodd" d="M10.3333 20.6667L0 10.3333L10.3333 1.90735e-06L12.9167 2.58334L5.16667 10.3333L12.9167 18.0833L10.3333 20.6667Z" fill="#22C55E"/>
             </svg>
           </button>
         </div>
-        <div style={styles.logo}>
-          <img src="/images/logo-withText.png" alt="logo" style={styles.logoImg} />
+        <div className="login-logo">
+          <img src="/images/logo-withText.png" alt="logo" />
         </div>
       </div>
       
-      <div style={styles.rowsTwo}>
-        <div style={styles.title}>
-          <h1 style={styles.titleH1}>Selamat Datang!</h1>
+      <div className="login-row-two">
+        <div className="login-title">
+          <h1>Selamat Datang!</h1>
         </div>
-        <div style={styles.subTitle}>
-          <p style={styles.subTitleP}>Login untuk mengakses akun Anda</p>
+        <div className="login-subtitle">
+          <p>Login untuk mengakses akun Anda</p>
         </div>
       </div>
       
-      <div style={styles.rowsThree}>
-        <div style={styles.input}>
+      <div className="login-row-three">
+        <div className="login-form-wrapper">
           {error && (
-            <div style={error.includes('⚠️') ? styles.warningMessage : styles.errorMessage}>
+            <div className={error.includes('⚠️') ? 'warning-message' : 'error-message'}>
               {error}
             </div>
           )}
           <form onSubmit={handleSubmit}>
-            <div style={styles.username}>
-              <label htmlFor="username" style={styles.label}>Username</label>
+            <div className="login-form-group">
+              <label htmlFor="username">Username</label>
               <input 
                 type="text" 
                 id="username"
@@ -293,12 +89,11 @@ const LoginPage = () => {
                 onChange={handleChange}
                 autoComplete="username"
                 required 
-                style={styles.inputField}
               />
             </div>
-            <div style={styles.password}>
-              <label htmlFor="password" style={styles.label}>Password</label>
-              <div style={styles.passwordInputWrapper}>
+            <div className="login-form-group password-group">
+              <label htmlFor="password">Password</label>
+              <div className="password-input-wrapper">
                 <input 
                   type={showPassword ? "text" : "password"}
                   id="password"
@@ -308,12 +103,11 @@ const LoginPage = () => {
                   onChange={handleChange}
                   autoComplete="current-password"
                   required 
-                  style={styles.inputFieldWithIcon}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  style={styles.passwordToggle}
+                  className="password-toggle"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
@@ -328,14 +122,16 @@ const LoginPage = () => {
                   )}
                 </button>
               </div>
-              <button type="button" onClick={(e) => e.preventDefault()} style={{...styles.passwordLink, background: 'none', border: 'none', padding: 0, cursor: 'pointer'}}>Lupa password?</button>
+              <button type="button" onClick={(e) => e.preventDefault()} className="forgot-password-link">
+                Lupa password?
+              </button>
             </div>
-            <div style={styles.button}>
-              <button type="submit" style={styles.loginButton} disabled={loading}>
+            <div className="login-button-wrapper">
+              <button type="submit" className="login-button" disabled={loading}>
                 {loading ? 'LOADING...' : 'LOGIN'}
               </button>
-              <p style={styles.buttonP}>
-                Belum punya akun? <a className="register" href="/register" style={styles.register}>Register!</a>
+              <p className="register-text">
+                Belum punya akun? <a href="/register" className="register-link">Register!</a>
               </p>
             </div>
           </form>

@@ -4,6 +4,12 @@ import LoginPage from './pages/LoginPage/LoginPage';
 import RegisterPage from './pages/RegisterPage/RegisterPage';
 import WaitingApprovalPage from './pages/AuthPage/AuthPage';
 import Dashboard from './pages/Dashboard/Dashboard';
+import DataIbu from './pages/DataIbu/DataIbu';
+import TambahIbu from './pages/TambahIbu/TambahIbu';
+import KunjunganANC from './pages/KunjunganANC/KunjunganANC';
+import TambahANC from './pages/TambahANC/TambahANC';
+import Komplikasi from './pages/Komplikasi/Komplikasi';
+import TambahKomplikasi from './pages/TambahKomplikasi/TambahKomplikasi';
 import OfflineIndicator from './components/OfflineIndicator/OfflineIndicator';
 import AuthModel from './services/AuthModel';
 import './App.css';
@@ -23,14 +29,15 @@ function AppLayout() {
     document.body.className = '';
     
     // Add appropriate class based on route
-    if (location.pathname === '/dashboard') {
+    const dashboardRoutes = ['/dashboard', '/data-ibu', '/tambah-ibu', '/kunjungan-anc', '/tambah-anc', '/komplikasi', '/tambah-komplikasi'];
+    if (dashboardRoutes.some(route => location.pathname.startsWith(route))) {
       document.body.classList.add('dashboard-page');
     } else {
       document.body.classList.add('login-page');
     }
   }, [location]);
   
-  const isDashboard = location.pathname === '/dashboard';
+  const isDashboard = ['/dashboard', '/data-ibu', '/tambah-ibu', '/kunjungan-anc', '/tambah-anc', '/komplikasi', '/tambah-komplikasi'].some(route => location.pathname.startsWith(route));
   
   return (
     <div className={isDashboard ? 'App' : 'App centered'}>
@@ -45,6 +52,54 @@ function AppLayout() {
           element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/data-ibu" 
+          element={
+            <ProtectedRoute>
+              <DataIbu />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/tambah-ibu" 
+          element={
+            <ProtectedRoute>
+              <TambahIbu />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/kunjungan-anc" 
+          element={
+            <ProtectedRoute>
+              <KunjunganANC />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/tambah-anc" 
+          element={
+            <ProtectedRoute>
+              <TambahANC />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/komplikasi" 
+          element={
+            <ProtectedRoute>
+              <Komplikasi />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/tambah-komplikasi" 
+          element={
+            <ProtectedRoute>
+              <TambahKomplikasi />
             </ProtectedRoute>
           } 
         />

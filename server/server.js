@@ -5,6 +5,8 @@ require('dotenv').config();
 const authRoutes = require('./routes/authRoutes');
 const ibuRoutes = require('./routes/ibuRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
+const ancRoutes = require('./routes/ancRoutes');
+const komplikasiRoutes = require('./routes/komplikasiRoutes');
 const auth = require('./middleware/auth');
 
 const app = express();
@@ -21,6 +23,8 @@ app.use(express.static(path.join(__dirname, '../build')));
 app.use('/api/auth', authRoutes);
 app.use('/api/ibu', ibuRoutes);
 app.use('/api/dashboard', auth, dashboardRoutes);
+app.use('/api/anc', ancRoutes);
+app.use('/api/komplikasi', komplikasiRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
