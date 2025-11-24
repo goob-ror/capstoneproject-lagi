@@ -1,0 +1,305 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Istok+Web:wght@400;700&display=swap');
+
+.login-container {
+  background-color: #FFFFFF;
+  border-radius: 25px;
+  width: 500px;
+  height: 450px;
+  padding: 30px;
+  position: relative;
+}
+
+.error-message {
+  background-color: #FEE2E2;
+  border: 1px solid #FCA5A5;
+  color: #991B1B;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  font-size: 14px;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.warning-message {
+  background-color: #FEF3C7;
+  border: 1px solid #FCD34D;
+  color: #92400E;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  font-size: 14px;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.login-row-one {
+  width: 100%;
+  display: flex;
+}
+
+.return-button {
+  padding: 20px;
+  margin: 0 0 0 -20px;
+}
+
+.return-button button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-logo {
+  width: 100%;
+  margin-left: -21px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-logo img {
+  width: 76px;
+  height: 74px;
+}
+
+.login-row-two {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  margin: 20px 0 0 0;
+  padding: 0;
+  text-align: center;
+}
+
+.login-title {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.login-title h1 {
+  font-family: 'Montserrat', sans-serif;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 36px;
+  color: #515151;
+  margin: 0;
+  padding: 0;
+}
+
+.login-subtitle {
+  width: 100%;
+  margin: -5px 0 0 0;
+  padding: 0;
+}
+
+.login-subtitle p {
+  font-family: 'Istok Web', sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  color: #515151;
+  margin: 0;
+  padding: 0;
+}
+
+.login-row-three {
+  width: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-form-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.login-form-group {
+  margin: 0 0 15px 0;
+}
+
+.login-form-group.password-group {
+  margin: 0 0 40px 0;
+  position: relative;
+}
+
+.login-form-group label {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  color: #515151;
+  font-size: 14px;
+  line-height: 10px;
+  display: block;
+}
+
+.login-form-group input {
+  width: 100%;
+  height: 40px;
+  border-radius: 6px;
+  border: 1px solid #D4D4D4;
+  padding: 0 12px;
+  font-family: 'Montserrat', sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 24px;
+  color: #515151;
+  margin: 6px 0 0 0;
+  box-sizing: border-box;
+}
+
+.login-form-group input:focus {
+  border-color: #22C55E;
+  outline: none;
+}
+
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-wrapper input {
+  padding-right: 45px;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-40%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #919191;
+}
+
+.password-toggle:hover {
+  color: #515151;
+}
+
+.forgot-password-link {
+  font-family: 'Istok Web', sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 18px;
+  color: #919191;
+  text-decoration: none;
+  margin: 0;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: inline-block;
+  margin-top: 5px;
+}
+
+.forgot-password-link:hover {
+  color: #515151;
+  text-decoration: underline;
+}
+
+.login-button-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+}
+
+.login-button {
+  width: 250px;
+  height: 35px;
+  border-radius: 10px;
+  margin: 0 0 -10px 0;
+  background-color: #22C55E;
+  border: none;
+  cursor: pointer;
+  font-family: 'Istok Web', sans-serif;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 24px;
+  color: #FFFFFF;
+  transition: background-color 0.2s;
+}
+
+.login-button:hover:not(:disabled) {
+  background-color: #16A34A;
+}
+
+.login-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.register-text {
+  font-family: 'Montserrat', sans-serif;
+  font-style: normal;
+  font-weight: 500;
+  color: #515151;
+  font-size: 14px;
+  margin: 15px 0 0 0;
+}
+
+.register-link {
+  color: #22C55E;
+  text-decoration: none;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 500;
+}
+
+.register-link:hover {
+  text-decoration: underline;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .login-container {
+    width: 90%;
+    max-width: 400px;
+    height: auto;
+    padding: 20px;
+  }
+
+  .login-logo img {
+    width: 60px;
+    height: 58px;
+  }
+
+  .login-title h1 {
+    font-size: 20px;
+    line-height: 30px;
+  }
+
+  .login-subtitle p {
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .login-form-group input {
+    font-size: 13px;
+  }
+
+  .login-button {
+    width: 200px;
+    height: 32px;
+    font-size: 14px;
+  }
+
+  .register-text {
+    font-size: 13px;
+  }
+}
