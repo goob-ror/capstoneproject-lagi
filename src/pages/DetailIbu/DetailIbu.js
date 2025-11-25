@@ -192,7 +192,11 @@ const DetailIbu = () => {
             </div>
             {ibuData.kehamilan && (
               <div className="pregnancy-status">
-                <span className={`status-badge ${ibuData.kehamilan.status_kehamilan === 'Hamil' ? 'badge-success' : 'badge-info'}`}>
+                <span className={`status-badge ${
+                  ibuData.kehamilan.status_kehamilan === 'Hamil' ? 'badge-success' : 
+                  ibuData.kehamilan.status_kehamilan === 'Keguguran' ? 'badge-danger' : 
+                  'badge-info'
+                }`}>
                   {ibuData.kehamilan.status_kehamilan}
                 </span>
                 {ibuData.kehamilan.status_kehamilan === 'Hamil' && (
@@ -358,7 +362,11 @@ const DetailIbu = () => {
                     </div>
                     <div className="info-row">
                       <span className="label">Status:</span>
-                      <span className={`status-badge ${ibuData.kehamilan.status_kehamilan === 'Hamil' ? 'badge-success' : 'badge-info'}`}>
+                      <span className={`status-badge ${
+                        ibuData.kehamilan.status_kehamilan === 'Hamil' ? 'badge-success' : 
+                        ibuData.kehamilan.status_kehamilan === 'Keguguran' ? 'badge-danger' : 
+                        'badge-info'
+                      }`}>
                         {ibuData.kehamilan.status_kehamilan}
                       </span>
                     </div>

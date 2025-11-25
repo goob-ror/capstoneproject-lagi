@@ -137,6 +137,24 @@ class DashboardModel {
     }
   }
 
+  async getANCSchedule() {
+    try {
+      const response = await fetch(`${this.baseURL}/dashboard/anc-schedule`, {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch ANC schedule');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching ANC schedule:', error);
+      throw error;
+    }
+  }
+
   getUser() {
     const user = localStorage.getItem('user');
     return user ? JSON.parse(user) : null;

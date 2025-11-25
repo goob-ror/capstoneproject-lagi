@@ -183,6 +183,7 @@ CREATE TABLE `ibu` (
   `tanggal_lahir` date DEFAULT NULL,
   `no_hp` varchar(20) DEFAULT NULL,
   `gol_darah` varchar(2) DEFAULT NULL,
+  `tinggi_badan` DECIMAL(5,2) DEFAULT NULL,
   `rhesus` varchar(8) DEFAULT NULL,
   `buku_kia` varchar(10) DEFAULT NULL,
   `pekerjaan` varchar(50) DEFAULT NULL,
@@ -263,7 +264,7 @@ CREATE TABLE `kehamilan` (
   `haid_pertama` date DEFAULT NULL,
   `haid_terakhir` date NOT NULL,
   `taksiran_persalinan` date DEFAULT NULL,
-  `status_kehamilan` enum('Hamil','Bersalin','Nifas','Selesai') DEFAULT 'Hamil',
+  `status_kehamilan` enum('Hamil','Bersalin','Nifas','Selesai','Keguguran') DEFAULT 'Hamil',
   `forkey_ibu` int NOT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP

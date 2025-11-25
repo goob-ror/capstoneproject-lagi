@@ -17,6 +17,7 @@ const TambahIbu = () => {
     no_hp: '',
     gol_darah: '',
     rhesus: '+',
+    tinggi_badan: '',
     buku_kia: 'Ada',
     pekerjaan: '',
     pendidikan: '',
@@ -35,6 +36,8 @@ const TambahIbu = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [user, setUser] = useState(null);
+  const [isAddingNewPregnancy, setIsAddingNewPregnancy] = useState(false);
+  const [originalPregnancyStatus, setOriginalPregnancyStatus] = useState(null);
 
   const [presenter] = useState(() => new TambahIbuPresenter({
     setLoading,
@@ -52,6 +55,10 @@ const TambahIbu = () => {
         ? new Date(data.kehamilan.haid_terakhir).toISOString().split('T')[0]
         : '';
       
+      // Store original pregnancy status to determine if we can add new pregnancy
+      const pregnancyStatus = data.kehamilan?.status_kehamilan || null;
+      setOriginalPregnancyStatus(pregnancyStatus);
+      
       setFormData({
         id: data.id,
         nik_ibu: data.nik_ibu || '',
@@ -60,6 +67,7 @@ const TambahIbu = () => {
         no_hp: data.no_hp || '',
         gol_darah: data.gol_darah || '',
         rhesus: data.rhesus || '+',
+        tinggi_badan: data.tinggi_badan || '',
         buku_kia: data.buku_kia || 'Ada',
         pekerjaan: data.pekerjaan || '',
         pendidikan: data.pendidikan || '',
@@ -110,7 +118,12 @@ const TambahIbu = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await presenter.handleSubmit(formData);
+    // Add flag to indicate if we're adding a new pregnancy
+    const submitData = {
+      ...formData,
+      isAddingNewPregnancy
+    };
+    await presenter.handleSubmit(submitData);
   };
 
   const handleCancel = () => {
@@ -120,6 +133,34 @@ const TambahIbu = () => {
   const handleLogout = () => {
     presenter.handleLogout();
   };
+
+  const handleAddNewPregnancy = () => {
+    setIsAddingNewPregnancy(true);
+    // Reset pregnancy fields for new pregnancy
+    setFormData(prev => ({
+      ...prev,
+      gravida: (parseInt(prev.gravida) + 1).toString(),
+      partus: prev.status_kehamilan === 'Selesai' ? (parseInt(prev.partus) + 1).toString() : prev.partus,
+      haid_terakhir: '',
+      status_kehamilan: 'Hamil'
+    }));
+  };
+
+  const handleCancelNewPregnancy = () => {
+    setIsAddingNewPregnancy(false);
+    // Reload original data
+    if (editId) {
+      presenter.loadIbuData(editId);
+    }
+  };
+
+  // Determine if pregnancy fields should be read-only
+  // Read-only if pregnancy is completed (Selesai or Keguguran) and not adding new pregnancy
+  const isCompletedPregnancy = ['Selesai', 'Keguguran'].includes(originalPregnancyStatus);
+  const isPregnancyReadOnly = isEditMode && !isAddingNewPregnancy && isCompletedPregnancy;
+  
+  // Show "Add New Pregnancy" button only in edit mode when status is completed and not already adding
+  const showAddPregnancyButton = isEditMode && isCompletedPregnancy && !isAddingNewPregnancy;
 
   return (
     <div className="dashboard-container">
@@ -314,6 +355,22 @@ const TambahIbu = () => {
                 </div>
 
                 <div className="form-group">
+                  <label htmlFor="tinggi_badan">Tinggi Badan</label>
+                  <input
+                    type="number"
+                    id="tinggi_badan"
+                    name="tinggi_badan"
+                    value={formData.tinggi_badan}
+                    onChange={handleChange}
+                    placeholder="Contoh: 160"
+                    min="100"
+                    max="250"
+                    step="0.1"
+                  />
+                  <small>Dalam cm (untuk perhitungan BMI)</small>
+                </div>
+
+                <div className="form-group">
                   <label htmlFor="buku_kia">Buku KIA</label>
                   <select
                     id="buku_kia"
@@ -418,7 +475,47 @@ const TambahIbu = () => {
             </div>
 
             <div className="form-card">
-              <h3 className="form-section-title">Data Kehamilan</h3>
+              <div className="form-section-header">
+                <h3 className="form-section-title">
+                  Data Kehamilan
+                  {isAddingNewPregnancy && (
+                    <span className="badge-new-pregnancy">Kehamilan Baru</span>
+                  )}
+                </h3>
+                {showAddPregnancyButton && (
+                  <button 
+                    type="button" 
+                    className="btn-add-pregnancy"
+                    onClick={handleAddNewPregnancy}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor"/>
+                    </svg>
+                    Tambah Kehamilan Baru
+                  </button>
+                )}
+                {isAddingNewPregnancy && (
+                  <button 
+                    type="button" 
+                    className="btn-cancel-pregnancy"
+                    onClick={handleCancelNewPregnancy}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="currentColor"/>
+                    </svg>
+                    Batal
+                  </button>
+                )}
+              </div>
+
+              {isPregnancyReadOnly && (
+                <div className="info-banner">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="currentColor"/>
+                  </svg>
+                  <span>Data kehamilan sebelumnya sudah {originalPregnancyStatus === 'Keguguran' ? 'mengalami keguguran' : 'selesai'}. Klik "Tambah Kehamilan Baru" untuk menambah kehamilan baru.</span>
+                </div>
+              )}
               
               <div className="form-row">
                 <div className="form-group">
@@ -432,6 +529,8 @@ const TambahIbu = () => {
                     min="1"
                     max="20"
                     required
+                    readOnly={isPregnancyReadOnly}
+                    disabled={isPregnancyReadOnly}
                   />
                   <small>Jumlah kehamilan</small>
                 </div>
@@ -447,6 +546,8 @@ const TambahIbu = () => {
                     min="0"
                     max="20"
                     required
+                    readOnly={isPregnancyReadOnly}
+                    disabled={isPregnancyReadOnly}
                   />
                   <small>Jumlah persalinan</small>
                 </div>
@@ -462,6 +563,8 @@ const TambahIbu = () => {
                     min="0"
                     max="20"
                     required
+                    readOnly={isPregnancyReadOnly}
+                    disabled={isPregnancyReadOnly}
                   />
                   <small>Jumlah keguguran</small>
                 </div>
@@ -477,6 +580,8 @@ const TambahIbu = () => {
                     value={formData.haid_terakhir}
                     onChange={handleChange}
                     required
+                    readOnly={isPregnancyReadOnly}
+                    disabled={isPregnancyReadOnly}
                   />
                   <small>Hari Pertama Haid Terakhir</small>
                 </div>
@@ -489,11 +594,13 @@ const TambahIbu = () => {
                     value={formData.status_kehamilan}
                     onChange={handleChange}
                     required
+                    disabled={isPregnancyReadOnly}
                   >
                     <option value="Hamil">Hamil</option>
                     <option value="Bersalin">Bersalin</option>
                     <option value="Nifas">Nifas</option>
                     <option value="Selesai">Selesai</option>
+                    <option value="Keguguran">Keguguran</option>
                   </select>
                 </div>
               </div>

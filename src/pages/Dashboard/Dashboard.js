@@ -19,7 +19,13 @@ const Dashboard = () => {
   const [immunizationCoverage, setImmunizationCoverage] = useState(null);
   const [riskDistribution, setRiskDistribution] = useState(null);
   const [nearingDueDates, setNearingDueDates] = useState(null);
+  const [ancSchedule, setANCSchedule] = useState(null);
   const [user, setUser] = useState(null);
+  const [dueDatePage, setDueDatePage] = useState(1);
+  const [ancSchedulePage, setANCSchedulePage] = useState(1);
+  const [hideDueDateOverdue, setHideDueDateOverdue] = useState(false);
+  const [hideANCOverdue, setHideANCOverdue] = useState(false);
+  const rowsPerPage = 20;
 
   const [presenter] = useState(() => new DashboardPresenter({
     setLoading,
@@ -32,6 +38,7 @@ const Dashboard = () => {
     displayImmunizationCoverage: (data) => setImmunizationCoverage(data),
     displayRiskDistribution: (data) => setRiskDistribution(data),
     displayNearingDueDates: (data) => setNearingDueDates(data),
+    displayANCSchedule: (data) => setANCSchedule(data),
     onLogout: () => navigate('/login')
   }));
 
@@ -64,6 +71,43 @@ const Dashboard = () => {
       return { text: `${months} Bulan`, color: 'normal' };
     }
   };
+
+  // Pagination helpers
+  const getPaginatedData = (data, page) => {
+    if (!data) return [];
+    const startIndex = (page - 1) * rowsPerPage;
+    const endIndex = startIndex + rowsPerPage;
+    return data.slice(startIndex, endIndex);
+  };
+
+  const getTotalPages = (data) => {
+    if (!data) return 0;
+    return Math.ceil(data.length / rowsPerPage);
+  };
+
+  // Filter overdue entries if checkbox is checked
+  const filteredDueDates = hideDueDateOverdue 
+    ? nearingDueDates?.filter(item => item.days_until_due >= 0)
+    : nearingDueDates;
+
+  const filteredANCSchedule = hideANCOverdue
+    ? ancSchedule?.filter(item => item.days_until_next_visit >= 0)
+    : ancSchedule;
+
+  const paginatedDueDates = getPaginatedData(filteredDueDates, dueDatePage);
+  const dueDateTotalPages = getTotalPages(filteredDueDates);
+
+  const paginatedANCSchedule = getPaginatedData(filteredANCSchedule, ancSchedulePage);
+  const ancScheduleTotalPages = getTotalPages(filteredANCSchedule);
+
+  // Reset to page 1 when filter changes
+  useEffect(() => {
+    setDueDatePage(1);
+  }, [hideDueDateOverdue]);
+
+  useEffect(() => {
+    setANCSchedulePage(1);
+  }, [hideANCOverdue]);
 
   const ibuByKelurahanChart = ibuByKelurahan ? {
     labels: ibuByKelurahan.map(item => item.kelurahan),
@@ -382,7 +426,17 @@ const Dashboard = () => {
         </div>
 
         <div className="table-section">
-          <h3 className="table-title">Daftar Ibu Hamil - Taksiran Persalinan (Diurutkan dari Terdekat)</h3>
+          <div className="table-header">
+            <h3 className="table-title">Daftar Ibu Hamil - Taksiran Persalinan (Diurutkan dari Terdekat)</h3>
+            <label className="filter-checkbox">
+              <input 
+                type="checkbox" 
+                checked={hideDueDateOverdue}
+                onChange={(e) => setHideDueDateOverdue(e.target.checked)}
+              />
+              <span>Sembunyikan Terlewatkan</span>
+            </label>
+          </div>
           <div className="table-container">
             <table className="data-table">
               <thead>
@@ -397,12 +451,13 @@ const Dashboard = () => {
                 </tr>
               </thead>
               <tbody>
-                {nearingDueDates && nearingDueDates.length > 0 ? (
-                  nearingDueDates.map((item, index) => {
+                {paginatedDueDates && paginatedDueDates.length > 0 ? (
+                  paginatedDueDates.map((item, index) => {
                     const dueDateInfo = formatDueDate(item.days_until_due);
+                    const actualIndex = (dueDatePage - 1) * rowsPerPage + index + 1;
                     return (
                       <tr key={index}>
-                        <td>{index + 1}</td>
+                        <td>{actualIndex}</td>
                         <td>{item.nama_lengkap}</td>
                         <td>{item.kelurahan || '-'}</td>
                         <td>{item.no_hp || '-'}</td>
@@ -430,6 +485,136 @@ const Dashboard = () => {
               </tbody>
             </table>
           </div>
+          {dueDateTotalPages > 1 && (
+            <div className="pagination">
+              <button 
+                className="pagination-btn" 
+                onClick={() => setDueDatePage(prev => Math.max(1, prev - 1))}
+                disabled={dueDatePage === 1}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" fill="currentColor"/>
+                </svg>
+                Sebelumnya
+              </button>
+              <span className="pagination-info">
+                Halaman {dueDatePage} dari {dueDateTotalPages} ({filteredDueDates?.length || 0} data{hideDueDateOverdue ? ' (terlewatkan disembunyikan)' : ''})
+              </span>
+              <button 
+                className="pagination-btn" 
+                onClick={() => setDueDatePage(prev => Math.min(dueDateTotalPages, prev + 1))}
+                disabled={dueDatePage === dueDateTotalPages}
+              >
+                Selanjutnya
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" fill="currentColor"/>
+                </svg>
+              </button>
+            </div>
+          )}
+        </div>
+
+        <div className="table-section">
+          <div className="table-header">
+            <h3 className="table-title">Jadwal Kunjungan ANC Berikutnya</h3>
+            <label className="filter-checkbox">
+              <input 
+                type="checkbox" 
+                checked={hideANCOverdue}
+                onChange={(e) => setHideANCOverdue(e.target.checked)}
+              />
+              <span>Sembunyikan Terlewatkan</span>
+            </label>
+          </div>
+          <div className="table-container">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Nama Ibu</th>
+                  <th>Kelurahan</th>
+                  <th>No. HP</th>
+                  <th>Usia Kehamilan</th>
+                  <th>Kunjungan Terakhir</th>
+                  <th>Kunjungan Berikutnya</th>
+                  <th>Tanggal Rekomendasi</th>
+                  <th>Sisa Hari</th>
+                  <th>Status Risiko</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedANCSchedule && paginatedANCSchedule.length > 0 ? (
+                  paginatedANCSchedule.map((item, index) => {
+                    const dueDateInfo = formatDueDate(item.days_until_next_visit);
+                    const actualIndex = (ancSchedulePage - 1) * rowsPerPage + index + 1;
+                    return (
+                      <tr key={index}>
+                        <td>{actualIndex}</td>
+                        <td>{item.nama_lengkap}</td>
+                        <td>{item.kelurahan || '-'}</td>
+                        <td>{item.no_hp || '-'}</td>
+                        <td>{item.gestational_weeks} minggu</td>
+                        <td>
+                          <span className="visit-badge">
+                            {item.last_visit_type || 'Belum ada'}
+                          </span>
+                        </td>
+                        <td>
+                          <span className="visit-badge next-visit">
+                            {item.next_visit_type}
+                          </span>
+                        </td>
+                        <td>{item.recommended_visit_date ? new Date(item.recommended_visit_date).toLocaleDateString('id-ID') : '-'}</td>
+                        <td>
+                          <span className={`days-badge ${dueDateInfo.color}`}>
+                            {dueDateInfo.text}
+                          </span>
+                        </td>
+                        <td>
+                          <span className={`risk-badge ${item.status_risiko === 'Risiko Tinggi' ? 'high-risk' : 'normal'}`}>
+                            {item.status_risiko}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan="10" style={{ textAlign: 'center', padding: '20px', color: '#9CA3AF' }}>
+                      Tidak ada jadwal kunjungan ANC
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+          {ancScheduleTotalPages > 1 && (
+            <div className="pagination">
+              <button 
+                className="pagination-btn" 
+                onClick={() => setANCSchedulePage(prev => Math.max(1, prev - 1))}
+                disabled={ancSchedulePage === 1}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" fill="currentColor"/>
+                </svg>
+                Sebelumnya
+              </button>
+              <span className="pagination-info">
+                Halaman {ancSchedulePage} dari {ancScheduleTotalPages} ({filteredANCSchedule?.length || 0} data{hideANCOverdue ? ' (terlewatkan disembunyikan)' : ''})
+              </span>
+              <button 
+                className="pagination-btn" 
+                onClick={() => setANCSchedulePage(prev => Math.min(ancScheduleTotalPages, prev + 1))}
+                disabled={ancSchedulePage === ancScheduleTotalPages}
+              >
+                Selanjutnya
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" fill="currentColor"/>
+                </svg>
+              </button>
+            </div>
+          )}
         </div>
       </main>
     </div>

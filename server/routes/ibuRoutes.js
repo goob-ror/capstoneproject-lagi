@@ -60,6 +60,7 @@ router.post('/', authMiddleware, async (req, res) => {
       no_hp,
       gol_darah,
       rhesus,
+      tinggi_badan,
       buku_kia,
       pekerjaan,
       pendidikan,
@@ -89,9 +90,9 @@ router.post('/', authMiddleware, async (req, res) => {
     // Insert ibu data
     const [ibuResult] = await connection.query(
       `INSERT INTO ibu (nik_ibu, nama_lengkap, tanggal_lahir, no_hp, gol_darah, 
-       rhesus, buku_kia, pekerjaan, pendidikan, kelurahan, alamat_lengkap) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [nik_ibu, nama_lengkap, tanggal_lahir, no_hp, gol_darah, rhesus, 
+       rhesus, tinggi_badan, buku_kia, pekerjaan, pendidikan, kelurahan, alamat_lengkap) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [nik_ibu, nama_lengkap, tanggal_lahir, no_hp, gol_darah, rhesus, tinggi_badan,
        buku_kia, pekerjaan, pendidikan, kelurahan, alamat_lengkap]
     );
 
@@ -142,6 +143,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
       no_hp,
       gol_darah,
       rhesus,
+      tinggi_badan,
       buku_kia,
       pekerjaan,
       pendidikan,
@@ -152,7 +154,8 @@ router.put('/:id', authMiddleware, async (req, res) => {
       partus,
       abortus,
       haid_terakhir,
-      status_kehamilan
+      status_kehamilan,
+      isAddingNewPregnancy
     } = req.body;
 
     // Start transaction
@@ -161,10 +164,10 @@ router.put('/:id', authMiddleware, async (req, res) => {
     // Update ibu data
     const [ibuResult] = await connection.query(
       `UPDATE ibu SET nik_ibu = ?, nama_lengkap = ?, tanggal_lahir = ?, 
-       no_hp = ?, gol_darah = ?, rhesus = ?, buku_kia = ?, pekerjaan = ?, 
+       no_hp = ?, gol_darah = ?, rhesus = ?, tinggi_badan = ?, buku_kia = ?, pekerjaan = ?, 
        pendidikan = ?, kelurahan = ?, alamat_lengkap = ? 
        WHERE id = ?`,
-      [nik_ibu, nama_lengkap, tanggal_lahir, no_hp, gol_darah, rhesus, 
+      [nik_ibu, nama_lengkap, tanggal_lahir, no_hp, gol_darah, rhesus, tinggi_badan,
        buku_kia, pekerjaan, pendidikan, kelurahan, alamat_lengkap, req.params.id]
     );
 
@@ -180,21 +183,39 @@ router.put('/:id', authMiddleware, async (req, res) => {
       taksiranPersalinan = new Date(hpht.getTime() + (280 * 24 * 60 * 60 * 1000));
     }
 
-    // Check if kehamilan record exists
+    // Check if kehamilan record exists and its status
     const [kehamilanCheck] = await connection.query(
-      'SELECT id FROM kehamilan WHERE forkey_ibu = ? ORDER BY created_at DESC LIMIT 1',
+      'SELECT id, status_kehamilan FROM kehamilan WHERE forkey_ibu = ? ORDER BY created_at DESC LIMIT 1',
       [req.params.id]
     );
 
     if (kehamilanCheck.length > 0) {
-      // Update existing kehamilan record
-      await connection.query(
-        `UPDATE kehamilan SET gravida = ?, partus = ?, abortus = ?, 
-         haid_terakhir = ?, taksiran_persalinan = ?, status_kehamilan = ? 
-         WHERE id = ?`,
-        [gravida || 1, partus || 0, abortus || 0, haid_terakhir, 
-         taksiranPersalinan, status_kehamilan || 'Hamil', kehamilanCheck[0].id]
-      );
+      const latestPregnancy = kehamilanCheck[0];
+      
+      // If explicitly adding new pregnancy OR latest pregnancy is completed ("Selesai" or "Keguguran") 
+      // and new status is active, create a new record instead of updating
+      const isCompletedPregnancy = ['Selesai', 'Keguguran'].includes(latestPregnancy.status_kehamilan);
+      const isNewActivePregnancy = !['Selesai', 'Keguguran'].includes(status_kehamilan);
+      
+      if (isAddingNewPregnancy || (isCompletedPregnancy && isNewActivePregnancy)) {
+        // Create new pregnancy record for new pregnancy
+        await connection.query(
+          `INSERT INTO kehamilan (gravida, partus, abortus, haid_terakhir, 
+           taksiran_persalinan, status_kehamilan, forkey_ibu) 
+           VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          [gravida || 1, partus || 0, abortus || 0, haid_terakhir, 
+           taksiranPersalinan, status_kehamilan || 'Hamil', req.params.id]
+        );
+      } else {
+        // Update existing kehamilan record (for active pregnancies or corrections)
+        await connection.query(
+          `UPDATE kehamilan SET gravida = ?, partus = ?, abortus = ?, 
+           haid_terakhir = ?, taksiran_persalinan = ?, status_kehamilan = ? 
+           WHERE id = ?`,
+          [gravida || 1, partus || 0, abortus || 0, haid_terakhir, 
+           taksiranPersalinan, status_kehamilan || 'Hamil', latestPregnancy.id]
+        );
+      }
     } else {
       // Create new kehamilan record if it doesn't exist
       await connection.query(

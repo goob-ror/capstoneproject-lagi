@@ -529,3 +529,87 @@
     text-align: center;
   }
 }
+
+/* Additional card icon colors */
+.card-icon.danger {
+  background: linear-gradient(135deg, #DC2626, #991B1B);
+}
+
+.card-icon.warning {
+  background: linear-gradient(135deg, #F59E0B, #D97706);
+}
+
+/* Header Actions */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+/* Export Buttons */
+.export-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-export {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Montserrat', sans-serif;
+  color: white;
+}
+
+.btn-export.excel {
+  background: linear-gradient(135deg, #16A34A, #15803D);
+}
+
+.btn-export.excel:hover {
+  background: linear-gradient(135deg, #15803D, #166534);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+}
+
+.btn-export.csv {
+  background: linear-gradient(135deg, #3B82F6, #2563EB);
+}
+
+.btn-export.csv:hover {
+  background: linear-gradient(135deg, #2563EB, #1D4ED8);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.btn-export svg {
+  flex-shrink: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header-actions {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .filter-section {
+    width: 100%;
+  }
+
+  .export-buttons {
+    width: 100%;
+  }
+
+  .btn-export {
+    flex: 1;
+    justify-content: center;
+  }
+}

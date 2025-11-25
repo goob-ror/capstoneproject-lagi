@@ -5,7 +5,7 @@ const db = require('../database/db');
 // Get dashboard statistics
 router.get('/stats', async (req, res) => {
   try {
-    // Total Ibu Hamil (Active Pregnancies)
+    // Total Ibu Hamil (Active Pregnancies - excluding completed/miscarriage)
     const [totalIbuHamilResult] = await db.query(
       "SELECT COUNT(*) as count FROM kehamilan WHERE status_kehamilan = 'Hamil'"
     );
@@ -260,6 +260,111 @@ router.get('/nearing-due-dates', async (req, res) => {
   } catch (error) {
     console.error('Error fetching nearing due dates:', error);
     res.status(500).json({ message: 'Failed to fetch nearing due dates' });
+  }
+});
+
+// Get ANC Schedule - Next visit recommendations based on gestational age
+router.get('/anc-schedule', async (req, res) => {
+  try {
+    const [results] = await db.query(`
+      SELECT 
+        i.nama_lengkap,
+        i.kelurahan,
+        i.no_hp,
+        k.haid_terakhir,
+        k.taksiran_persalinan,
+        
+        -- Calculate gestational age in weeks
+        FLOOR(DATEDIFF(CURDATE(), k.haid_terakhir) / 7) as gestational_weeks,
+        
+        -- Get last ANC visit type
+        (SELECT jenis_kunjungan 
+         FROM antenatal_care 
+         WHERE forkey_hamil = k.id 
+         ORDER BY tanggal_kunjungan DESC 
+         LIMIT 1) as last_visit_type,
+        
+        -- Get last ANC visit date
+        (SELECT tanggal_kunjungan 
+         FROM antenatal_care 
+         WHERE forkey_hamil = k.id 
+         ORDER BY tanggal_kunjungan DESC 
+         LIMIT 1) as last_visit_date,
+        
+        -- Determine next recommended visit type based on last visit
+        CASE 
+          WHEN (SELECT jenis_kunjungan FROM antenatal_care WHERE forkey_hamil = k.id ORDER BY tanggal_kunjungan DESC LIMIT 1) IS NULL THEN 'K1'
+          WHEN (SELECT jenis_kunjungan FROM antenatal_care WHERE forkey_hamil = k.id ORDER BY tanggal_kunjungan DESC LIMIT 1) = 'K1' THEN 'K2'
+          WHEN (SELECT jenis_kunjungan FROM antenatal_care WHERE forkey_hamil = k.id ORDER BY tanggal_kunjungan DESC LIMIT 1) = 'K2' THEN 'K3'
+          WHEN (SELECT jenis_kunjungan FROM antenatal_care WHERE forkey_hamil = k.id ORDER BY tanggal_kunjungan DESC LIMIT 1) = 'K3' THEN 'K4'
+          WHEN (SELECT jenis_kunjungan FROM antenatal_care WHERE forkey_hamil = k.id ORDER BY tanggal_kunjungan DESC LIMIT 1) = 'K4' THEN 'K5'
+          WHEN (SELECT jenis_kunjungan FROM antenatal_care WHERE forkey_hamil = k.id ORDER BY tanggal_kunjungan DESC LIMIT 1) = 'K5' THEN 'K6'
+          ELSE 'Selesai'
+        END as next_visit_type,
+        
+        -- Calculate recommended date for next visit based on gestational age
+        CASE 
+          -- K1: Should be done before 14 weeks
+          WHEN (SELECT jenis_kunjungan FROM antenatal_care WHERE forkey_hamil = k.id ORDER BY tanggal_kunjungan DESC LIMIT 1) IS NULL 
+            THEN DATE_ADD(k.haid_terakhir, INTERVAL 14 WEEK)
+          
+          -- K2: Should be done before 14 weeks (end of trimester 1)
+          WHEN (SELECT jenis_kunjungan FROM antenatal_care WHERE forkey_hamil = k.id ORDER BY tanggal_kunjungan DESC LIMIT 1) = 'K1' 
+            THEN DATE_ADD(k.haid_terakhir, INTERVAL 14 WEEK)
+          
+          -- K3: Should be done at 14-28 weeks (trimester 2)
+          WHEN (SELECT jenis_kunjungan FROM antenatal_care WHERE forkey_hamil = k.id ORDER BY tanggal_kunjungan DESC LIMIT 1) = 'K2' 
+            THEN DATE_ADD(k.haid_terakhir, INTERVAL 24 WEEK)
+          
+          -- K4: Should be done at 28-36 weeks (start of trimester 3)
+          WHEN (SELECT jenis_kunjungan FROM antenatal_care WHERE forkey_hamil = k.id ORDER BY tanggal_kunjungan DESC LIMIT 1) = 'K3' 
+            THEN DATE_ADD(k.haid_terakhir, INTERVAL 30 WEEK)
+          
+          -- K5: Should be done at 28-36 weeks
+          WHEN (SELECT jenis_kunjungan FROM antenatal_care WHERE forkey_hamil = k.id ORDER BY tanggal_kunjungan DESC LIMIT 1) = 'K4' 
+            THEN DATE_ADD(k.haid_terakhir, INTERVAL 34 WEEK)
+          
+          -- K6: Should be done at 36-40 weeks (end of trimester 3)
+          WHEN (SELECT jenis_kunjungan FROM antenatal_care WHERE forkey_hamil = k.id ORDER BY tanggal_kunjungan DESC LIMIT 1) = 'K5' 
+            THEN DATE_ADD(k.haid_terakhir, INTERVAL 38 WEEK)
+          
+          ELSE NULL
+        END as recommended_visit_date,
+        
+        CASE 
+          WHEN EXISTS (
+            SELECT 1 FROM antenatal_care anc 
+            WHERE anc.forkey_hamil = k.id 
+            AND anc.status_risiko_visit = 'Risiko Tinggi'
+          ) THEN 'Risiko Tinggi'
+          ELSE 'Normal'
+        END as status_risiko
+        
+      FROM kehamilan k
+      JOIN ibu i ON k.forkey_ibu = i.id
+      WHERE k.status_kehamilan = 'Hamil'
+      AND k.haid_terakhir IS NOT NULL
+      HAVING next_visit_type != 'Selesai'
+      ORDER BY 
+        CASE 
+          WHEN recommended_visit_date < CURDATE() THEN 0
+          ELSE 1
+        END,
+        recommended_visit_date ASC
+    `);
+    
+    // Calculate days until next visit
+    const formattedResults = results.map(row => ({
+      ...row,
+      days_until_next_visit: row.recommended_visit_date 
+        ? Math.floor((new Date(row.recommended_visit_date) - new Date()) / (1000 * 60 * 60 * 24))
+        : null
+    }));
+    
+    res.json(formattedResults);
+  } catch (error) {
+    console.error('Error fetching ANC schedule:', error);
+    res.status(500).json({ message: 'Failed to fetch ANC schedule' });
   }
 });
 

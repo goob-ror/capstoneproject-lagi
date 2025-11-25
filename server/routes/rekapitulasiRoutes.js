@@ -229,6 +229,105 @@ router.get('/', authMiddleware, async (req, res) => {
       ORDER BY kelurahan
     `);
 
+    // Get Obesity statistics (BMI >= 30)
+    const obesityQuery = kelurahan
+      ? `SELECT 
+          COUNT(DISTINCT i.id) as total_obese,
+          COUNT(DISTINCT CASE 
+            WHEN ac.berat_badan / POWER(i.tinggi_badan / 100, 2) >= 30 THEN i.id 
+          END) as obese_count,
+          ROUND((COUNT(DISTINCT CASE 
+            WHEN ac.berat_badan / POWER(i.tinggi_badan / 100, 2) >= 30 THEN i.id 
+          END) * 100.0 / COUNT(DISTINCT i.id)), 1) as obese_percentage
+        FROM ibu i
+        JOIN kehamilan k ON i.id = k.forkey_ibu
+        LEFT JOIN antenatal_care ac ON k.id = ac.forkey_hamil
+        WHERE k.status_kehamilan = 'Hamil' 
+        AND i.tinggi_badan IS NOT NULL 
+        AND ac.berat_badan IS NOT NULL
+        AND i.kelurahan = ?`
+      : `SELECT 
+          COUNT(DISTINCT i.id) as total_checked,
+          COUNT(DISTINCT CASE 
+            WHEN ac.berat_badan / POWER(i.tinggi_badan / 100, 2) >= 30 THEN i.id 
+          END) as obese_count,
+          ROUND((COUNT(DISTINCT CASE 
+            WHEN ac.berat_badan / POWER(i.tinggi_badan / 100, 2) >= 30 THEN i.id 
+          END) * 100.0 / COUNT(DISTINCT i.id)), 1) as obese_percentage
+        FROM ibu i
+        JOIN kehamilan k ON i.id = k.forkey_ibu
+        LEFT JOIN antenatal_care ac ON k.id = ac.forkey_hamil
+        WHERE k.status_kehamilan = 'Hamil' 
+        AND i.tinggi_badan IS NOT NULL 
+        AND ac.berat_badan IS NOT NULL`;
+    const [obesityResult] = await pool.query(obesityQuery, params);
+
+    // Get Preeklamsia/Eklamsia statistics
+    const preeklamsiaQuery = kelurahan
+      ? `SELECT 
+          COUNT(DISTINCT k.id) as total_preeklamsia,
+          COUNT(DISTINCT CASE 
+            WHEN ko.kode_diagnosis = 'O15' THEN k.id 
+          END) as eklamsia_count,
+          COUNT(DISTINCT CASE 
+            WHEN ko.kode_diagnosis LIKE 'O14%' THEN k.id 
+          END) as preeklamsia_count,
+          COUNT(DISTINCT CASE 
+            WHEN ko.kode_diagnosis = 'O13' THEN k.id 
+          END) as hipertensi_gestasional_count
+        FROM kehamilan k
+        JOIN ibu i ON k.forkey_ibu = i.id
+        LEFT JOIN komplikasi ko ON k.id = ko.forkey_hamil
+        WHERE k.status_kehamilan = 'Hamil'
+        AND ko.kode_diagnosis IN ('O13', 'O14', 'O14.1', 'O15', 'O16')
+        AND i.kelurahan = ?`
+      : `SELECT 
+          COUNT(DISTINCT k.id) as total_preeklamsia,
+          COUNT(DISTINCT CASE 
+            WHEN ko.kode_diagnosis = 'O15' THEN k.id 
+          END) as eklamsia_count,
+          COUNT(DISTINCT CASE 
+            WHEN ko.kode_diagnosis LIKE 'O14%' THEN k.id 
+          END) as preeklamsia_count,
+          COUNT(DISTINCT CASE 
+            WHEN ko.kode_diagnosis = 'O13' THEN k.id 
+          END) as hipertensi_gestasional_count
+        FROM kehamilan k
+        LEFT JOIN komplikasi ko ON k.id = ko.forkey_hamil
+        WHERE k.status_kehamilan = 'Hamil'
+        AND ko.kode_diagnosis IN ('O13', 'O14', 'O14.1', 'O15', 'O16')`;
+    const [preeklamsiaResult] = await pool.query(preeklamsiaQuery, params);
+
+    // Get Hepatitis statistics
+    const hepatitisQuery = kelurahan
+      ? `SELECT 
+          COUNT(DISTINCT k.id) as total_screened,
+          COUNT(DISTINCT CASE 
+            WHEN ac.skrining_hbsag = 'Reaktif' THEN k.id 
+          END) as hepatitis_b_positive,
+          ROUND((COUNT(DISTINCT CASE 
+            WHEN ac.skrining_hbsag = 'Reaktif' THEN k.id 
+          END) * 100.0 / COUNT(DISTINCT k.id)), 1) as hepatitis_percentage
+        FROM kehamilan k
+        JOIN ibu i ON k.forkey_ibu = i.id
+        LEFT JOIN antenatal_care ac ON k.id = ac.forkey_hamil
+        WHERE k.status_kehamilan = 'Hamil'
+        AND ac.skrining_hbsag IS NOT NULL
+        AND i.kelurahan = ?`
+      : `SELECT 
+          COUNT(DISTINCT k.id) as total_screened,
+          COUNT(DISTINCT CASE 
+            WHEN ac.skrining_hbsag = 'Reaktif' THEN k.id 
+          END) as hepatitis_b_positive,
+          ROUND((COUNT(DISTINCT CASE 
+            WHEN ac.skrining_hbsag = 'Reaktif' THEN k.id 
+          END) * 100.0 / COUNT(DISTINCT k.id)), 1) as hepatitis_percentage
+        FROM kehamilan k
+        LEFT JOIN antenatal_care ac ON k.id = ac.forkey_hamil
+        WHERE k.status_kehamilan = 'Hamil'
+        AND ac.skrining_hbsag IS NOT NULL`;
+    const [hepatitisResult] = await pool.query(hepatitisQuery, params);
+
     res.json({
       totalIbu,
       totalHamil,
@@ -241,6 +340,9 @@ router.get('/', authMiddleware, async (req, res) => {
       riskDistribution: riskResult,
       ttImmunization: ttResult,
       hbStatistics: hbResult[0],
+      obesityStatistics: obesityResult[0],
+      preeklamsiaStatistics: preeklamsiaResult[0],
+      hepatitisStatistics: hepatitisResult[0],
       kelurahanList: kelurahanList.map(k => k.kelurahan),
       selectedKelurahan: kelurahan || null
     });

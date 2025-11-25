@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import * as XLSX from 'xlsx';
 import RekapitulasiPresenter from './Rekapitulasi-presenter';
 import './Rekapitulasi.css';
 
@@ -39,6 +40,138 @@ const Rekapitulasi = () => {
 
   const handleLogout = () => {
     presenter.handleLogout();
+  };
+
+  const handleExportExcel = () => {
+    if (!summaryData) return;
+
+    // Create workbook
+    const wb = XLSX.utils.book_new();
+
+    // Sheet 1: Summary Statistics
+    const summarySheet = [
+      ['REKAPITULASI DATA IBUNDACARE'],
+      ['Tanggal Export:', new Date().toLocaleDateString('id-ID')],
+      ['Kelurahan:', selectedKelurahan || 'Semua Kelurahan'],
+      [],
+      ['STATISTIK UMUM'],
+      ['Total Ibu Terdaftar', summaryData.totalIbu || 0],
+      ['Ibu Hamil Aktif', summaryData.totalHamil || 0],
+      ['Total Kunjungan ANC', summaryData.totalANC || 0],
+      ['Total Komplikasi', summaryData.totalKomplikasi || 0],
+      [],
+      ['STATISTIK KESEHATAN'],
+      ['Obesitas (BMI ≥30)', summaryData.obesityStatistics?.obese_count || 0, `${summaryData.obesityStatistics?.obese_percentage || 0}%`],
+      ['Preeklamsia', summaryData.preeklamsiaStatistics?.preeklamsia_count || 0],
+      ['Eklamsia', summaryData.preeklamsiaStatistics?.eklamsia_count || 0],
+      ['Hepatitis B Positif', summaryData.hepatitisStatistics?.hepatitis_b_positive || 0, `${summaryData.hepatitisStatistics?.hepatitis_percentage || 0}%`],
+      ['Rata-rata Hb', `${summaryData.hbStatistics?.avg_hb || 0} g/dL`],
+      ['Anemia (Hb < 11)', summaryData.hbStatistics?.anemia_count || 0],
+      ['Tablet Fe Diberikan', summaryData.feStatistics?.total_fe_given || 0, `${summaryData.feStatistics?.percentage_fe || 0}%`],
+    ];
+    const ws1 = XLSX.utils.aoa_to_sheet(summarySheet);
+    XLSX.utils.book_append_sheet(wb, ws1, 'Ringkasan');
+
+    // Sheet 2: ANC by Type
+    if (summaryData.ancByType && summaryData.ancByType.length > 0) {
+      const ancData = [
+        ['KUNJUNGAN ANC BERDASARKAN JENIS'],
+        ['Jenis Kunjungan', 'Jumlah', 'Persentase'],
+        ...summaryData.ancByType.map(item => [
+          item.jenis_kunjungan,
+          item.count,
+          `${item.percentage}%`
+        ])
+      ];
+      const ws2 = XLSX.utils.aoa_to_sheet(ancData);
+      XLSX.utils.book_append_sheet(wb, ws2, 'Kunjungan ANC');
+    }
+
+    // Sheet 3: Complications by Severity
+    if (summaryData.complicationsBySeverity && summaryData.complicationsBySeverity.length > 0) {
+      const compData = [
+        ['KOMPLIKASI BERDASARKAN TINGKAT KEPARAHAN'],
+        ['Tingkat Keparahan', 'Jumlah', 'Persentase'],
+        ...summaryData.complicationsBySeverity.map(item => [
+          item.tingkat_keparahan,
+          item.count,
+          `${item.percentage}%`
+        ])
+      ];
+      const ws3 = XLSX.utils.aoa_to_sheet(compData);
+      XLSX.utils.book_append_sheet(wb, ws3, 'Komplikasi');
+    }
+
+    // Sheet 4: Ibu by Kelurahan
+    if (summaryData.ibuByKelurahan && summaryData.ibuByKelurahan.length > 0) {
+      const kelurahanData = [
+        ['IBU BERDASARKAN KELURAHAN'],
+        ['Kelurahan', 'Total Ibu', 'Ibu Hamil', 'Persentase'],
+        ...summaryData.ibuByKelurahan.map(item => [
+          item.kelurahan,
+          item.total,
+          item.hamil,
+          `${item.percentage}%`
+        ])
+      ];
+      const ws4 = XLSX.utils.aoa_to_sheet(kelurahanData);
+      XLSX.utils.book_append_sheet(wb, ws4, 'Per Kelurahan');
+    }
+
+    // Generate filename
+    const kelurahanName = selectedKelurahan ? `_${selectedKelurahan}` : '_Semua';
+    const filename = `Rekapitulasi_IBundaCare${kelurahanName}_${new Date().toISOString().split('T')[0]}.xlsx`;
+
+    // Save file
+    XLSX.writeFile(wb, filename);
+  };
+
+  const handleExportCSV = () => {
+    if (!summaryData) return;
+
+    // Create CSV content
+    let csvContent = 'REKAPITULASI DATA IBUNDACARE\n';
+    csvContent += `Tanggal Export:,${new Date().toLocaleDateString('id-ID')}\n`;
+    csvContent += `Kelurahan:,${selectedKelurahan || 'Semua Kelurahan'}\n\n`;
+    
+    csvContent += 'STATISTIK UMUM\n';
+    csvContent += `Total Ibu Terdaftar,${summaryData.totalIbu || 0}\n`;
+    csvContent += `Ibu Hamil Aktif,${summaryData.totalHamil || 0}\n`;
+    csvContent += `Total Kunjungan ANC,${summaryData.totalANC || 0}\n`;
+    csvContent += `Total Komplikasi,${summaryData.totalKomplikasi || 0}\n\n`;
+    
+    csvContent += 'STATISTIK KESEHATAN\n';
+    csvContent += `Obesitas (BMI ≥30),${summaryData.obesityStatistics?.obese_count || 0},${summaryData.obesityStatistics?.obese_percentage || 0}%\n`;
+    csvContent += `Preeklamsia,${summaryData.preeklamsiaStatistics?.preeklamsia_count || 0}\n`;
+    csvContent += `Eklamsia,${summaryData.preeklamsiaStatistics?.eklamsia_count || 0}\n`;
+    csvContent += `Hepatitis B Positif,${summaryData.hepatitisStatistics?.hepatitis_b_positive || 0},${summaryData.hepatitisStatistics?.hepatitis_percentage || 0}%\n`;
+    csvContent += `Rata-rata Hb,${summaryData.hbStatistics?.avg_hb || 0} g/dL\n`;
+    csvContent += `Anemia (Hb < 11),${summaryData.hbStatistics?.anemia_count || 0}\n`;
+    csvContent += `Tablet Fe Diberikan,${summaryData.feStatistics?.total_fe_given || 0},${summaryData.feStatistics?.percentage_fe || 0}%\n\n`;
+
+    // Add ANC data
+    if (summaryData.ancByType && summaryData.ancByType.length > 0) {
+      csvContent += 'KUNJUNGAN ANC BERDASARKAN JENIS\n';
+      csvContent += 'Jenis Kunjungan,Jumlah,Persentase\n';
+      summaryData.ancByType.forEach(item => {
+        csvContent += `${item.jenis_kunjungan},${item.count},${item.percentage}%\n`;
+      });
+      csvContent += '\n';
+    }
+
+    // Create blob and download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    const kelurahanName = selectedKelurahan ? `_${selectedKelurahan}` : '_Semua';
+    const filename = `Rekapitulasi_IBundaCare${kelurahanName}_${new Date().toISOString().split('T')[0]}.csv`;
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   if (loading) {
@@ -123,21 +256,38 @@ const Rekapitulasi = () => {
               )}
             </p>
           </div>
-          <div className="filter-section">
-            <label htmlFor="kelurahan-filter" className="filter-label">Filter Kelurahan:</label>
-            <select 
-              id="kelurahan-filter"
-              className="filter-select"
-              value={selectedKelurahan}
-              onChange={handleKelurahanChange}
-            >
-              <option value="">Semua Kelurahan</option>
-              {summaryData?.kelurahanList?.map(kelurahan => (
-                <option key={kelurahan} value={kelurahan}>
-                  {kelurahan}
-                </option>
-              ))}
-            </select>
+          <div className="header-actions">
+            <div className="filter-section">
+              <label htmlFor="kelurahan-filter" className="filter-label">Filter Kelurahan:</label>
+              <select 
+                id="kelurahan-filter"
+                className="filter-select"
+                value={selectedKelurahan}
+                onChange={handleKelurahanChange}
+              >
+                <option value="">Semua Kelurahan</option>
+                {summaryData?.kelurahanList?.map(kelurahan => (
+                  <option key={kelurahan} value={kelurahan}>
+                    {kelurahan}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="export-buttons">
+              <button className="btn-export excel" onClick={handleExportExcel} title="Export ke Excel">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z" fill="currentColor"/>
+                  <path d="M9.5 13.5l1.5 2 1.5-2 1.5 2 1.5-2" stroke="currentColor" strokeWidth="1.5"/>
+                </svg>
+                Excel
+              </button>
+              <button className="btn-export csv" onClick={handleExportCSV} title="Export ke CSV">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z" fill="currentColor"/>
+                </svg>
+                CSV
+              </button>
+            </div>
           </div>
         </div>
 
@@ -225,6 +375,48 @@ const Rekapitulasi = () => {
                   <h3>Rata-rata Hb</h3>
                   <p className="card-value">{summaryData.hbStatistics?.avg_hb || 0}</p>
                   <p className="card-label">g/dL ({summaryData.hbStatistics?.anemia_count || 0} anemia)</p>
+                </div>
+              </div>
+
+              <div className="summary-card">
+                <div className="card-icon purple">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" fill="currentColor"/>
+                  </svg>
+                </div>
+                <div className="card-content">
+                  <h3>Obesitas (BMI ≥30)</h3>
+                  <p className="card-value">{summaryData.obesityStatistics?.obese_count || 0}</p>
+                  <p className="card-label">{summaryData.obesityStatistics?.obese_percentage || 0}% dari ibu hamil</p>
+                </div>
+              </div>
+
+              <div className="summary-card">
+                <div className="card-icon danger">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" fill="currentColor"/>
+                  </svg>
+                </div>
+                <div className="card-content">
+                  <h3>Preeklamsia/Eklamsia</h3>
+                  <p className="card-value">{(summaryData.preeklamsiaStatistics?.preeklamsia_count || 0) + (summaryData.preeklamsiaStatistics?.eklamsia_count || 0)}</p>
+                  <p className="card-label">
+                    {summaryData.preeklamsiaStatistics?.eklamsia_count || 0} eklamsia, 
+                    {summaryData.preeklamsiaStatistics?.preeklamsia_count || 0} preeklamsia
+                  </p>
+                </div>
+              </div>
+
+              <div className="summary-card">
+                <div className="card-icon warning">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z" fill="currentColor"/>
+                  </svg>
+                </div>
+                <div className="card-content">
+                  <h3>Hepatitis B</h3>
+                  <p className="card-value">{summaryData.hepatitisStatistics?.hepatitis_b_positive || 0}</p>
+                  <p className="card-label">{summaryData.hepatitisStatistics?.hepatitis_percentage || 0}% dari yang diskrining</p>
                 </div>
               </div>
             </>

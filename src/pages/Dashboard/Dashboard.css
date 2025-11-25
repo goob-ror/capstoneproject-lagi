@@ -590,3 +590,149 @@
     padding: 8px;
   }
 }
+
+/* Pagination Styles */
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background-color: #F9FAFB;
+  border-top: 1px solid #E5E7EB;
+  border-radius: 0 0 12px 12px;
+  margin-top: -1px;
+}
+
+.pagination-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background-color: white;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background-color: #22C55E;
+  border-color: #22C55E;
+  color: white;
+  transform: translateY(-1px);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.pagination-info {
+  font-size: 13px;
+  color: #6B7280;
+  font-weight: 500;
+}
+
+/* Visit Badge Styles */
+.visit-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  background-color: #E0E7FF;
+  color: #3730A3;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.visit-badge.next-visit {
+  background-color: #DBEAFE;
+  color: #1E40AF;
+}
+
+/* Responsive Pagination */
+@media (max-width: 768px) {
+  .pagination {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .pagination-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .pagination-info {
+    order: -1;
+    text-align: center;
+  }
+}
+
+/* Table Header with Filter */
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.table-header .table-title {
+  margin: 0;
+}
+
+/* Filter Checkbox */
+.filter-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  padding: 8px 12px;
+  background-color: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.filter-checkbox:hover {
+  background-color: #F3F4F6;
+  border-color: #D1D5DB;
+}
+
+.filter-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #22C55E;
+}
+
+.filter-checkbox span {
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.filter-checkbox input[type="checkbox"]:checked + span {
+  color: #22C55E;
+  font-weight: 600;
+}
+
+/* Responsive Table Header */
+@media (max-width: 768px) {
+  .table-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .filter-checkbox {
+    width: 100%;
+    justify-content: center;
+  }
+}

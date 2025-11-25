@@ -18,7 +18,8 @@ class DashboardPresenter {
         ancPerMonth,
         immunizationCoverage,
         riskDistribution,
-        nearingDueDates
+        nearingDueDates,
+        ancSchedule
       ] = await Promise.all([
         this.model.getDashboardStats(),
         this.model.getIbuByKelurahan(),
@@ -26,7 +27,8 @@ class DashboardPresenter {
         this.model.getANCPerMonth(),
         this.model.getImmunizationCoverage(),
         this.model.getRiskDistribution(),
-        this.model.getNearingDueDates()
+        this.model.getNearingDueDates(),
+        this.model.getANCSchedule()
       ]);
 
       this.view.displayStats(stats);
@@ -36,6 +38,7 @@ class DashboardPresenter {
       this.view.displayImmunizationCoverage(immunizationCoverage);
       this.view.displayRiskDistribution(riskDistribution);
       this.view.displayNearingDueDates(nearingDueDates);
+      this.view.displayANCSchedule(ancSchedule);
 
     } catch (error) {
       this.view.setError(error.message || 'Failed to load dashboard data');
