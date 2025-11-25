@@ -85,7 +85,7 @@ class TambahIbuModel {
   validateFormData(formData) {
     const errors = [];
 
-    // Required fields
+    // Required fields - Data Pribadi
     if (!formData.nik_ibu) {
       errors.push('NIK harus diisi');
     } else if (!this.validateNIK(formData.nik_ibu)) {
@@ -103,6 +103,27 @@ class TambahIbuModel {
     // Optional but validated fields
     if (formData.no_hp && !this.validatePhone(formData.no_hp)) {
       errors.push('No. HP harus 10-13 digit angka');
+    }
+
+    // Required fields - Data Kehamilan
+    if (!formData.gravida || formData.gravida < 1) {
+      errors.push('Gravida harus diisi dengan nilai minimal 1');
+    }
+
+    if (formData.partus === '' || formData.partus < 0) {
+      errors.push('Partus harus diisi dengan nilai minimal 0');
+    }
+
+    if (formData.abortus === '' || formData.abortus < 0) {
+      errors.push('Abortus harus diisi dengan nilai minimal 0');
+    }
+
+    if (!formData.haid_terakhir) {
+      errors.push('Haid terakhir (HPHT) harus diisi');
+    }
+
+    if (!formData.status_kehamilan) {
+      errors.push('Status kehamilan harus diisi');
     }
 
     return {

@@ -7,6 +7,7 @@ const ibuRoutes = require('./routes/ibuRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const ancRoutes = require('./routes/ancRoutes');
 const komplikasiRoutes = require('./routes/komplikasiRoutes');
+const rekapitulasiRoutes = require('./routes/rekapitulasiRoutes');
 const auth = require('./middleware/auth');
 
 const app = express();
@@ -25,6 +26,7 @@ app.use('/api/ibu', ibuRoutes);
 app.use('/api/dashboard', auth, dashboardRoutes);
 app.use('/api/anc', ancRoutes);
 app.use('/api/komplikasi', komplikasiRoutes);
+app.use('/api/rekapitulasi', rekapitulasiRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

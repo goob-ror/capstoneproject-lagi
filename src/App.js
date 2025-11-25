@@ -6,10 +6,12 @@ import WaitingApprovalPage from './pages/AuthPage/AuthPage';
 import Dashboard from './pages/Dashboard/Dashboard';
 import DataIbu from './pages/DataIbu/DataIbu';
 import TambahIbu from './pages/TambahIbu/TambahIbu';
+import DetailIbu from './pages/DetailIbu/DetailIbu';
 import KunjunganANC from './pages/KunjunganANC/KunjunganANC';
 import TambahANC from './pages/TambahANC/TambahANC';
 import Komplikasi from './pages/Komplikasi/Komplikasi';
 import TambahKomplikasi from './pages/TambahKomplikasi/TambahKomplikasi';
+import Rekapitulasi from './pages/Rekapitulasi/Rekapitulasi';
 import OfflineIndicator from './components/OfflineIndicator/OfflineIndicator';
 import AuthModel from './services/AuthModel';
 import './App.css';
@@ -29,7 +31,7 @@ function AppLayout() {
     document.body.className = '';
     
     // Add appropriate class based on route
-    const dashboardRoutes = ['/dashboard', '/data-ibu', '/tambah-ibu', '/kunjungan-anc', '/tambah-anc', '/komplikasi', '/tambah-komplikasi'];
+    const dashboardRoutes = ['/dashboard', '/data-ibu', '/detail-ibu', '/tambah-ibu', '/kunjungan-anc', '/tambah-anc', '/komplikasi', '/tambah-komplikasi', '/rekapitulasi'];
     if (dashboardRoutes.some(route => location.pathname.startsWith(route))) {
       document.body.classList.add('dashboard-page');
     } else {
@@ -37,7 +39,7 @@ function AppLayout() {
     }
   }, [location]);
   
-  const isDashboard = ['/dashboard', '/data-ibu', '/tambah-ibu', '/kunjungan-anc', '/tambah-anc', '/komplikasi', '/tambah-komplikasi'].some(route => location.pathname.startsWith(route));
+  const isDashboard = ['/dashboard', '/data-ibu', '/detail-ibu', '/tambah-ibu', '/kunjungan-anc', '/tambah-anc', '/komplikasi', '/tambah-komplikasi', '/rekapitulasi'].some(route => location.pathname.startsWith(route));
   
   return (
     <div className={isDashboard ? 'App' : 'App centered'}>
@@ -72,6 +74,14 @@ function AppLayout() {
           } 
         />
         <Route 
+          path="/detail-ibu/:id" 
+          element={
+            <ProtectedRoute>
+              <DetailIbu />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
           path="/kunjungan-anc" 
           element={
             <ProtectedRoute>
@@ -100,6 +110,14 @@ function AppLayout() {
           element={
             <ProtectedRoute>
               <TambahKomplikasi />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/rekapitulasi" 
+          element={
+            <ProtectedRoute>
+              <Rekapitulasi />
             </ProtectedRoute>
           } 
         />
