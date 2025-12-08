@@ -184,6 +184,7 @@ CREATE TABLE `ibu` (
   `no_hp` varchar(20) DEFAULT NULL,
   `gol_darah` varchar(2) DEFAULT NULL,
   `tinggi_badan` DECIMAL(5,2) DEFAULT NULL,
+  `beratbadan` INT DEFAULT NULL,
   `rhesus` varchar(8) DEFAULT NULL,
   `buku_kia` varchar(10) DEFAULT NULL,
   `pekerjaan` varchar(50) DEFAULT NULL,
@@ -553,6 +554,7 @@ CREATE TABLE `suami` (
   `gol_darah` varchar(2) DEFAULT NULL,
   `pekerjaan` varchar(50) DEFAULT NULL,
   `pendidikan` varchar(50) DEFAULT NULL,
+  `isPerokok` BOOLEAN DEFAULT '0',
   `forkey_ibu` int NOT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP

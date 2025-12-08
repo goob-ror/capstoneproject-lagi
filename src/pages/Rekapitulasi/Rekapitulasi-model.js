@@ -11,10 +11,15 @@ class RekapitulasiModel {
     };
   }
 
-  async getSummaryData(kelurahan = null) {
+  async getSummaryData(kelurahan = null, year = null, month = null) {
     try {
-      const url = kelurahan 
-        ? `${this.baseURL}?kelurahan=${encodeURIComponent(kelurahan)}`
+      const params = new URLSearchParams();
+      if (kelurahan) params.append('kelurahan', kelurahan);
+      if (year) params.append('year', year);
+      if (month) params.append('month', month);
+      
+      const url = params.toString() 
+        ? `${this.baseURL}?${params.toString()}`
         : this.baseURL;
         
       const response = await fetch(url, {

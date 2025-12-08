@@ -12,6 +12,8 @@ const Rekapitulasi = () => {
   const [summaryData, setSummaryData] = useState(null);
   const [user, setUser] = useState(null);
   const [selectedKelurahan, setSelectedKelurahan] = useState('');
+  const [selectedYear, setSelectedYear] = useState('');
+  const [selectedMonth, setSelectedMonth] = useState('');
 
   const [presenter] = useState(() => new RekapitulasiPresenter({
     setLoading,
@@ -35,7 +37,19 @@ const Rekapitulasi = () => {
   const handleKelurahanChange = (e) => {
     const kelurahan = e.target.value;
     setSelectedKelurahan(kelurahan);
-    presenter.loadSummaryData(kelurahan || null);
+    presenter.loadSummaryData(kelurahan || null, selectedYear || null, selectedMonth || null);
+  };
+
+  const handleYearChange = (e) => {
+    const year = e.target.value;
+    setSelectedYear(year);
+    presenter.loadSummaryData(selectedKelurahan || null, year || null, selectedMonth || null);
+  };
+
+  const handleMonthChange = (e) => {
+    const month = e.target.value;
+    setSelectedMonth(month);
+    presenter.loadSummaryData(selectedKelurahan || null, selectedYear || null, month || null);
   };
 
   const handleLogout = () => {
@@ -53,6 +67,8 @@ const Rekapitulasi = () => {
       ['REKAPITULASI DATA IBUNDACARE'],
       ['Tanggal Export:', new Date().toLocaleDateString('id-ID')],
       ['Kelurahan:', selectedKelurahan || 'Semua Kelurahan'],
+      ['Tahun:', selectedYear || 'Semua Tahun'],
+      ['Bulan:', selectedMonth ? getMonthName(selectedMonth) : 'Semua Bulan'],
       [],
       ['STATISTIK UMUM'],
       ['Total Ibu Terdaftar', summaryData.totalIbu || 0],
@@ -120,10 +136,21 @@ const Rekapitulasi = () => {
 
     // Generate filename
     const kelurahanName = selectedKelurahan ? `_${selectedKelurahan}` : '_Semua';
-    const filename = `Rekapitulasi_IBundaCare${kelurahanName}_${new Date().toISOString().split('T')[0]}.xlsx`;
+    const yearName = selectedYear ? `_${selectedYear}` : '';
+    const monthName = selectedMonth ? `_${getMonthName(selectedMonth)}` : '';
+    const filename = `Rekapitulasi_IBundaCare${kelurahanName}${yearName}${monthName}_${new Date().toISOString().split('T')[0]}.xlsx`;
 
     // Save file
     XLSX.writeFile(wb, filename);
+  };
+
+  const getMonthName = (month) => {
+    const months = {
+      '01': 'Januari', '02': 'Februari', '03': 'Maret', '04': 'April',
+      '05': 'Mei', '06': 'Juni', '07': 'Juli', '08': 'Agustus',
+      '09': 'September', '10': 'Oktober', '11': 'November', '12': 'Desember'
+    };
+    return months[month] || month;
   };
 
   const handleExportCSV = () => {
@@ -132,7 +159,9 @@ const Rekapitulasi = () => {
     // Create CSV content
     let csvContent = 'REKAPITULASI DATA IBUNDACARE\n';
     csvContent += `Tanggal Export:,${new Date().toLocaleDateString('id-ID')}\n`;
-    csvContent += `Kelurahan:,${selectedKelurahan || 'Semua Kelurahan'}\n\n`;
+    csvContent += `Kelurahan:,${selectedKelurahan || 'Semua Kelurahan'}\n`;
+    csvContent += `Tahun:,${selectedYear || 'Semua Tahun'}\n`;
+    csvContent += `Bulan:,${selectedMonth ? getMonthName(selectedMonth) : 'Semua Bulan'}\n\n`;
     
     csvContent += 'STATISTIK UMUM\n';
     csvContent += `Total Ibu Terdaftar,${summaryData.totalIbu || 0}\n`;
@@ -164,7 +193,9 @@ const Rekapitulasi = () => {
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     const kelurahanName = selectedKelurahan ? `_${selectedKelurahan}` : '_Semua';
-    const filename = `Rekapitulasi_IBundaCare${kelurahanName}_${new Date().toISOString().split('T')[0]}.csv`;
+    const yearName = selectedYear ? `_${selectedYear}` : '';
+    const monthName = selectedMonth ? `_${getMonthName(selectedMonth)}` : '';
+    const filename = `Rekapitulasi_IBundaCare${kelurahanName}${yearName}${monthName}_${new Date().toISOString().split('T')[0]}.csv`;
     
     link.setAttribute('href', url);
     link.setAttribute('download', filename);
@@ -254,11 +285,55 @@ const Rekapitulasi = () => {
               {selectedKelurahan && (
                 <span className="filter-indicator"> - Kelurahan: <strong>{selectedKelurahan}</strong></span>
               )}
+              {selectedYear && (
+                <span className="filter-indicator"> - Tahun: <strong>{selectedYear}</strong></span>
+              )}
+              {selectedMonth && (
+                <span className="filter-indicator"> - Bulan: <strong>{getMonthName(selectedMonth)}</strong></span>
+              )}
             </p>
           </div>
           <div className="header-actions">
             <div className="filter-section">
-              <label htmlFor="kelurahan-filter" className="filter-label">Filter Kelurahan:</label>
+              <label htmlFor="year-filter" className="filter-label">Tahun:</label>
+              <select 
+                id="year-filter"
+                className="filter-select"
+                value={selectedYear}
+                onChange={handleYearChange}
+              >
+                <option value="">Semua Tahun</option>
+                <option value="2025">2025</option>
+                <option value="2024">2024</option>
+                <option value="2023">2023</option>
+                <option value="2026">2026</option>
+              </select>
+            </div>
+            <div className="filter-section">
+              <label htmlFor="month-filter" className="filter-label">Bulan:</label>
+              <select 
+                id="month-filter"
+                className="filter-select"
+                value={selectedMonth}
+                onChange={handleMonthChange}
+              >
+                <option value="">Semua Bulan</option>
+                <option value="01">Januari</option>
+                <option value="02">Februari</option>
+                <option value="03">Maret</option>
+                <option value="04">April</option>
+                <option value="05">Mei</option>
+                <option value="06">Juni</option>
+                <option value="07">Juli</option>
+                <option value="08">Agustus</option>
+                <option value="09">September</option>
+                <option value="10">Oktober</option>
+                <option value="11">November</option>
+                <option value="12">Desember</option>
+              </select>
+            </div>
+            <div className="filter-section">
+              <label htmlFor="kelurahan-filter" className="filter-label">Kelurahan:</label>
               <select 
                 id="kelurahan-filter"
                 className="filter-select"

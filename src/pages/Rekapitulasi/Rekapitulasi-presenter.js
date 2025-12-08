@@ -6,12 +6,12 @@ class RekapitulasiPresenter {
     this.model = new RekapitulasiModel();
   }
 
-  async loadSummaryData(kelurahan = null) {
+  async loadSummaryData(kelurahan = null, year = null, month = null) {
     this.view.setLoading(true);
     this.view.clearError();
 
     try {
-      const data = await this.model.getSummaryData(kelurahan);
+      const data = await this.model.getSummaryData(kelurahan, year, month);
       this.view.displaySummaryData(data);
     } catch (error) {
       console.error('Load summary error:', error);
