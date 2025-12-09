@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import TambahIbuPresenter from './TambahIbu-presenter';
+import { calculateBMI, getBMICategory, getBMICategoryColor } from '../../utils/bmiCalculator';
 import './TambahIbu.css';
 
 const TambahIbu = () => {
@@ -8,6 +9,7 @@ const TambahIbu = () => {
   const [searchParams] = useSearchParams();
   const editId = searchParams.get('id');
   const isEditMode = !!editId;
+  const [activeTab, setActiveTab] = useState('data-ibu');
   
   const [formData, setFormData] = useState({
     id: '',
@@ -18,6 +20,7 @@ const TambahIbu = () => {
     gol_darah: '',
     rhesus: '+',
     tinggi_badan: '',
+    beratbadan: '',
     buku_kia: 'Ada',
     pekerjaan: '',
     pendidikan: '',
@@ -30,6 +33,21 @@ const TambahIbu = () => {
     haid_terakhir: '',
     status_kehamilan: 'Hamil'
   });
+
+  // Data Suami
+  const [suamiData, setSuamiData] = useState({
+    nik_suami: '',
+    nama_lengkap: '',
+    tanggal_lahir: '',
+    no_hp: '',
+    gol_darah: '',
+    pekerjaan: '',
+    pendidikan: '',
+    isPerokok: false
+  });
+
+  // Riwayat Penyakit
+  const [riwayatPenyakit, setRiwayatPenyakit] = useState([]);
 
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(isEditMode);
@@ -68,6 +86,7 @@ const TambahIbu = () => {
         gol_darah: data.gol_darah || '',
         rhesus: data.rhesus || '+',
         tinggi_badan: data.tinggi_badan || '',
+        beratbadan: data.beratbadan || '',
         buku_kia: data.buku_kia || 'Ada',
         pekerjaan: data.pekerjaan || '',
         pendidikan: data.pendidikan || '',
@@ -80,6 +99,37 @@ const TambahIbu = () => {
         haid_terakhir: formattedHaidTerakhir,
         status_kehamilan: data.kehamilan?.status_kehamilan || 'Hamil'
       });
+
+      // Load suami data if exists
+      if (data.suami) {
+        const formattedSuamiDate = data.suami.tanggal_lahir 
+          ? new Date(data.suami.tanggal_lahir).toISOString().split('T')[0]
+          : '';
+        
+        setSuamiData({
+          nik_suami: data.suami.nik_suami || '',
+          nama_lengkap: data.suami.nama_lengkap || '',
+          tanggal_lahir: formattedSuamiDate,
+          no_hp: data.suami.no_hp || '',
+          gol_darah: data.suami.gol_darah || '',
+          pekerjaan: data.suami.pekerjaan || '',
+          pendidikan: data.suami.pendidikan || '',
+          isPerokok: data.suami.isPerokok || false
+        });
+      }
+
+      // Load riwayat penyakit if exists
+      if (data.riwayat_penyakit && data.riwayat_penyakit.length > 0) {
+        setRiwayatPenyakit(data.riwayat_penyakit.map(rp => ({
+          id: rp.id,
+          nama_penyakit: rp.nama_penyakit || '',
+          kategori_penyakit: rp.kategori_penyakit || 'Lainnya',
+          tahun_diagnosis: rp.tahun_diagnosis || '',
+          status_penyakit: rp.status_penyakit || 'Sembuh',
+          keterangan: rp.keterangan || ''
+        })));
+      }
+      
       setLoadingData(false);
     },
     onSuccess: (message) => {
@@ -116,12 +166,43 @@ const TambahIbu = () => {
     }));
   };
 
+  const handleSuamiChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setSuamiData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+  };
+
+  const handleAddRiwayatPenyakit = () => {
+    setRiwayatPenyakit(prev => [...prev, {
+      id: null,
+      nama_penyakit: '',
+      kategori_penyakit: 'Lainnya',
+      tahun_diagnosis: '',
+      status_penyakit: 'Sembuh',
+      keterangan: ''
+    }]);
+  };
+
+  const handleRemoveRiwayatPenyakit = (index) => {
+    setRiwayatPenyakit(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleRiwayatPenyakitChange = (index, field, value) => {
+    setRiwayatPenyakit(prev => prev.map((rp, i) => 
+      i === index ? { ...rp, [field]: value } : rp
+    ));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     // Add flag to indicate if we're adding a new pregnancy
     const submitData = {
       ...formData,
-      isAddingNewPregnancy
+      isAddingNewPregnancy,
+      suami: suamiData,
+      riwayat_penyakit: riwayatPenyakit
     };
     await presenter.handleSubmit(submitData);
   };
@@ -255,12 +336,49 @@ const TambahIbu = () => {
           </div>
         ) : (
           <div className="form-section">
+            {/* Tabs Navigation */}
+            <div className="form-tabs-container">
+              <button
+                type="button"
+                className={`form-tab-button ${activeTab === 'data-ibu' ? 'active' : ''}`}
+                onClick={() => setActiveTab('data-ibu')}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="currentColor"/>
+                </svg>
+                Data Ibu
+              </button>
+              <button
+                type="button"
+                className={`form-tab-button ${activeTab === 'data-suami' ? 'active' : ''}`}
+                onClick={() => setActiveTab('data-suami')}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" fill="currentColor"/>
+                </svg>
+                Data Suami
+              </button>
+              <button
+                type="button"
+                className={`form-tab-button ${activeTab === 'riwayat-penyakit' ? 'active' : ''}`}
+                onClick={() => setActiveTab('riwayat-penyakit')}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm11 15H4v-2h16v2zm0-5H4V8h5.08L7 10.83 8.62 12 11 8.76l1-1.36 1 1.36L15.38 12 17 10.83 14.92 8H20v6z" fill="currentColor"/>
+                </svg>
+                Riwayat Penyakit
+              </button>
+            </div>
+
             <form onSubmit={handleSubmit}>
               {/* Hidden ID field for edit mode */}
               {isEditMode && (
                 <input type="hidden" name="id" value={formData.id} />
               )}
               
+              {/* Tab Content: Data Ibu */}
+              {activeTab === 'data-ibu' && (
+                <>
               <div className="form-card">
                 <h3 className="form-section-title">Data Pribadi</h3>
                 
@@ -367,9 +485,44 @@ const TambahIbu = () => {
                     max="250"
                     step="0.1"
                   />
-                  <small>Dalam cm (untuk perhitungan BMI)</small>
+                  <small>Dalam cm</small>
                 </div>
 
+                <div className="form-group">
+                  <label htmlFor="beratbadan">Berat Badan Sebelum Hamil</label>
+                  <input
+                    type="number"
+                    id="beratbadan"
+                    name="beratbadan"
+                    value={formData.beratbadan}
+                    onChange={handleChange}
+                    placeholder="Contoh: 55"
+                    min="20"
+                    max="200"
+                    step="0.1"
+                  />
+                  <small>Dalam kg</small>
+                </div>
+              </div>
+
+              {formData.tinggi_badan && formData.beratbadan && (
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>IMT (Indeks Massa Tubuh)</label>
+                    <div className="bmi-display">
+                      <span className="bmi-value">
+                        {calculateBMI(parseFloat(formData.beratbadan), parseFloat(formData.tinggi_badan))}
+                      </span>
+                      <span className={`bmi-category ${getBMICategoryColor(getBMICategory(calculateBMI(parseFloat(formData.beratbadan), parseFloat(formData.tinggi_badan))))}`}>
+                        {getBMICategory(calculateBMI(parseFloat(formData.beratbadan), parseFloat(formData.tinggi_badan)))}
+                      </span>
+                    </div>
+                    <small>Kurus: &lt;18.5 | Normal: 18.5-24.9 | Gemuk: 25-29.9 | Obese: ≥30</small>
+                  </div>
+                </div>
+              )}
+
+              <div className="form-row">
                 <div className="form-group">
                   <label htmlFor="buku_kia">Buku KIA</label>
                   <select
@@ -605,6 +758,260 @@ const TambahIbu = () => {
                 </div>
               </div>
             </div>
+                </>
+              )}
+
+              {/* Tab Content: Data Suami */}
+              {activeTab === 'data-suami' && (
+                <div className="form-card">
+                  <h3 className="form-section-title">Data Suami</h3>
+                  
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label htmlFor="suami_nik">NIK Suami</label>
+                      <input
+                        type="text"
+                        id="suami_nik"
+                        name="nik_suami"
+                        value={suamiData.nik_suami}
+                        onChange={handleSuamiChange}
+                        placeholder="Masukkan NIK (16 digit)"
+                        maxLength="16"
+                        pattern="[0-9]{16}"
+                      />
+                      <small>16 digit angka</small>
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="suami_nama">Nama Lengkap Suami</label>
+                      <input
+                        type="text"
+                        id="suami_nama"
+                        name="nama_lengkap"
+                        value={suamiData.nama_lengkap}
+                        onChange={handleSuamiChange}
+                        placeholder="Masukkan nama lengkap suami"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label htmlFor="suami_tanggal_lahir">Tanggal Lahir</label>
+                      <input
+                        type="date"
+                        id="suami_tanggal_lahir"
+                        name="tanggal_lahir"
+                        value={suamiData.tanggal_lahir}
+                        onChange={handleSuamiChange}
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="suami_no_hp">No. HP</label>
+                      <input
+                        type="tel"
+                        id="suami_no_hp"
+                        name="no_hp"
+                        value={suamiData.no_hp}
+                        onChange={handleSuamiChange}
+                        placeholder="Contoh: 081234567890"
+                        pattern="[0-9]{10,13}"
+                      />
+                      <small>10-13 digit angka</small>
+                    </div>
+                  </div>
+
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label htmlFor="suami_gol_darah">Golongan Darah</label>
+                      <select
+                        id="suami_gol_darah"
+                        name="gol_darah"
+                        value={suamiData.gol_darah}
+                        onChange={handleSuamiChange}
+                      >
+                        <option value="">Pilih Golongan Darah</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="AB">AB</option>
+                        <option value="O">O</option>
+                      </select>
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="suami_pekerjaan">Pekerjaan</label>
+                      <select
+                        id="suami_pekerjaan"
+                        name="pekerjaan"
+                        value={suamiData.pekerjaan}
+                        onChange={handleSuamiChange}
+                      >
+                        <option value="">Pilih Pekerjaan</option>
+                        <option value="PNS">PNS</option>
+                        <option value="Swasta">Swasta</option>
+                        <option value="Wiraswasta">Wiraswasta</option>
+                        <option value="Petani">Petani</option>
+                        <option value="Buruh">Buruh</option>
+                        <option value="Pedagang">Pedagang</option>
+                        <option value="Guru">Guru</option>
+                        <option value="Dokter">Dokter</option>
+                        <option value="Karyawan">Karyawan</option>
+                        <option value="Honorer">Honorer</option>
+                        <option value="Seniman">Seniman</option>
+                        <option value="Lainnya">Lainnya</option>
+                      </select>
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="suami_pendidikan">Pendidikan</label>
+                      <select
+                        id="suami_pendidikan"
+                        name="pendidikan"
+                        value={suamiData.pendidikan}
+                        onChange={handleSuamiChange}
+                      >
+                        <option value="">Pilih Pendidikan</option>
+                        <option value="SD">SD</option>
+                        <option value="SMP">SMP</option>
+                        <option value="SMA">SMA</option>
+                        <option value="SMK">SMK</option>
+                        <option value="D3">D3</option>
+                        <option value="D4">D4</option>
+                        <option value="S1">S1</option>
+                        <option value="S2">S2</option>
+                        <option value="S3">S3</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label className="checkbox-label">
+                        <input
+                          type="checkbox"
+                          name="isPerokok"
+                          checked={suamiData.isPerokok}
+                          onChange={handleSuamiChange}
+                        />
+                        <span>Perokok</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Tab Content: Riwayat Penyakit */}
+              {activeTab === 'riwayat-penyakit' && (
+                <div className="form-card">
+                  <div className="form-section-header">
+                    <h3 className="form-section-title">Riwayat Penyakit</h3>
+                    <button 
+                      type="button" 
+                      className="btn-add-item"
+                      onClick={handleAddRiwayatPenyakit}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor"/>
+                      </svg>
+                      Tambah Riwayat Penyakit
+                    </button>
+                  </div>
+
+                  {riwayatPenyakit.length === 0 ? (
+                    <div className="empty-state">
+                      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z" fill="currentColor" opacity="0.3"/>
+                      </svg>
+                      <p>Belum ada riwayat penyakit</p>
+                      <small>Klik tombol "Tambah Riwayat Penyakit" untuk menambahkan</small>
+                    </div>
+                  ) : (
+                    riwayatPenyakit.map((rp, index) => (
+                      <div key={index} className="riwayat-item">
+                        <div className="riwayat-item-header">
+                          <h4>Riwayat Penyakit #{index + 1}</h4>
+                          <button
+                            type="button"
+                            className="btn-remove-item"
+                            onClick={() => handleRemoveRiwayatPenyakit(index)}
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" fill="currentColor"/>
+                            </svg>
+                            Hapus
+                          </button>
+                        </div>
+
+                        <div className="form-row">
+                          <div className="form-group">
+                            <label>Nama Penyakit</label>
+                            <input
+                              type="text"
+                              value={rp.nama_penyakit}
+                              onChange={(e) => handleRiwayatPenyakitChange(index, 'nama_penyakit', e.target.value)}
+                              placeholder="Contoh: Hipertensi, Diabetes, dll"
+                            />
+                          </div>
+
+                          <div className="form-group">
+                            <label>Kategori Penyakit</label>
+                            <select
+                              value={rp.kategori_penyakit}
+                              onChange={(e) => handleRiwayatPenyakitChange(index, 'kategori_penyakit', e.target.value)}
+                            >
+                              <option value="Penyakit Menular">Penyakit Menular</option>
+                              <option value="Penyakit Tidak Menular">Penyakit Tidak Menular</option>
+                              <option value="Penyakit Kronis">Penyakit Kronis</option>
+                              <option value="Alergi">Alergi</option>
+                              <option value="Operasi">Operasi</option>
+                              <option value="Lainnya">Lainnya</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        <div className="form-row">
+                          <div className="form-group">
+                            <label>Tahun Diagnosis</label>
+                            <input
+                              type="number"
+                              value={rp.tahun_diagnosis}
+                              onChange={(e) => handleRiwayatPenyakitChange(index, 'tahun_diagnosis', e.target.value)}
+                              placeholder="Contoh: 2020"
+                              min="1900"
+                              max={new Date().getFullYear()}
+                            />
+                          </div>
+
+                          <div className="form-group">
+                            <label>Status Penyakit</label>
+                            <select
+                              value={rp.status_penyakit}
+                              onChange={(e) => handleRiwayatPenyakitChange(index, 'status_penyakit', e.target.value)}
+                            >
+                              <option value="Sembuh">Sembuh</option>
+                              <option value="Dalam Pengobatan">Dalam Pengobatan</option>
+                              <option value="Kronis">Kronis</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        <div className="form-row">
+                          <div className="form-group full-width">
+                            <label>Keterangan</label>
+                            <textarea
+                              value={rp.keterangan}
+                              onChange={(e) => handleRiwayatPenyakitChange(index, 'keterangan', e.target.value)}
+                              placeholder="Keterangan tambahan tentang penyakit"
+                              rows="2"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
 
               <div className="form-actions">
                 <button type="button" className="btn-secondary" onClick={handleCancel}>

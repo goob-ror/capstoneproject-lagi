@@ -156,7 +156,7 @@
 .content-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 25px;
   flex-wrap: wrap;
   gap: 15px;
@@ -189,6 +189,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 .filter-label {
@@ -208,6 +209,8 @@
   cursor: pointer;
   transition: all 0.2s;
   min-width: 150px;
+  max-width: 200px;
+  height: 40px;
 }
 
 .filter-select:hover {
@@ -542,15 +545,17 @@
 /* Header Actions */
 .header-actions {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
   flex-wrap: wrap;
+  min-height: 40px;
 }
 
 /* Export Buttons */
 .export-buttons {
   display: flex;
   gap: 10px;
+  flex-shrink: 0;
 }
 
 .btn-export {
@@ -566,6 +571,8 @@
   transition: all 0.2s;
   font-family: 'Montserrat', sans-serif;
   color: white;
+  height: 40px;
+  white-space: nowrap;
 }
 
 .btn-export.excel {

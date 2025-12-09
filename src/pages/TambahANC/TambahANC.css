@@ -202,6 +202,24 @@
   font-size: 13px;
 }
 
+.warning-banner {
+  background-color: #FEF3C7;
+  border: 1px solid #FCD34D;
+  color: #92400E;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.warning-banner svg {
+  flex-shrink: 0;
+  color: #F59E0B;
+}
+
 .anc-form {
   background-color: white;
   border-radius: 12px;
@@ -396,4 +414,236 @@
 /* Ensure react-select works well in the form */
 .form-group > div[class*="css-"] {
   width: 100%;
+}
+
+/* BMI and Weight Tracking Styles */
+.bmi-info-card,
+.weight-tracking-card {
+  background-color: #F9FAFB;
+  border: 2px solid #E5E7EB;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.bmi-info-card h4,
+.weight-tracking-card h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 15px 0;
+}
+
+.bmi-display {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bmi-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.bmi-label,
+.weight-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #6B7280;
+}
+
+.bmi-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.bmi-category {
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.bmi-underweight {
+  background-color: #FEF3C7;
+  color: #92400E;
+}
+
+.bmi-normal {
+  background-color: #DCFCE7;
+  color: #166534;
+}
+
+.bmi-overweight {
+  background-color: #FED7AA;
+  color: #9A3412;
+}
+
+.bmi-obese {
+  background-color: #FEE2E2;
+  color: #991B1B;
+}
+
+.bmi-reference {
+  font-size: 12px;
+  color: #6B7280;
+  font-style: italic;
+}
+
+/* Weight Tracking */
+.weight-comparison {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.weight-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.weight-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.previous-visits {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background-color: white;
+  border-radius: 8px;
+}
+
+.visit-weight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  background-color: #F9FAFB;
+  border-radius: 6px;
+  flex-wrap: wrap;
+}
+
+.visit-info {
+  font-size: 13px;
+  color: #6B7280;
+  font-weight: 500;
+}
+
+.visit-weight-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.weight-diff {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 12px;
+}
+
+.weight-diff.positive {
+  background-color: #DCFCE7;
+  color: #166534;
+}
+
+.weight-diff.negative {
+  background-color: #FEE2E2;
+  color: #991B1B;
+}
+
+.total-weight-change {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px;
+  background-color: white;
+  border-radius: 8px;
+  border: 2px solid #E5E7EB;
+}
+
+.weight-value-large {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.weight-value-large.positive {
+  color: #16A34A;
+}
+
+.weight-value-large.negative {
+  color: #DC2626;
+}
+
+@media (max-width: 768px) {
+  .bmi-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .visit-weight {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .total-weight-change {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* Visit Type Selector with Badges */
+.visit-type-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.existing-visits-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 12px;
+  background-color: #F0FDF4;
+  border: 1px solid #BBF7D0;
+  border-radius: 6px;
+}
+
+.existing-visits-info small {
+  font-size: 12px;
+  color: #166534;
+  font-weight: 500;
+}
+
+.existing-visits-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.visit-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  background-color: #DCFCE7;
+  color: #166534;
+  border: 1px solid #86EFAC;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.visit-badge::before {
+  content: '✓ ';
+  margin-right: 2px;
 }

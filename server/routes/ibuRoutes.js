@@ -36,9 +36,23 @@ router.get('/:id', authMiddleware, async (req, res) => {
       [req.params.id]
     );
 
+    // Get suami data
+    const [suamiRows] = await pool.query(
+      'SELECT * FROM suami WHERE forkey_ibu = ?',
+      [req.params.id]
+    );
+
+    // Get riwayat penyakit
+    const [riwayatRows] = await pool.query(
+      'SELECT * FROM riwayat_penyakit WHERE forkey_ibu = ? ORDER BY tahun_diagnosis DESC',
+      [req.params.id]
+    );
+
     const result = {
       ...ibu,
-      kehamilan: kehamilanRows.length > 0 ? kehamilanRows[0] : null
+      kehamilan: kehamilanRows.length > 0 ? kehamilanRows[0] : null,
+      suami: suamiRows.length > 0 ? suamiRows[0] : null,
+      riwayat_penyakit: riwayatRows
     };
 
     res.json(result);
@@ -71,7 +85,11 @@ router.post('/', authMiddleware, async (req, res) => {
       partus,
       abortus,
       haid_terakhir,
-      status_kehamilan
+      status_kehamilan,
+      // Data Suami
+      suami,
+      // Riwayat Penyakit
+      riwayat_penyakit
     } = req.body;
 
     // Check if NIK already exists
@@ -90,10 +108,10 @@ router.post('/', authMiddleware, async (req, res) => {
     // Insert ibu data
     const [ibuResult] = await connection.query(
       `INSERT INTO ibu (nik_ibu, nama_lengkap, tanggal_lahir, no_hp, gol_darah, 
-       rhesus, tinggi_badan, buku_kia, pekerjaan, pendidikan, kelurahan, alamat_lengkap) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       rhesus, tinggi_badan, beratbadan, buku_kia, pekerjaan, pendidikan, kelurahan, alamat_lengkap) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [nik_ibu, nama_lengkap, tanggal_lahir, no_hp, gol_darah, rhesus, tinggi_badan,
-       buku_kia, pekerjaan, pendidikan, kelurahan, alamat_lengkap]
+       req.body.beratbadan || null, buku_kia, pekerjaan, pendidikan, kelurahan, alamat_lengkap]
     );
 
     const ibuId = ibuResult.insertId;
@@ -113,6 +131,34 @@ router.post('/', authMiddleware, async (req, res) => {
       [gravida || 1, partus || 0, abortus || 0, haid_terakhir, 
        taksiranPersalinan, status_kehamilan || 'Hamil', ibuId]
     );
+
+    // Insert suami data if provided
+    if (suami && (suami.nik_suami || suami.nama_lengkap)) {
+      await connection.query(
+        `INSERT INTO suami (nik_suami, nama_lengkap, tanggal_lahir, no_hp, 
+         gol_darah, pekerjaan, pendidikan, isPerokok, forkey_ibu) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [suami.nik_suami || null, suami.nama_lengkap || null, suami.tanggal_lahir || null,
+         suami.no_hp || null, suami.gol_darah || null, suami.pekerjaan || null,
+         suami.pendidikan || null, suami.isPerokok || false, ibuId]
+      );
+    }
+
+    // Insert riwayat penyakit if provided
+    if (riwayat_penyakit && riwayat_penyakit.length > 0) {
+      for (const rp of riwayat_penyakit) {
+        if (rp.nama_penyakit) {
+          await connection.query(
+            `INSERT INTO riwayat_penyakit (nama_penyakit, kategori_penyakit, 
+             tahun_diagnosis, status_penyakit, keterangan, forkey_ibu) 
+             VALUES (?, ?, ?, ?, ?, ?)`,
+            [rp.nama_penyakit, rp.kategori_penyakit || 'Lainnya',
+             rp.tahun_diagnosis || null, rp.status_penyakit || 'Sembuh',
+             rp.keterangan || null, ibuId]
+          );
+        }
+      }
+    }
 
     // Commit transaction
     await connection.commit();
@@ -155,7 +201,11 @@ router.put('/:id', authMiddleware, async (req, res) => {
       abortus,
       haid_terakhir,
       status_kehamilan,
-      isAddingNewPregnancy
+      isAddingNewPregnancy,
+      // Data Suami
+      suami,
+      // Riwayat Penyakit
+      riwayat_penyakit
     } = req.body;
 
     // Start transaction
@@ -164,11 +214,11 @@ router.put('/:id', authMiddleware, async (req, res) => {
     // Update ibu data
     const [ibuResult] = await connection.query(
       `UPDATE ibu SET nik_ibu = ?, nama_lengkap = ?, tanggal_lahir = ?, 
-       no_hp = ?, gol_darah = ?, rhesus = ?, tinggi_badan = ?, buku_kia = ?, pekerjaan = ?, 
+       no_hp = ?, gol_darah = ?, rhesus = ?, tinggi_badan = ?, beratbadan = ?, buku_kia = ?, pekerjaan = ?, 
        pendidikan = ?, kelurahan = ?, alamat_lengkap = ? 
        WHERE id = ?`,
       [nik_ibu, nama_lengkap, tanggal_lahir, no_hp, gol_darah, rhesus, tinggi_badan,
-       buku_kia, pekerjaan, pendidikan, kelurahan, alamat_lengkap, req.params.id]
+       req.body.beratbadan || null, buku_kia, pekerjaan, pendidikan, kelurahan, alamat_lengkap, req.params.id]
     );
 
     if (ibuResult.affectedRows === 0) {
@@ -225,6 +275,61 @@ router.put('/:id', authMiddleware, async (req, res) => {
         [gravida || 1, partus || 0, abortus || 0, haid_terakhir, 
          taksiranPersalinan, status_kehamilan || 'Hamil', req.params.id]
       );
+    }
+
+    // Handle suami data
+    if (suami) {
+      const [suamiCheck] = await connection.query(
+        'SELECT id FROM suami WHERE forkey_ibu = ?',
+        [req.params.id]
+      );
+
+      if (suamiCheck.length > 0) {
+        // Update existing suami record
+        await connection.query(
+          `UPDATE suami SET nik_suami = ?, nama_lengkap = ?, tanggal_lahir = ?, 
+           no_hp = ?, gol_darah = ?, pekerjaan = ?, pendidikan = ?, isPerokok = ? 
+           WHERE forkey_ibu = ?`,
+          [suami.nik_suami || null, suami.nama_lengkap || null, suami.tanggal_lahir || null,
+           suami.no_hp || null, suami.gol_darah || null, suami.pekerjaan || null,
+           suami.pendidikan || null, suami.isPerokok || false, req.params.id]
+        );
+      } else if (suami.nik_suami || suami.nama_lengkap) {
+        // Create new suami record
+        await connection.query(
+          `INSERT INTO suami (nik_suami, nama_lengkap, tanggal_lahir, no_hp, 
+           gol_darah, pekerjaan, pendidikan, isPerokok, forkey_ibu) 
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [suami.nik_suami || null, suami.nama_lengkap || null, suami.tanggal_lahir || null,
+           suami.no_hp || null, suami.gol_darah || null, suami.pekerjaan || null,
+           suami.pendidikan || null, suami.isPerokok || false, req.params.id]
+        );
+      }
+    }
+
+    // Handle riwayat penyakit - delete all and re-insert
+    if (riwayat_penyakit !== undefined) {
+      // Delete existing riwayat penyakit
+      await connection.query(
+        'DELETE FROM riwayat_penyakit WHERE forkey_ibu = ?',
+        [req.params.id]
+      );
+
+      // Insert new riwayat penyakit
+      if (riwayat_penyakit.length > 0) {
+        for (const rp of riwayat_penyakit) {
+          if (rp.nama_penyakit) {
+            await connection.query(
+              `INSERT INTO riwayat_penyakit (nama_penyakit, kategori_penyakit, 
+               tahun_diagnosis, status_penyakit, keterangan, forkey_ibu) 
+               VALUES (?, ?, ?, ?, ?, ?)`,
+              [rp.nama_penyakit, rp.kategori_penyakit || 'Lainnya',
+               rp.tahun_diagnosis || null, rp.status_penyakit || 'Sembuh',
+               rp.keterangan || null, req.params.id]
+            );
+          }
+        }
+      }
     }
 
     // Commit transaction

@@ -46,14 +46,14 @@ router.get('/', authMiddleware, async (req, res) => {
     
     const params = kelurahan ? [kelurahan] : [];
 
-    // Get total ibu
+    // Get total ibu (filtered by kelurahan only, not by date)
     const totalIbuQuery = kelurahan 
       ? 'SELECT COUNT(*) as count FROM ibu WHERE kelurahan = ?'
       : 'SELECT COUNT(*) as count FROM ibu';
     const [totalIbuResult] = await pool.query(totalIbuQuery, params);
     const totalIbu = totalIbuResult[0].count;
 
-    // Get total ibu hamil (active pregnancies)
+    // Get total ibu hamil (active pregnancies, filtered by kelurahan only)
     const totalHamilQuery = kelurahan
       ? `SELECT COUNT(*) as count FROM kehamilan k 
          INNER JOIN ibu i ON k.forkey_ibu = i.id 

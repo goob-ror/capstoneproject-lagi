@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Select from 'react-select';
 import TambahANCPresenter from './TambahANC-presenter';
+import { calculateBMI, getBMICategory, getBMICategoryColor } from '../../utils/bmiCalculator';
 import './TambahANC.css';
 
 const TambahANC = () => {
@@ -14,6 +15,11 @@ const TambahANC = () => {
   const [error, setError] = useState('');
   const [pregnancies, setPregnancies] = useState([]);
   const [user, setUser] = useState(null);
+  const [motherData, setMotherData] = useState(null);
+  const [previousVisits, setPreviousVisits] = useState([]);
+  const [existingVisitId, setExistingVisitId] = useState(null);
+  const [existingVisitWarning, setExistingVisitWarning] = useState('');
+  const [existingVisitTypes, setExistingVisitTypes] = useState([]);
 
   const [formData, setFormData] = useState({
     tanggal_kunjungan: '',
@@ -53,6 +59,15 @@ const TambahANC = () => {
     setError,
     clearError: () => setError(''),
     setPregnancies,
+    setMotherData,
+    setPreviousVisits,
+    setExistingVisitId,
+    showExistingVisitWarning: (jenisKunjungan) => {
+      setExistingVisitWarning(`Data kunjungan ${jenisKunjungan} sudah ada. Form telah diisi dengan data yang ada. Anda dapat memperbarui data ini.`);
+    },
+    hideExistingVisitWarning: () => {
+      setExistingVisitWarning('');
+    },
     populateForm: (data) => {
       setFormData({
         tanggal_kunjungan: data.tanggal_kunjungan ? data.tanggal_kunjungan.split('T')[0] : '',
@@ -109,8 +124,91 @@ const TambahANC = () => {
     }
   }, [presenter, isEdit, editId]);
 
+  // Load mother data and previous visits when pregnancy is selected
+  useEffect(() => {
+    if (formData.forkey_hamil) {
+      presenter.loadMotherData(formData.forkey_hamil);
+      presenter.loadPreviousVisits(formData.forkey_hamil);
+    } else {
+      setMotherData(null);
+      setPreviousVisits([]);
+      setExistingVisitTypes([]);
+    }
+  }, [formData.forkey_hamil, presenter]);
+
+  // Extract existing visit types and auto-select next available
+  useEffect(() => {
+    if (previousVisits && previousVisits.length > 0 && !isEdit) {
+      // Get unique visit types only
+      const existingTypes = [...new Set(previousVisits.map(visit => visit.jenis_kunjungan))];
+      setExistingVisitTypes(existingTypes);
+      
+      // Auto-select next available visit type
+      const allVisitTypes = ['K1', 'K2', 'K3', 'K4', 'K5', 'K6', 'K7', 'K8'];
+      const nextAvailable = allVisitTypes.find(type => !existingTypes.includes(type));
+      
+      if (nextAvailable && formData.jenis_kunjungan !== nextAvailable) {
+        setFormData(prev => ({
+          ...prev,
+          jenis_kunjungan: nextAvailable
+        }));
+      }
+    }
+  }, [previousVisits, isEdit]);
+
+  // Check for existing visit when pregnancy and visit type are selected (only in add mode, not edit)
+  useEffect(() => {
+    if (!isEdit && formData.forkey_hamil && formData.jenis_kunjungan) {
+      presenter.checkExistingVisit(formData.forkey_hamil, formData.jenis_kunjungan);
+    }
+  }, [formData.forkey_hamil, formData.jenis_kunjungan, isEdit, presenter]);
+
+  // Function to reset form to initial state (keeping pregnancy and bidan)
+  const resetFormFields = () => {
+    setFormData(prev => ({
+      tanggal_kunjungan: '',
+      jenis_kunjungan: prev.jenis_kunjungan,
+      jenis_akses: 'Murni',
+      pemeriksa: 'Bidan',
+      berat_badan: '',
+      tekanan_darah: '',
+      lila: '',
+      tinggi_fundus: '',
+      denyut_jantung_janin: '',
+      status_imunisasi_tt: 'T0',
+      beri_tablet_fe: false,
+      hasil_lab_hb: '',
+      lab_protein_urine: 'Negatif',
+      lab_gula_darah: '',
+      hasil_lab_lainnya: '',
+      skrining_hiv: 'Belum Diperiksa',
+      skrining_sifilis: 'Belum Diperiksa',
+      skrining_hbsag: 'Belum Diperiksa',
+      skrining_tb: 'Belum Diperiksa',
+      terapi_malaria: false,
+      terapi_kecacingan: false,
+      hasil_usg: '',
+      status_kmk_usg: '',
+      status_risiko_visit: 'Normal',
+      skrining_jiwa: '',
+      hasil_temu_wicara: '',
+      tata_laksana_kasus: '',
+      keterangan_anc: '',
+      forkey_hamil: prev.forkey_hamil,
+      forkey_bidan: prev.forkey_bidan
+    }));
+  };
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+    
+    // If changing jenis_kunjungan, reset form fields
+    if (name === 'jenis_kunjungan') {
+      resetFormFields();
+      setExistingVisitId(null);
+      setExistingVisitWarning('');
+    }
+    
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value
@@ -119,7 +217,46 @@ const TambahANC = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await presenter.handleSubmit(formData, isEdit, editId);
+    
+    // If updating existing visit, confirm with user
+    if (existingVisitId && !isEdit) {
+      const confirmUpdate = window.confirm(
+        `Data kunjungan ${formData.jenis_kunjungan} sudah ada. Apakah Anda ingin memperbarui data yang ada?`
+      );
+      if (!confirmUpdate) {
+        return;
+      }
+    }
+    
+    // Calculate weight difference
+    let selisih_beratbadan = null;
+    if (formData.berat_badan && motherData) {
+      if (previousVisits && previousVisits.length > 0) {
+        // Calculate difference from most recent visit
+        const lastVisit = previousVisits[0];
+        if (lastVisit.berat_badan) {
+          selisih_beratbadan = (parseFloat(formData.berat_badan) - parseFloat(lastVisit.berat_badan)).toFixed(2);
+        }
+      } else if (motherData.beratbadan) {
+        // Calculate difference from pre-pregnancy weight (first visit)
+        selisih_beratbadan = (parseFloat(formData.berat_badan) - parseFloat(motherData.beratbadan)).toFixed(2);
+      }
+    }
+    
+    const submitData = {
+      ...formData,
+      selisih_beratbadan: selisih_beratbadan ? parseFloat(selisih_beratbadan) : null
+    };
+    
+    // If existing visit found, update it instead of creating new
+    const finalEditId = existingVisitId || editId;
+    const finalIsEdit = isEdit || !!existingVisitId;
+    
+    console.log('Submit mode:', finalIsEdit ? 'UPDATE' : 'CREATE');
+    console.log('Visit ID:', finalEditId);
+    console.log('Visit Type:', formData.jenis_kunjungan);
+    
+    await presenter.handleSubmit(submitData, finalIsEdit, finalEditId);
   };
 
   const handleLogout = () => {
@@ -251,6 +388,15 @@ const TambahANC = () => {
           </div>
         )}
 
+        {existingVisitWarning && (
+          <div className="warning-banner">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" fill="currentColor"/>
+            </svg>
+            {existingVisitWarning}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="anc-form">
           <div className="form-section">
             <h3>Informasi Dasar</h3>
@@ -286,20 +432,38 @@ const TambahANC = () => {
 
               <div className="form-group">
                 <label htmlFor="jenis_kunjungan">Jenis Kunjungan *</label>
-                <select
-                  id="jenis_kunjungan"
-                  name="jenis_kunjungan"
-                  value={formData.jenis_kunjungan}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="K1">K1</option>
-                  <option value="K2">K2</option>
-                  <option value="K3">K3</option>
-                  <option value="K4">K4</option>
-                  <option value="K5">K5</option>
-                  <option value="K6">K6</option>
-                </select>
+                <div className="visit-type-selector">
+                  <select
+                    id="jenis_kunjungan"
+                    name="jenis_kunjungan"
+                    value={formData.jenis_kunjungan}
+                    onChange={handleChange}
+                    required
+                  >
+                    {['K1', 'K2', 'K3', 'K4', 'K5', 'K6', 'K7', 'K8'].map(type => (
+                      <option key={type} value={type}>
+                        {type} {existingVisitTypes.includes(type) ? '✓ (Ada)' : ''}
+                      </option>
+                    ))}
+                  </select>
+                  {existingVisitTypes.length > 0 && (
+                    <div className="existing-visits-info">
+                      <small>Kunjungan yang sudah ada:</small>
+                      <div className="existing-visits-badges">
+                        {existingVisitTypes
+                          .sort((a, b) => {
+                            // Sort K1, K2, K3, etc. in order
+                            const numA = parseInt(a.replace('K', ''));
+                            const numB = parseInt(b.replace('K', ''));
+                            return numA - numB;
+                          })
+                          .map(type => (
+                            <span key={type} className="visit-badge">{type}</span>
+                          ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="form-group">
@@ -360,6 +524,9 @@ const TambahANC = () => {
                   onChange={handleChange}
                   placeholder="Contoh: 55.5"
                 />
+                {motherData && motherData.beratbadan && (
+                  <small>Berat sebelum hamil: {motherData.beratbadan} kg</small>
+                )}
               </div>
 
               <div className="form-group">
@@ -412,6 +579,74 @@ const TambahANC = () => {
                 />
               </div>
             </div>
+
+            {/* BMI Display */}
+            {motherData && motherData.tinggi_badan && formData.berat_badan && (
+              <div className="bmi-info-card">
+                <h4>Indeks Massa Tubuh (IMT)</h4>
+                <div className="bmi-display">
+                  <div className="bmi-item">
+                    <span className="bmi-label">IMT Saat Ini:</span>
+                    <span className="bmi-value">
+                      {calculateBMI(parseFloat(formData.berat_badan), parseFloat(motherData.tinggi_badan))}
+                    </span>
+                    <span className={`bmi-category ${getBMICategoryColor(getBMICategory(calculateBMI(parseFloat(formData.berat_badan), parseFloat(motherData.tinggi_badan))))}`}>
+                      {getBMICategory(calculateBMI(parseFloat(formData.berat_badan), parseFloat(motherData.tinggi_badan)))}
+                    </span>
+                  </div>
+                  <small className="bmi-reference">Kurus: &lt;18.5 | Normal: 18.5-24.9 | Gemuk: 25-29.9 | Obese: ≥30</small>
+                </div>
+              </div>
+            )}
+
+            {/* Weight Difference Tracking */}
+            {motherData && formData.berat_badan && (
+              <div className="weight-tracking-card">
+                <h4>Perubahan Berat Badan</h4>
+                <div className="weight-comparison">
+                  {motherData.beratbadan && (
+                    <div className="weight-item">
+                      <span className="weight-label">Sebelum Hamil:</span>
+                      <span className="weight-value">{motherData.beratbadan} kg</span>
+                    </div>
+                  )}
+                  
+                  {previousVisits && previousVisits.length > 0 && (
+                    <div className="previous-visits">
+                      <span className="weight-label">Kunjungan Sebelumnya:</span>
+                      {previousVisits.slice(0, 3).map((visit, index) => {
+                        const weightDiff = visit.berat_badan && formData.berat_badan 
+                          ? (parseFloat(formData.berat_badan) - parseFloat(visit.berat_badan)).toFixed(1)
+                          : null;
+                        return (
+                          <div key={index} className="visit-weight">
+                            <span className="visit-info">
+                              {visit.jenis_kunjungan} ({new Date(visit.tanggal_kunjungan).toLocaleDateString('id-ID')}):
+                            </span>
+                            <span className="visit-weight-value">{visit.berat_badan} kg</span>
+                            {weightDiff && (
+                              <span className={`weight-diff ${parseFloat(weightDiff) >= 0 ? 'positive' : 'negative'}`}>
+                                ({parseFloat(weightDiff) >= 0 ? '+' : ''}{weightDiff} kg)
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {motherData.beratbadan && formData.berat_badan && (
+                    <div className="total-weight-change">
+                      <span className="weight-label">Total Perubahan:</span>
+                      <span className={`weight-value-large ${(parseFloat(formData.berat_badan) - parseFloat(motherData.beratbadan)) >= 0 ? 'positive' : 'negative'}`}>
+                        {(parseFloat(formData.berat_badan) - parseFloat(motherData.beratbadan)) >= 0 ? '+' : ''}
+                        {(parseFloat(formData.berat_badan) - parseFloat(motherData.beratbadan)).toFixed(1)} kg
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="form-section">

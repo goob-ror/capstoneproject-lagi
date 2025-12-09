@@ -30,12 +30,13 @@ SET time_zone = "+00:00";
 CREATE TABLE `antenatal_care` (
   `id` int NOT NULL,
   `tanggal_kunjungan` datetime NOT NULL,
-  `jenis_kunjungan` enum('K1','K2','K3','K4','K5','K6') NOT NULL,
+  `jenis_kunjungan` enum('K1','K2','K3','K4','K5','K6', 'K7', 'K8') NOT NULL,
   `jenis_akses` enum('Murni','Akses') NOT NULL,
   `pemeriksa` enum('Bidan','Dokter') NOT NULL,
   `berat_badan` decimal(5,2) DEFAULT NULL,
   `tekanan_darah` varchar(10) DEFAULT NULL,
   `lila` decimal(4,2) DEFAULT NULL,
+  `selisih_beratbadan` decimal(4,2) DEFAULT NULL,
   `tinggi_fundus` decimal(4,2) DEFAULT NULL,
   `denyut_jantung_janin` int DEFAULT NULL,
   `status_imunisasi_tt` enum('T0','T1','T2','T3','T4','T5') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
@@ -250,6 +251,45 @@ INSERT INTO `ibu` (`id`, `nik_ibu`, `nama_lengkap`, `tanggal_lahir`, `no_hp`, `g
 (48, '6472016612890048', 'Lydia Kandou', '1989-12-22', '081234567048', 'B', '+', 'Ada', 'Wiraswasta', 'SMA', 'Handil Bakti', 'Jl. Perjuangan No. 45 RT. 12', '2025-11-23 22:21:48', '2025-11-23 22:21:48'),
 (49, '6472014301940049', 'Nafa Urbach', '1994-08-08', '081234567049', 'A', '+', 'Ada', 'IRT', 'SMK', 'Simpang Pasir', 'Jl. Sejati No. 6 RT. 01', '2025-11-23 22:21:48', '2025-11-23 22:21:48'),
 (50, '6472015002970050', 'Mulan Jameela', '1997-04-04', '081234567050', 'O', '+', 'Ada', 'Swasta', 'S1', 'Bukuan', 'Jl. Patimura No. 3 RT. 10', '2025-11-23 22:21:48', '2025-11-23 22:21:48');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `riwayat_penyakit`
+--
+
+CREATE TABLE `riwayat_penyakit` (
+  `id` int NOT NULL,
+  `nama_penyakit` varchar(100) NOT NULL,
+  `kategori_penyakit` enum('Penyakit Menular','Penyakit Tidak Menular','Penyakit Kronis','Alergi','Operasi','Lainnya') DEFAULT 'Lainnya',
+  `tahun_diagnosis` year DEFAULT NULL,
+  `status_penyakit` enum('Sembuh','Dalam Pengobatan','Kronis') DEFAULT 'Sembuh',
+  `keterangan` text,
+  `forkey_ibu` int NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Tabel riwayat penyakit ibu - dapat menyimpan multiple penyakit per ibu';
+
+--
+-- Dumping data for table `riwayat_penyakit`
+--
+
+INSERT INTO `riwayat_penyakit` (`id`, `nama_penyakit`, `kategori_penyakit`, `tahun_diagnosis`, `status_penyakit`, `keterangan`, `forkey_ibu`, `created_at`, `updated_at`) VALUES
+(1, 'Hipertensi', 'Penyakit Tidak Menular', 2020, 'Dalam Pengobatan', 'Tekanan darah terkontrol dengan obat', 2, '2025-12-09 10:00:00', '2025-12-09 10:00:00'),
+(2, 'Diabetes Mellitus Tipe 2', 'Penyakit Kronis', 2019, 'Dalam Pengobatan', 'Gula darah terkontrol dengan diet dan obat', 4, '2025-12-09 10:00:00', '2025-12-09 10:00:00'),
+(3, 'Asma', 'Penyakit Kronis', 2015, 'Dalam Pengobatan', 'Menggunakan inhaler saat kambuh', 8, '2025-12-09 10:00:00', '2025-12-09 10:00:00'),
+(4, 'Alergi Seafood', 'Alergi', 2010, 'Kronis', 'Hindari makanan laut', 12, '2025-12-09 10:00:00', '2025-12-09 10:00:00'),
+(5, 'Operasi Appendix', 'Operasi', 2018, 'Sembuh', 'Operasi appendektomi', 15, '2025-12-09 10:00:00', '2025-12-09 10:00:00'),
+(6, 'Anemia', 'Penyakit Tidak Menular', 2021, 'Sembuh', 'Sudah normal setelah konsumsi Fe', 18, '2025-12-09 10:00:00', '2025-12-09 10:00:00'),
+(7, 'Hepatitis B', 'Penyakit Menular', 2017, 'Kronis', 'Carrier HBsAg positif', 22, '2025-12-09 10:00:00', '2025-12-09 10:00:00'),
+(8, 'Tuberkulosis', 'Penyakit Menular', 2020, 'Sembuh', 'Sudah selesai pengobatan OAT 6 bulan', 25, '2025-12-09 10:00:00', '2025-12-09 10:00:00'),
+(9, 'Hipertensi', 'Penyakit Tidak Menular', 2019, 'Dalam Pengobatan', 'Konsumsi obat rutin', 28, '2025-12-09 10:00:00', '2025-12-09 10:00:00'),
+(10, 'Alergi Obat Penisilin', 'Alergi', 2015, 'Kronis', 'Hindari antibiotik golongan penisilin', 30, '2025-12-09 10:00:00', '2025-12-09 10:00:00'),
+(11, 'Operasi Caesar', 'Operasi', 2022, 'Sembuh', 'SC pada kehamilan pertama', 32, '2025-12-09 10:00:00', '2025-12-09 10:00:00'),
+(12, 'Diabetes Gestasional', 'Penyakit Tidak Menular', 2023, 'Sembuh', 'Pada kehamilan sebelumnya', 35, '2025-12-09 10:00:00', '2025-12-09 10:00:00'),
+(13, 'Asma', 'Penyakit Kronis', 2016, 'Dalam Pengobatan', 'Terkontrol dengan obat', 38, '2025-12-09 10:00:00', '2025-12-09 10:00:00'),
+(14, 'Hipertensi', 'Penyakit Tidak Menular', 2021, 'Dalam Pengobatan', 'Pre-eklampsia pada kehamilan lalu', 40, '2025-12-09 10:00:00', '2025-12-09 10:00:00'),
+(15, 'Anemia', 'Penyakit Tidak Menular', 2022, 'Sembuh', 'Hb sudah normal', 42, '2025-12-09 10:00:00', '2025-12-09 10:00:00');
 
 -- --------------------------------------------------------
 
@@ -644,6 +684,15 @@ ALTER TABLE `ibu`
   ADD KEY `idx_ibu_kelurahan` (`kelurahan`);
 
 --
+-- Indexes for table `riwayat_penyakit`
+--
+ALTER TABLE `riwayat_penyakit`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_riwayat_ibu` (`forkey_ibu`),
+  ADD KEY `idx_riwayat_kategori` (`kategori_penyakit`),
+  ADD KEY `idx_riwayat_status` (`status_penyakit`);
+
+--
 -- Indexes for table `kehamilan`
 --
 ALTER TABLE `kehamilan`
@@ -709,6 +758,12 @@ ALTER TABLE `ibu`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=51;
 
 --
+-- AUTO_INCREMENT for table `riwayat_penyakit`
+--
+ALTER TABLE `riwayat_penyakit`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+
+--
 -- AUTO_INCREMENT for table `kehamilan`
 --
 ALTER TABLE `kehamilan`
@@ -748,6 +803,12 @@ ALTER TABLE `suami`
 ALTER TABLE `antenatal_care`
   ADD CONSTRAINT `antenatal_care_ibfk_1` FOREIGN KEY (`forkey_hamil`) REFERENCES `kehamilan` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `antenatal_care_ibfk_2` FOREIGN KEY (`forkey_bidan`) REFERENCES `bidan` (`id`);
+
+--
+-- Constraints for table `riwayat_penyakit`
+--
+ALTER TABLE `riwayat_penyakit`
+  ADD CONSTRAINT `riwayat_penyakit_ibfk_1` FOREIGN KEY (`forkey_ibu`) REFERENCES `ibu` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `kehamilan`

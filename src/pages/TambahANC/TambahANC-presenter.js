@@ -22,6 +22,62 @@ class TambahANCPresenter {
     }
   }
 
+  async loadMotherData(pregnancyId) {
+    try {
+      const motherData = await this.model.getMotherDataByPregnancyId(pregnancyId);
+      this.view.setMotherData(motherData);
+    } catch (error) {
+      console.error('Load mother data error:', error);
+      
+      if (error.message.includes('401') || error.message.includes('Unauthorized')) {
+        this.handleLogout();
+        return;
+      }
+      
+      this.view.setError('Gagal memuat data ibu.');
+    }
+  }
+
+  async loadPreviousVisits(pregnancyId) {
+    try {
+      const visits = await this.model.getPreviousVisitsByPregnancyId(pregnancyId);
+      this.view.setPreviousVisits(visits);
+    } catch (error) {
+      console.error('Load previous visits error:', error);
+      
+      if (error.message.includes('401') || error.message.includes('Unauthorized')) {
+        this.handleLogout();
+        return;
+      }
+      
+      this.view.setError('Gagal memuat data kunjungan sebelumnya.');
+    }
+  }
+
+  async checkExistingVisit(pregnancyId, jenisKunjungan) {
+    try {
+      const result = await this.model.checkExistingVisit(pregnancyId, jenisKunjungan);
+      if (result.exists && result.data) {
+        // Only populate if visit exists
+        this.view.populateForm(result.data);
+        this.view.setExistingVisitId(result.data.id);
+        this.view.showExistingVisitWarning(jenisKunjungan);
+      } else {
+        // Clear existing visit data when switching to non-existent visit
+        this.view.setExistingVisitId(null);
+        this.view.hideExistingVisitWarning();
+        // Don't populate form - let it stay empty for new entry
+      }
+    } catch (error) {
+      console.error('Check existing visit error:', error);
+      
+      if (error.message.includes('401') || error.message.includes('Unauthorized')) {
+        this.handleLogout();
+        return;
+      }
+    }
+  }
+
   async loadAncData(id) {
     this.view.setLoading(true);
     

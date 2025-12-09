@@ -47,6 +47,60 @@ class TambahANCModel {
     }
   }
 
+  async getMotherDataByPregnancyId(pregnancyId) {
+    try {
+      const response = await fetch(`${this.baseURL}/pregnancy/${pregnancyId}/mother`, {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch mother data');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching mother data:', error);
+      throw error;
+    }
+  }
+
+  async getPreviousVisitsByPregnancyId(pregnancyId) {
+    try {
+      const response = await fetch(`${this.baseURL}/pregnancy/${pregnancyId}/visits`, {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch previous visits');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching previous visits:', error);
+      throw error;
+    }
+  }
+
+  async checkExistingVisit(pregnancyId, jenisKunjungan) {
+    try {
+      const response = await fetch(`${this.baseURL}/pregnancy/${pregnancyId}/visit/${jenisKunjungan}`, {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to check existing visit');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error checking existing visit:', error);
+      throw error;
+    }
+  }
+
   async createAnc(data) {
     try {
       const response = await fetch(this.baseURL, {

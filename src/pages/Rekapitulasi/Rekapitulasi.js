@@ -278,7 +278,9 @@ const Rekapitulasi = () => {
 
       <main className="main-content">
         <div className="content-header">
-          <div>
+          <div style={{
+            width: '100%'
+          }}>
             <h1>Rekapitulasi</h1>
             <p>
               Laporan dan ringkasan data kesehatan ibu
