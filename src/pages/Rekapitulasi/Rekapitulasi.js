@@ -82,7 +82,25 @@ const Rekapitulasi = () => {
       ['Eklamsia', summaryData.preeklamsiaStatistics?.eklamsia_count || 0],
       ['Hepatitis B Positif', summaryData.hepatitisStatistics?.hepatitis_b_positive || 0, `${summaryData.hepatitisStatistics?.hepatitis_percentage || 0}%`],
       ['Rata-rata Hb', `${summaryData.hbStatistics?.avg_hb || 0} g/dL`],
-      ['Anemia (Hb < 11)', summaryData.hbStatistics?.anemia_count || 0],
+      [],
+      ['TRIMESTER 1 (0-13 minggu)'],
+      ['Normal (≥ 11)', summaryData.hbStatistics?.trimester1_normal || 0],
+      ['Anemia Ringan (10.0-10.9)', summaryData.hbStatistics?.trimester1_ringan || 0],
+      ['Anemia Sedang (7.0-9.9)', summaryData.hbStatistics?.trimester1_sedang || 0],
+      ['Anemia Berat (<7.0)', summaryData.hbStatistics?.trimester1_berat || 0],
+      [],
+      ['TRIMESTER 2 (14-27 minggu)'],
+      ['Normal (≥ 11)', summaryData.hbStatistics?.trimester2_normal || 0],
+      ['Anemia Ringan (10.0-10.9)', summaryData.hbStatistics?.trimester2_ringan || 0],
+      ['Anemia Sedang (7.0-9.9)', summaryData.hbStatistics?.trimester2_sedang || 0],
+      ['Anemia Berat (<7.0)', summaryData.hbStatistics?.trimester2_berat || 0],
+      [],
+      ['TRIMESTER 3 (28+ minggu)'],
+      ['Normal (≥ 11)', summaryData.hbStatistics?.trimester3_normal || 0],
+      ['Anemia Ringan (10.0-10.9)', summaryData.hbStatistics?.trimester3_ringan || 0],
+      ['Anemia Sedang (7.0-9.9)', summaryData.hbStatistics?.trimester3_sedang || 0],
+      ['Anemia Berat (<7.0)', summaryData.hbStatistics?.trimester3_berat || 0],
+      [],
       ['Tablet Fe Diberikan', summaryData.feStatistics?.total_fe_given || 0, `${summaryData.feStatistics?.percentage_fe || 0}%`],
     ];
     const ws1 = XLSX.utils.aoa_to_sheet(summarySheet);
@@ -174,8 +192,26 @@ const Rekapitulasi = () => {
     csvContent += `Preeklamsia,${summaryData.preeklamsiaStatistics?.preeklamsia_count || 0}\n`;
     csvContent += `Eklamsia,${summaryData.preeklamsiaStatistics?.eklamsia_count || 0}\n`;
     csvContent += `Hepatitis B Positif,${summaryData.hepatitisStatistics?.hepatitis_b_positive || 0},${summaryData.hepatitisStatistics?.hepatitis_percentage || 0}%\n`;
-    csvContent += `Rata-rata Hb,${summaryData.hbStatistics?.avg_hb || 0} g/dL\n`;
-    csvContent += `Anemia (Hb < 11),${summaryData.hbStatistics?.anemia_count || 0}\n`;
+    csvContent += `Rata-rata Hb,${summaryData.hbStatistics?.avg_hb || 0} g/dL\n\n`;
+    
+    csvContent += 'HEMOGLOBIN TRIMESTER 1 (0-13 minggu)\n';
+    csvContent += `Normal (≥ 11),${summaryData.hbStatistics?.trimester1_normal || 0}\n`;
+    csvContent += `Anemia Ringan (10.0-10.9),${summaryData.hbStatistics?.trimester1_ringan || 0}\n`;
+    csvContent += `Anemia Sedang (7.0-9.9),${summaryData.hbStatistics?.trimester1_sedang || 0}\n`;
+    csvContent += `Anemia Berat (<7.0),${summaryData.hbStatistics?.trimester1_berat || 0}\n\n`;
+    
+    csvContent += 'HEMOGLOBIN TRIMESTER 2 (14-27 minggu)\n';
+    csvContent += `Normal (≥ 11),${summaryData.hbStatistics?.trimester2_normal || 0}\n`;
+    csvContent += `Anemia Ringan (10.0-10.9),${summaryData.hbStatistics?.trimester2_ringan || 0}\n`;
+    csvContent += `Anemia Sedang (7.0-9.9),${summaryData.hbStatistics?.trimester2_sedang || 0}\n`;
+    csvContent += `Anemia Berat (<7.0),${summaryData.hbStatistics?.trimester2_berat || 0}\n\n`;
+    
+    csvContent += 'HEMOGLOBIN TRIMESTER 3 (28+ minggu)\n';
+    csvContent += `Normal (≥ 11),${summaryData.hbStatistics?.trimester3_normal || 0}\n`;
+    csvContent += `Anemia Ringan (10.0-10.9),${summaryData.hbStatistics?.trimester3_ringan || 0}\n`;
+    csvContent += `Anemia Sedang (7.0-9.9),${summaryData.hbStatistics?.trimester3_sedang || 0}\n`;
+    csvContent += `Anemia Berat (<7.0),${summaryData.hbStatistics?.trimester3_berat || 0}\n\n`;
+    
     csvContent += `Tablet Fe Diberikan,${summaryData.feStatistics?.total_fe_given || 0},${summaryData.feStatistics?.percentage_fe || 0}%\n\n`;
 
     // Add ANC data
@@ -451,7 +487,7 @@ const Rekapitulasi = () => {
                 <div className="card-content">
                   <h3>Rata-rata Hb</h3>
                   <p className="card-value">{summaryData.hbStatistics?.avg_hb || 0}</p>
-                  <p className="card-label">g/dL ({summaryData.hbStatistics?.anemia_count || 0} anemia)</p>
+                  <p className="card-label">g/dL ({(summaryData.hbStatistics?.total_checked || 0) - ((summaryData.hbStatistics?.trimester1_normal || 0) + (summaryData.hbStatistics?.trimester2_normal || 0) + (summaryData.hbStatistics?.trimester3_normal || 0))} anemia)</p>
                 </div>
               </div>
 
@@ -651,25 +687,155 @@ const Rekapitulasi = () => {
 
         <div className="report-section">
           <div className="report-card full-width">
-            <h3>Statistik Hemoglobin (Hb)</h3>
-            <div className="hb-stats-grid">
-              <div className="hb-stat-item">
-                <div className="hb-stat-label">Rata-rata Hb</div>
-                <div className="hb-stat-value">{summaryData?.hbStatistics?.avg_hb || 0} g/dL</div>
+            <h3>Kategori Hemoglobin (Hb) Berdasarkan Trimester</h3>
+            <div className="hb-category-summary">
+              <div className="hb-summary-item">
+                <span className="hb-summary-label">Rata-rata Hb:</span>
+                <span className="hb-summary-value">{summaryData?.hbStatistics?.avg_hb || 0} g/dL</span>
               </div>
-              <div className="hb-stat-item">
-                <div className="hb-stat-label">Hb Minimum</div>
-                <div className="hb-stat-value">{summaryData?.hbStatistics?.min_hb || 0} g/dL</div>
+              <div className="hb-summary-item">
+                <span className="hb-summary-label">Total Diperiksa:</span>
+                <span className="hb-summary-value">{summaryData?.hbStatistics?.total_checked || 0} kunjungan</span>
               </div>
-              <div className="hb-stat-item">
-                <div className="hb-stat-label">Hb Maximum</div>
-                <div className="hb-stat-value">{summaryData?.hbStatistics?.max_hb || 0} g/dL</div>
+            </div>
+
+            {/* Trimester Grid */}
+            <div className="trimester-grid">
+              {/* Trimester 1 */}
+              <div className="trimester-card">
+                <h4 className="trimester-title">Trimester 1 (0-13 minggu)</h4>
+                <div className="trimester-total">
+                  Total: <strong>{summaryData?.hbStatistics?.trimester1_total || 0}</strong> kunjungan
+                </div>
+                <div className="table-responsive">
+                  <table className="report-table hb-category-table">
+                    <thead>
+                      <tr>
+                        <th>Kategori</th>
+                        <th>Rentang Hb</th>
+                        <th>Jumlah</th>
+                        <th>%</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><span className="status-badge badge-success">Normal</span></td>
+                        <td>≥ 11.0</td>
+                        <td>{summaryData?.hbStatistics?.trimester1_normal || 0}</td>
+                        <td>{summaryData?.hbStatistics?.trimester1_total > 0 ? Math.round((summaryData?.hbStatistics?.trimester1_normal || 0) * 100 / summaryData?.hbStatistics?.trimester1_total) : 0}%</td>
+                      </tr>
+                      <tr>
+                        <td><span className="status-badge badge-warning-light">Anemia Ringan</span></td>
+                        <td>10.0 - 10.9</td>
+                        <td>{summaryData?.hbStatistics?.trimester1_ringan || 0}</td>
+                        <td>{summaryData?.hbStatistics?.trimester1_total > 0 ? Math.round((summaryData?.hbStatistics?.trimester1_ringan || 0) * 100 / summaryData?.hbStatistics?.trimester1_total) : 0}%</td>
+                      </tr>
+                      <tr>
+                        <td><span className="status-badge badge-warning">Anemia Sedang</span></td>
+                        <td>7.0 - 9.9</td>
+                        <td>{summaryData?.hbStatistics?.trimester1_sedang || 0}</td>
+                        <td>{summaryData?.hbStatistics?.trimester1_total > 0 ? Math.round((summaryData?.hbStatistics?.trimester1_sedang || 0) * 100 / summaryData?.hbStatistics?.trimester1_total) : 0}%</td>
+                      </tr>
+                      <tr>
+                        <td><span className="status-badge badge-danger">Anemia Berat</span></td>
+                        <td>&lt; 7.0</td>
+                        <td>{summaryData?.hbStatistics?.trimester1_berat || 0}</td>
+                        <td>{summaryData?.hbStatistics?.trimester1_total > 0 ? Math.round((summaryData?.hbStatistics?.trimester1_berat || 0) * 100 / summaryData?.hbStatistics?.trimester1_total) : 0}%</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
-              <div className="hb-stat-item">
-                <div className="hb-stat-label">Kasus Anemia (Hb &lt; 11)</div>
-                <div className="hb-stat-value danger">
-                  {summaryData?.hbStatistics?.anemia_count || 0} 
-                  <span className="hb-stat-percentage">({summaryData?.hbStatistics?.anemia_percentage || 0}%)</span>
+
+              {/* Trimester 2 */}
+              <div className="trimester-card">
+                <h4 className="trimester-title">Trimester 2 (14-27 minggu)</h4>
+                <div className="trimester-total">
+                  Total: <strong>{summaryData?.hbStatistics?.trimester2_total || 0}</strong> kunjungan
+                </div>
+                <div className="table-responsive">
+                  <table className="report-table hb-category-table">
+                    <thead>
+                      <tr>
+                        <th>Kategori</th>
+                        <th>Rentang Hb</th>
+                        <th>Jumlah</th>
+                        <th>%</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><span className="status-badge badge-success">Normal</span></td>
+                        <td>≥ 11.0</td>
+                        <td>{summaryData?.hbStatistics?.trimester2_normal || 0}</td>
+                        <td>{summaryData?.hbStatistics?.trimester2_total > 0 ? Math.round((summaryData?.hbStatistics?.trimester2_normal || 0) * 100 / summaryData?.hbStatistics?.trimester2_total) : 0}%</td>
+                      </tr>
+                      <tr>
+                        <td><span className="status-badge badge-warning-light">Anemia Ringan</span></td>
+                        <td>10.0 - 10.9</td>
+                        <td>{summaryData?.hbStatistics?.trimester2_ringan || 0}</td>
+                        <td>{summaryData?.hbStatistics?.trimester2_total > 0 ? Math.round((summaryData?.hbStatistics?.trimester2_ringan || 0) * 100 / summaryData?.hbStatistics?.trimester2_total) : 0}%</td>
+                      </tr>
+                      <tr>
+                        <td><span className="status-badge badge-warning">Anemia Sedang</span></td>
+                        <td>7.0 - 9.9</td>
+                        <td>{summaryData?.hbStatistics?.trimester2_sedang || 0}</td>
+                        <td>{summaryData?.hbStatistics?.trimester2_total > 0 ? Math.round((summaryData?.hbStatistics?.trimester2_sedang || 0) * 100 / summaryData?.hbStatistics?.trimester2_total) : 0}%</td>
+                      </tr>
+                      <tr>
+                        <td><span className="status-badge badge-danger">Anemia Berat</span></td>
+                        <td>&lt; 7.0</td>
+                        <td>{summaryData?.hbStatistics?.trimester2_berat || 0}</td>
+                        <td>{summaryData?.hbStatistics?.trimester2_total > 0 ? Math.round((summaryData?.hbStatistics?.trimester2_berat || 0) * 100 / summaryData?.hbStatistics?.trimester2_total) : 0}%</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Trimester 3 */}
+              <div className="trimester-card">
+                <h4 className="trimester-title">Trimester 3 (28+ minggu)</h4>
+                <div className="trimester-total">
+                  Total: <strong>{summaryData?.hbStatistics?.trimester3_total || 0}</strong> kunjungan
+                </div>
+                <div className="table-responsive">
+                  <table className="report-table hb-category-table">
+                    <thead>
+                      <tr>
+                        <th>Kategori</th>
+                        <th>Rentang Hb</th>
+                        <th>Jumlah</th>
+                        <th>%</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><span className="status-badge badge-success">Normal</span></td>
+                        <td>≥ 11.0</td>
+                        <td>{summaryData?.hbStatistics?.trimester3_normal || 0}</td>
+                        <td>{summaryData?.hbStatistics?.trimester3_total > 0 ? Math.round((summaryData?.hbStatistics?.trimester3_normal || 0) * 100 / summaryData?.hbStatistics?.trimester3_total) : 0}%</td>
+                      </tr>
+                      <tr>
+                        <td><span className="status-badge badge-warning-light">Anemia Ringan</span></td>
+                        <td>10.0 - 10.9</td>
+                        <td>{summaryData?.hbStatistics?.trimester3_ringan || 0}</td>
+                        <td>{summaryData?.hbStatistics?.trimester3_total > 0 ? Math.round((summaryData?.hbStatistics?.trimester3_ringan || 0) * 100 / summaryData?.hbStatistics?.trimester3_total) : 0}%</td>
+                      </tr>
+                      <tr>
+                        <td><span className="status-badge badge-warning">Anemia Sedang</span></td>
+                        <td>7.0 - 9.9</td>
+                        <td>{summaryData?.hbStatistics?.trimester3_sedang || 0}</td>
+                        <td>{summaryData?.hbStatistics?.trimester3_total > 0 ? Math.round((summaryData?.hbStatistics?.trimester3_sedang || 0) * 100 / summaryData?.hbStatistics?.trimester3_total) : 0}%</td>
+                      </tr>
+                      <tr>
+                        <td><span className="status-badge badge-danger">Anemia Berat</span></td>
+                        <td>&lt; 7.0</td>
+                        <td>{summaryData?.hbStatistics?.trimester3_berat || 0}</td>
+                        <td>{summaryData?.hbStatistics?.trimester3_total > 0 ? Math.round((summaryData?.hbStatistics?.trimester3_berat || 0) * 100 / summaryData?.hbStatistics?.trimester3_total) : 0}%</td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>

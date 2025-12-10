@@ -226,23 +226,45 @@ router.get('/', authMiddleware, async (req, res) => {
         ORDER BY ac.status_imunisasi_tt`;
     const [ttResult] = await pool.query(ttQuery, [...ttWhere.params, ...ttWhere.params]);
 
-    // Get average Hemoglobin (Hb) level
+    // Get Hemoglobin (Hb) level categories by trimester
+    // Calculate gestational age based on HPHT (haid_terakhir)
     const hbWhere = buildWhereClause(!!kelurahan, true, false);
     const hbWhereWithNull = hbWhere.clause 
-      ? `${hbWhere.clause} AND ac.hasil_lab_hb IS NOT NULL`
-      : 'WHERE ac.hasil_lab_hb IS NOT NULL';
+      ? `${hbWhere.clause} AND ac.hasil_lab_hb IS NOT NULL AND k.haid_terakhir IS NOT NULL`
+      : 'WHERE ac.hasil_lab_hb IS NOT NULL AND k.haid_terakhir IS NOT NULL';
     
-    const hbQuery = `SELECT 
+    // Helper function to calculate trimester based on gestational weeks
+    // Trimester 1: 0-13 weeks, Trimester 2: 14-27 weeks, Trimester 3: 28+ weeks
+    const hbByTrimesterQuery = `SELECT 
+          -- Overall statistics
           ROUND(AVG(ac.hasil_lab_hb), 2) as avg_hb,
-          ROUND(MIN(ac.hasil_lab_hb), 2) as min_hb,
-          ROUND(MAX(ac.hasil_lab_hb), 2) as max_hb,
-          COUNT(CASE WHEN ac.hasil_lab_hb < 11 THEN 1 END) as anemia_count,
-          ROUND((COUNT(CASE WHEN ac.hasil_lab_hb < 11 THEN 1 END) * 100.0 / COUNT(*)), 1) as anemia_percentage
+          COUNT(*) as total_checked,
+          
+          -- Trimester 1 (0-13 weeks)
+          COUNT(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) <= 91 THEN 1 END) as trimester1_total,
+          COUNT(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) <= 91 AND ac.hasil_lab_hb >= 11 THEN 1 END) as trimester1_normal,
+          COUNT(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) <= 91 AND ac.hasil_lab_hb >= 10.0 AND ac.hasil_lab_hb < 11 THEN 1 END) as trimester1_ringan,
+          COUNT(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) <= 91 AND ac.hasil_lab_hb >= 7.0 AND ac.hasil_lab_hb < 10.0 THEN 1 END) as trimester1_sedang,
+          COUNT(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) <= 91 AND ac.hasil_lab_hb < 7.0 THEN 1 END) as trimester1_berat,
+          
+          -- Trimester 2 (14-27 weeks / 92-189 days)
+          COUNT(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) BETWEEN 92 AND 189 THEN 1 END) as trimester2_total,
+          COUNT(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) BETWEEN 92 AND 189 AND ac.hasil_lab_hb >= 11 THEN 1 END) as trimester2_normal,
+          COUNT(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) BETWEEN 92 AND 189 AND ac.hasil_lab_hb >= 10.0 AND ac.hasil_lab_hb < 11 THEN 1 END) as trimester2_ringan,
+          COUNT(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) BETWEEN 92 AND 189 AND ac.hasil_lab_hb >= 7.0 AND ac.hasil_lab_hb < 10.0 THEN 1 END) as trimester2_sedang,
+          COUNT(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) BETWEEN 92 AND 189 AND ac.hasil_lab_hb < 7.0 THEN 1 END) as trimester2_berat,
+          
+          -- Trimester 3 (28+ weeks / 190+ days)
+          COUNT(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) >= 190 THEN 1 END) as trimester3_total,
+          COUNT(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) >= 190 AND ac.hasil_lab_hb >= 11 THEN 1 END) as trimester3_normal,
+          COUNT(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) >= 190 AND ac.hasil_lab_hb >= 10.0 AND ac.hasil_lab_hb < 11 THEN 1 END) as trimester3_ringan,
+          COUNT(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) >= 190 AND ac.hasil_lab_hb >= 7.0 AND ac.hasil_lab_hb < 10.0 THEN 1 END) as trimester3_sedang,
+          COUNT(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) >= 190 AND ac.hasil_lab_hb < 7.0 THEN 1 END) as trimester3_berat
         FROM antenatal_care ac
         INNER JOIN kehamilan k ON ac.forkey_hamil = k.id
         ${kelurahan ? 'INNER JOIN ibu i ON k.forkey_ibu = i.id' : ''}
         ${hbWhereWithNull}`;
-    const [hbResult] = await pool.query(hbQuery, hbWhere.params);
+    const [hbResult] = await pool.query(hbByTrimesterQuery, hbWhere.params);
 
     // Get list of all kelurahan for filter dropdown
     const [kelurahanList] = await pool.query(`
