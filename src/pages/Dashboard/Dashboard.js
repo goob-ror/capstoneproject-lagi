@@ -20,6 +20,8 @@ const Dashboard = () => {
   const [riskDistribution, setRiskDistribution] = useState(null);
   const [nearingDueDates, setNearingDueDates] = useState(null);
   const [ancSchedule, setANCSchedule] = useState(null);
+  const [suamiPerokokKelurahan, setSuamiPerokokKelurahan] = useState(null);
+  const [imtDistributionKelurahan, setImtDistributionKelurahan] = useState(null);
   const [user, setUser] = useState(null);
   const [dueDatePage, setDueDatePage] = useState(1);
   const [ancSchedulePage, setANCSchedulePage] = useState(1);
@@ -39,6 +41,8 @@ const Dashboard = () => {
     displayRiskDistribution: (data) => setRiskDistribution(data),
     displayNearingDueDates: (data) => setNearingDueDates(data),
     displayANCSchedule: (data) => setANCSchedule(data),
+    displaySuamiPerokokKelurahan: (data) => setSuamiPerokokKelurahan(data),
+    displayImtDistributionKelurahan: (data) => setImtDistributionKelurahan(data),
     onLogout: () => navigate('/login')
   }));
 
@@ -178,6 +182,54 @@ const Dashboard = () => {
       backgroundColor: ['#22C55E', '#EF4444'],
       borderWidth: 0
     }]
+  } : null;
+
+  const suamiPerokokChart = suamiPerokokKelurahan ? {
+    labels: suamiPerokokKelurahan.map(item => item.kelurahan),
+    datasets: [
+      {
+        label: 'Perokok',
+        data: suamiPerokokKelurahan.map(item => item.perokok_count),
+        backgroundColor: '#EF4444',
+        borderRadius: 4
+      },
+      {
+        label: 'Non-Perokok',
+        data: suamiPerokokKelurahan.map(item => item.non_perokok_count),
+        backgroundColor: '#22C55E',
+        borderRadius: 4
+      }
+    ]
+  } : null;
+
+  const imtDistributionChart = imtDistributionKelurahan ? {
+    labels: imtDistributionKelurahan.map(item => item.kelurahan),
+    datasets: [
+      {
+        label: 'Kurus',
+        data: imtDistributionKelurahan.map(item => item.underweight_count),
+        backgroundColor: '#3B82F6',
+        borderRadius: 4
+      },
+      {
+        label: 'Normal',
+        data: imtDistributionKelurahan.map(item => item.normal_count),
+        backgroundColor: '#22C55E',
+        borderRadius: 4
+      },
+      {
+        label: 'Gemuk',
+        data: imtDistributionKelurahan.map(item => item.overweight_count),
+        backgroundColor: '#F59E0B',
+        borderRadius: 4
+      },
+      {
+        label: 'Obesitas',
+        data: imtDistributionKelurahan.map(item => item.obesitas_count),
+        backgroundColor: '#EF4444',
+        borderRadius: 4
+      }
+    ]
   } : null;
 
   const chartOptions = {
@@ -408,6 +460,24 @@ const Dashboard = () => {
                 <h3 className="chart-title">Cakupan Imunisasi TT/Fe 90 per Kelurahan</h3>
                 <div className="chart-container-small">
                   <Bar data={immunizationChart} options={barChartOptions} />
+                </div>
+              </div>
+            )}
+
+            {suamiPerokokChart && (
+              <div className="chart-card">
+                <h3 className="chart-title">Status Merokok Suami per Kelurahan</h3>
+                <div className="chart-container-small">
+                  <Bar data={suamiPerokokChart} options={stackedBarOptions} />
+                </div>
+              </div>
+            )}
+
+            {imtDistributionChart && (
+              <div className="chart-card">
+                <h3 className="chart-title">Distribusi IMT Ibu per Kelurahan</h3>
+                <div className="chart-container-small">
+                  <Bar data={imtDistributionChart} options={stackedBarOptions} />
                 </div>
               </div>
             )}

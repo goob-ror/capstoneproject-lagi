@@ -12,6 +12,8 @@ const DetailIbu = () => {
   const [ibuData, setIbuData] = useState(null);
   const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState('info');
+  const [selectedPregnancy, setSelectedPregnancy] = useState(null);
+  const [showANCModal, setShowANCModal] = useState(false);
 
   const [presenter] = useState(() => new DetailIbuPresenter({
     setLoading,
@@ -53,6 +55,39 @@ const DetailIbu = () => {
       month: 'long',
       year: 'numeric'
     });
+  };
+
+  const calculateBMI = (weight, height) => {
+    if (!weight || !height || weight <= 0 || height <= 0) return null;
+    const heightInM = parseFloat(height) / 100;
+    const bmi = parseFloat(weight) / (heightInM * heightInM);
+    return bmi.toFixed(1);
+  };
+
+  const getBMICategory = (bmi) => {
+    if (!bmi) return '-';
+    if (bmi < 18.5) return 'Underweight';
+    if (bmi < 25) return 'Normal';
+    if (bmi < 30) return 'Overweight';
+    return 'Obesitas';
+  };
+
+  const getAnemiaCategory = (hb) => {
+    if (!hb) return '-';
+    if (hb >= 11.0) return 'Normal';
+    if (hb >= 10.0) return 'Anemia Ringan';
+    if (hb >= 7.0) return 'Anemia Sedang';
+    return 'Anemia Berat';
+  };
+
+  const handlePregnancyClick = (pregnancy) => {
+    setSelectedPregnancy(pregnancy);
+    setShowANCModal(true);
+  };
+
+  const closeANCModal = () => {
+    setShowANCModal(false);
+    setSelectedPregnancy(null);
   };
 
   if (loading) {
@@ -221,22 +256,22 @@ const DetailIbu = () => {
                 Informasi Dasar
               </button>
               <button 
-                className={`tab ${activeTab === 'pregnancy' ? 'active' : ''}`}
-                onClick={() => setActiveTab('pregnancy')}
+                className={`tab ${activeTab === 'medical-history' ? 'active' : ''}`}
+                onClick={() => setActiveTab('medical-history')}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z" fill="currentColor"/>
+                  <path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm11 15H4v-2h16v2zm0-5H4V8h5.08L7 10.83 8.62 12 11 8.76l1-1.36 1 1.36L15.38 12 17 10.83 14.92 8H20v6z" fill="currentColor"/>
                 </svg>
-                Data Kehamilan
+                Riwayat Penyakit
               </button>
               <button 
-                className={`tab ${activeTab === 'anc' ? 'active' : ''}`}
-                onClick={() => setActiveTab('anc')}
+                className={`tab ${activeTab === 'pregnancy-history' ? 'active' : ''}`}
+                onClick={() => setActiveTab('pregnancy-history')}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" fill="currentColor"/>
                 </svg>
-                Kunjungan ANC ({ibuData.ancVisits?.length || 0})
+                Riwayat Kehamilan
               </button>
               <button 
                 className={`tab ${activeTab === 'complications' ? 'active' : ''}`}
@@ -304,6 +339,42 @@ const DetailIbu = () => {
                     </div>
                   </div>
 
+                  {ibuData.kehamilan && (
+                    <div className="info-card">
+                      <h3>Data Kehamilan Saat Ini</h3>
+                      <div className="info-row">
+                        <span className="label">Gravida:</span>
+                        <span className="value">{ibuData.kehamilan.gravida}</span>
+                      </div>
+                      <div className="info-row">
+                        <span className="label">Partus:</span>
+                        <span className="value">{ibuData.kehamilan.partus}</span>
+                      </div>
+                      <div className="info-row">
+                        <span className="label">Abortus:</span>
+                        <span className="value">{ibuData.kehamilan.abortus}</span>
+                      </div>
+                      <div className="info-row">
+                        <span className="label">HPHT:</span>
+                        <span className="value">{formatDate(ibuData.kehamilan.haid_terakhir)}</span>
+                      </div>
+                      <div className="info-row">
+                        <span className="label">Taksiran Persalinan:</span>
+                        <span className="value">{formatDate(ibuData.kehamilan.taksiran_persalinan)}</span>
+                      </div>
+                      <div className="info-row">
+                        <span className="label">Status:</span>
+                        <span className={`status-badge ${
+                          ibuData.kehamilan.status_kehamilan === 'Hamil' ? 'badge-success' : 
+                          ibuData.kehamilan.status_kehamilan === 'Keguguran' ? 'badge-danger' : 
+                          'badge-info'
+                        }`}>
+                          {ibuData.kehamilan.status_kehamilan}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
                   {ibuData.suami && (
                     <div className="info-card">
                       <h3>Data Suami</h3>
@@ -336,106 +407,89 @@ const DetailIbu = () => {
                 </div>
               )}
 
-              {activeTab === 'pregnancy' && ibuData.kehamilan && (
-                <div className="info-grid">
-                  <div className="info-card">
-                    <h3>Informasi Kehamilan</h3>
-                    <div className="info-row">
-                      <span className="label">Gravida:</span>
-                      <span className="value">{ibuData.kehamilan.gravida}</span>
+              {activeTab === 'medical-history' && (
+                <div className="medical-history-list">
+                  {ibuData.riwayat_penyakit && ibuData.riwayat_penyakit.length > 0 ? (
+                    ibuData.riwayat_penyakit.map((rp, index) => (
+                      <div key={rp.id} className="medical-history-card">
+                        <div className="medical-history-header">
+                          <div>
+                            <h4>{rp.nama_penyakit}</h4>
+                            <p className="diagnosis-year">Diagnosis: {rp.tahun_diagnosis || '-'}</p>
+                          </div>
+                          <div className="badges">
+                            <span className={`status-badge ${
+                              rp.kategori_penyakit === 'Penyakit Menular' ? 'badge-danger' : 
+                              rp.kategori_penyakit === 'Penyakit Kronis' ? 'badge-warning' : 
+                              rp.kategori_penyakit === 'Alergi' ? 'badge-info' : 'badge-secondary'
+                            }`}>
+                              {rp.kategori_penyakit}
+                            </span>
+                            <span className={`status-badge ${
+                              rp.status_penyakit === 'Sembuh' ? 'badge-success' : 
+                              rp.status_penyakit === 'Dalam Pengobatan' ? 'badge-warning' : 'badge-danger'
+                            }`}>
+                              {rp.status_penyakit}
+                            </span>
+                          </div>
+                        </div>
+                        {rp.keterangan && (
+                          <div className="medical-history-details">
+                            <p><strong>Keterangan:</strong> {rp.keterangan}</p>
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <div className="empty-state">
+                      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm11 15H4v-2h16v2zm0-5H4V8h5.08L7 10.83 8.62 12 11 8.76l1-1.36 1 1.36L15.38 12 17 10.83 14.92 8H20v6z" fill="currentColor" opacity="0.3"/>
+                      </svg>
+                      <p>Tidak ada riwayat penyakit tercatat</p>
                     </div>
-                    <div className="info-row">
-                      <span className="label">Partus:</span>
-                      <span className="value">{ibuData.kehamilan.partus}</span>
-                    </div>
-                    <div className="info-row">
-                      <span className="label">Abortus:</span>
-                      <span className="value">{ibuData.kehamilan.abortus}</span>
-                    </div>
-                    <div className="info-row">
-                      <span className="label">HPHT:</span>
-                      <span className="value">{formatDate(ibuData.kehamilan.haid_terakhir)}</span>
-                    </div>
-                    <div className="info-row">
-                      <span className="label">Taksiran Persalinan:</span>
-                      <span className="value">{formatDate(ibuData.kehamilan.taksiran_persalinan)}</span>
-                    </div>
-                    <div className="info-row">
-                      <span className="label">Status:</span>
-                      <span className={`status-badge ${
-                        ibuData.kehamilan.status_kehamilan === 'Hamil' ? 'badge-success' : 
-                        ibuData.kehamilan.status_kehamilan === 'Keguguran' ? 'badge-danger' : 
-                        'badge-info'
-                      }`}>
-                        {ibuData.kehamilan.status_kehamilan}
-                      </span>
-                    </div>
-                  </div>
+                  )}
                 </div>
               )}
 
-              {activeTab === 'anc' && (
-                <div className="anc-list">
-                  {ibuData.ancVisits && ibuData.ancVisits.length > 0 ? (
-                    ibuData.ancVisits.map((anc, index) => (
-                      <div key={anc.id} className="anc-card">
-                        <div className="anc-header">
+              {activeTab === 'pregnancy-history' && (
+                <div className="pregnancy-history-list">
+                  {ibuData.pregnancyHistory && ibuData.pregnancyHistory.length > 0 ? (
+                    ibuData.pregnancyHistory.map((pregnancy, index) => (
+                      <div 
+                        key={pregnancy.id} 
+                        className="pregnancy-history-card clickable"
+                        onClick={() => handlePregnancyClick(pregnancy)}
+                      >
+                        <div className="pregnancy-history-header">
                           <div>
-                            <h4>{anc.jenis_kunjungan} - {anc.jenis_akses}</h4>
-                            <p className="anc-date">{formatDate(anc.tanggal_kunjungan)}</p>
+                            <h4>Kehamilan ke-{pregnancy.gravida}</h4>
+                            <p className="pregnancy-date">
+                              HPHT: {formatDate(pregnancy.haid_terakhir)} - 
+                              Taksiran: {formatDate(pregnancy.taksiran_persalinan)}
+                            </p>
                           </div>
-                          <span className={`status-badge ${anc.status_risiko_visit === 'Risiko Tinggi' ? 'badge-danger' : 'badge-success'}`}>
-                            {anc.status_risiko_visit}
-                          </span>
+                          <div className="badges">
+                            <span className={`status-badge ${
+                              pregnancy.status_kehamilan === 'Hamil' ? 'badge-success' : 
+                              pregnancy.status_kehamilan === 'Bersalin' ? 'badge-info' :
+                              pregnancy.status_kehamilan === 'Selesai' ? 'badge-success' :
+                              pregnancy.status_kehamilan === 'Keguguran' ? 'badge-danger' : 
+                              'badge-secondary'
+                            }`}>
+                              {pregnancy.status_kehamilan}
+                            </span>
+                            <span className="anc-count-badge">
+                              {pregnancy.ancVisits?.length || 0} ANC
+                            </span>
+                          </div>
                         </div>
-                        <div className="anc-details">
-                          <div className="detail-grid">
-                            <div className="detail-item">
-                              <span className="detail-label">Pemeriksa:</span>
-                              <span className="detail-value">{anc.pemeriksa}</span>
-                            </div>
-                            <div className="detail-item">
-                              <span className="detail-label">Berat Badan:</span>
-                              <span className="detail-value">{anc.berat_badan ? `${anc.berat_badan} kg` : '-'}</span>
-                            </div>
-                            <div className="detail-item">
-                              <span className="detail-label">Tekanan Darah:</span>
-                              <span className="detail-value">{anc.tekanan_darah || '-'}</span>
-                            </div>
-                            <div className="detail-item">
-                              <span className="detail-label">LILA:</span>
-                              <span className="detail-value">{anc.lila ? `${anc.lila} cm` : '-'}</span>
-                            </div>
-                            <div className="detail-item">
-                              <span className="detail-label">Tinggi Fundus:</span>
-                              <span className="detail-value">{anc.tinggi_fundus ? `${anc.tinggi_fundus} cm` : '-'}</span>
-                            </div>
-                            <div className="detail-item">
-                              <span className="detail-label">DJJ:</span>
-                              <span className="detail-value">{anc.denyut_jantung_janin ? `${anc.denyut_jantung_janin} bpm` : '-'}</span>
-                            </div>
-                            <div className="detail-item">
-                              <span className="detail-label">HB:</span>
-                              <span className="detail-value">{anc.hasil_lab_hb ? `${anc.hasil_lab_hb} g/dL` : '-'}</span>
-                            </div>
-                            <div className="detail-item">
-                              <span className="detail-label">Protein Urine:</span>
-                              <span className="detail-value">{anc.lab_protein_urine || '-'}</span>
-                            </div>
-                            <div className="detail-item">
-                              <span className="detail-label">Imunisasi TT:</span>
-                              <span className="detail-value">{anc.status_imunisasi_tt || '-'}</span>
-                            </div>
-                            <div className="detail-item">
-                              <span className="detail-label">Tablet FE:</span>
-                              <span className="detail-value">{anc.beri_tablet_fe ? 'Ya' : 'Tidak'}</span>
-                            </div>
+                        <div className="pregnancy-summary">
+                          <div className="summary-item">
+                            <span className="summary-label">G{pregnancy.gravida}P{pregnancy.partus}A{pregnancy.abortus}</span>
                           </div>
-                          {anc.keterangan_anc && (
-                            <div className="anc-notes">
-                              <strong>Keterangan:</strong> {anc.keterangan_anc}
-                            </div>
-                          )}
+                          <div className="summary-item">
+                            <span className="summary-label">Klik untuk melihat detail ANC</span>
+                          </div>
                         </div>
                       </div>
                     ))
@@ -444,7 +498,7 @@ const DetailIbu = () => {
                       <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z" fill="currentColor" opacity="0.3"/>
                       </svg>
-                      <p>Belum ada data kunjungan ANC</p>
+                      <p>Belum ada riwayat kehamilan</p>
                     </div>
                   )}
                 </div>
@@ -541,6 +595,178 @@ const DetailIbu = () => {
           </div>
         </div>
       </main>
+
+      {/* ANC Details Modal */}
+      {showANCModal && selectedPregnancy && (
+        <div className="modal-overlay" onClick={closeANCModal}>
+          <div className="modal-content anc-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Detail Kunjungan ANC - Kehamilan ke-{selectedPregnancy.gravida}</h3>
+              <button className="modal-close" onClick={closeANCModal}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="currentColor"/>
+                </svg>
+              </button>
+            </div>
+            
+            <div className="modal-body">
+              <div className="pregnancy-info">
+                <div className="info-row">
+                  <span className="label">Status Kehamilan:</span>
+                  <span className={`status-badge ${
+                    selectedPregnancy.status_kehamilan === 'Hamil' ? 'badge-success' : 
+                    selectedPregnancy.status_kehamilan === 'Keguguran' ? 'badge-danger' : 
+                    'badge-info'
+                  }`}>
+                    {selectedPregnancy.status_kehamilan}
+                  </span>
+                </div>
+                <div className="info-row">
+                  <span className="label">HPHT:</span>
+                  <span className="value">{formatDate(selectedPregnancy.haid_terakhir)}</span>
+                </div>
+                <div className="info-row">
+                  <span className="label">Taksiran Persalinan:</span>
+                  <span className="value">{formatDate(selectedPregnancy.taksiran_persalinan)}</span>
+                </div>
+              </div>
+
+              <div className="anc-visits-list">
+                <h4>Riwayat Kunjungan ANC ({selectedPregnancy.ancVisits?.length || 0})</h4>
+                {selectedPregnancy.ancVisits && selectedPregnancy.ancVisits.length > 0 ? (
+                  selectedPregnancy.ancVisits.map((anc, index) => {
+                    const prevANC = index > 0 ? selectedPregnancy.ancVisits[index - 1] : null;
+                    const weightDiff = prevANC && anc.berat_badan && prevANC.berat_badan 
+                      ? (anc.berat_badan - prevANC.berat_badan).toFixed(1) : null;
+                    
+                    const currentBMI = anc.berat_badan && ibuData?.ibu?.tinggi_badan 
+                      ? calculateBMI(anc.berat_badan, ibuData.ibu.tinggi_badan) : null;
+                    const prevBMI = prevANC && prevANC.berat_badan && ibuData?.ibu?.tinggi_badan 
+                      ? calculateBMI(prevANC.berat_badan, ibuData.ibu.tinggi_badan) : null;
+                    const bmiDiff = currentBMI && prevBMI ? (currentBMI - prevBMI).toFixed(1) : null;
+
+                    return (
+                      <div key={anc.id} className="anc-visit-card">
+                        <div className="anc-visit-header">
+                          <div>
+                            <h5>{anc.jenis_kunjungan} - {anc.jenis_akses}</h5>
+                            <p className="visit-date">{formatDate(anc.tanggal_kunjungan)}</p>
+                          </div>
+                          <span className={`status-badge ${anc.status_risiko_visit === 'Risiko Tinggi' ? 'badge-danger' : 'badge-success'}`}>
+                            {anc.status_risiko_visit}
+                          </span>
+                        </div>
+                        
+                        <div className="anc-visit-details">
+                          <div className="detail-grid">
+                            <div className="detail-item">
+                              <span className="detail-label">Hemoglobin:</span>
+                              <span className={`detail-value ${
+                                anc.hasil_lab_hb ? (anc.hasil_lab_hb >= 11 ? 'normal' : 'anemia') : ''
+                              }`}>
+                                <span>{anc.hasil_lab_hb ? `${anc.hasil_lab_hb} g/dL` : '-'}</span>
+                                {anc.hasil_lab_hb && (
+                                  <span className="category">({getAnemiaCategory(anc.hasil_lab_hb)})</span>
+                                )}
+                              </span>
+                            </div>
+                            
+                            <div className="detail-item">
+                              <span className="detail-label">Berat Badan & IMT:</span>
+                              <span className="detail-value">
+                                <div>
+                                  <span>{anc.berat_badan ? `${anc.berat_badan} kg` : '-'}</span>
+                                  {currentBMI && (
+                                    <div className="bmi-info">
+                                      IMT: <strong>{currentBMI}</strong> ({getBMICategory(currentBMI)})
+                                    </div>
+                                  )}
+                                  {!currentBMI && ibuData?.ibu?.tinggi_badan && (
+                                    <div className="bmi-info">
+                                      IMT: Tidak dapat dihitung (tinggi: {ibuData.ibu.tinggi_badan} cm)
+                                    </div>
+                                  )}
+                                  {!ibuData?.ibu?.tinggi_badan && (
+                                    <div className="bmi-info">
+                                      IMT: Data tinggi badan tidak tersedia
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="changes-info">
+                                  {weightDiff && (
+                                    <span className={`weight-change ${parseFloat(weightDiff) >= 0 ? 'increase' : 'decrease'}`}>
+                                      Berat: {parseFloat(weightDiff) >= 0 ? '+' : ''}{weightDiff} kg
+                                    </span>
+                                  )}
+                                  {bmiDiff && (
+                                    <span className={`bmi-change ${parseFloat(bmiDiff) >= 0 ? 'increase' : 'decrease'}`}>
+                                      IMT: {parseFloat(bmiDiff) >= 0 ? '+' : ''}{bmiDiff}
+                                    </span>
+                                  )}
+                                </div>
+                              </span>
+                            </div>
+
+                            <div className="detail-item">
+                              <span className="detail-label">Pemeriksa:</span>
+                              <span className="detail-value">{anc.pemeriksa}</span>
+                            </div>
+                            
+                            <div className="detail-item">
+                              <span className="detail-label">Tekanan Darah:</span>
+                              <span className="detail-value">{anc.tekanan_darah || '-'}</span>
+                            </div>
+                            
+                            <div className="detail-item">
+                              <span className="detail-label">LILA:</span>
+                              <span className="detail-value">{anc.lila ? `${anc.lila} cm` : '-'}</span>
+                            </div>
+                            
+                            <div className="detail-item">
+                              <span className="detail-label">Tinggi Fundus:</span>
+                              <span className="detail-value">{anc.tinggi_fundus ? `${anc.tinggi_fundus} cm` : '-'}</span>
+                            </div>
+                            
+                            <div className="detail-item">
+                              <span className="detail-label">DJJ:</span>
+                              <span className="detail-value">{anc.denyut_jantung_janin ? `${anc.denyut_jantung_janin} bpm` : '-'}</span>
+                            </div>
+                            
+                            <div className="detail-item">
+                              <span className="detail-label">Protein Urine:</span>
+                              <span className="detail-value">{anc.lab_protein_urine || '-'}</span>
+                            </div>
+                            
+                            <div className="detail-item">
+                              <span className="detail-label">Imunisasi TT:</span>
+                              <span className="detail-value">{anc.status_imunisasi_tt || '-'}</span>
+                            </div>
+                            
+                            <div className="detail-item">
+                              <span className="detail-label">Tablet FE:</span>
+                              <span className="detail-value">{anc.beri_tablet_fe ? 'Ya' : 'Tidak'}</span>
+                            </div>
+                          </div>
+                          
+                          {anc.keterangan_anc && (
+                            <div className="anc-notes">
+                              <strong>Keterangan:</strong> {anc.keterangan_anc}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="empty-state">
+                    <p>Belum ada kunjungan ANC untuk kehamilan ini</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

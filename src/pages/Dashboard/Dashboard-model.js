@@ -155,6 +155,42 @@ class DashboardModel {
     }
   }
 
+  async getSuamiPerokokKelurahan() {
+    try {
+      const response = await fetch(`${this.baseURL}/dashboard/suami-perokok-kelurahan`, {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch suami perokok by kelurahan');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching suami perokok by kelurahan:', error);
+      throw error;
+    }
+  }
+
+  async getImtDistributionKelurahan() {
+    try {
+      const response = await fetch(`${this.baseURL}/dashboard/imt-distribution-kelurahan`, {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch IMT distribution by kelurahan');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching IMT distribution by kelurahan:', error);
+      throw error;
+    }
+  }
+
   getUser() {
     const user = localStorage.getItem('user');
     return user ? JSON.parse(user) : null;

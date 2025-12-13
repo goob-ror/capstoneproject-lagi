@@ -390,7 +390,35 @@ router.get('/:id/detail', authMiddleware, async (req, res) => {
     );
     const kehamilan = kehamilanRows.length > 0 ? kehamilanRows[0] : null;
     
-    // Get ANC visits if pregnancy exists
+    // Get medical history (riwayat penyakit)
+    const [riwayatRows] = await pool.query(
+      'SELECT * FROM riwayat_penyakit WHERE forkey_ibu = ? ORDER BY tahun_diagnosis DESC',
+      [id]
+    );
+    
+    // Get all pregnancy history
+    const [pregnancyHistoryRows] = await pool.query(
+      'SELECT * FROM kehamilan WHERE forkey_ibu = ? ORDER BY created_at DESC',
+      [id]
+    );
+    
+    // For each pregnancy, get its ANC visits
+    const pregnancyHistory = [];
+    for (const pregnancy of pregnancyHistoryRows) {
+      const [ancRows] = await pool.query(
+        `SELECT * FROM antenatal_care 
+         WHERE forkey_hamil = ? 
+         ORDER BY tanggal_kunjungan ASC`,
+        [pregnancy.id]
+      );
+      
+      pregnancyHistory.push({
+        ...pregnancy,
+        ancVisits: ancRows
+      });
+    }
+    
+    // Get ANC visits for current pregnancy
     let ancVisits = [];
     if (kehamilan) {
       const [ancRows] = await pool.query(
@@ -419,7 +447,9 @@ router.get('/:id/detail', authMiddleware, async (req, res) => {
       suami,
       kehamilan,
       ancVisits,
-      complications
+      complications,
+      riwayat_penyakit: riwayatRows,
+      pregnancyHistory
     });
   } catch (error) {
     console.error('Error fetching ibu detail:', error);

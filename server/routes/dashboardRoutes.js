@@ -368,4 +368,86 @@ router.get('/anc-schedule', async (req, res) => {
   }
 });
 
+// Get Suami Perokok per Kelurahan
+router.get('/suami-perokok-kelurahan', async (req, res) => {
+  try {
+    const [results] = await db.query(`
+      SELECT 
+        COALESCE(i.kelurahan, 'Tidak Diketahui') as kelurahan,
+        COUNT(s.id) as total_suami,
+        SUM(CASE WHEN s.isPerokok = 1 THEN 1 ELSE 0 END) as perokok_count,
+        SUM(CASE WHEN s.isPerokok = 0 THEN 1 ELSE 0 END) as non_perokok_count,
+        CASE 
+          WHEN COUNT(s.id) > 0 THEN ROUND((SUM(CASE WHEN s.isPerokok = 1 THEN 1 ELSE 0 END) / COUNT(s.id)) * 100, 1)
+          ELSE 0 
+        END as perokok_percentage
+      FROM ibu i
+      LEFT JOIN suami s ON i.id = s.forkey_ibu
+      WHERE s.id IS NOT NULL
+      GROUP BY i.kelurahan
+      ORDER BY i.kelurahan ASC
+    `);
+    res.json(results);
+  } catch (error) {
+    console.error('Error fetching suami perokok by kelurahan:', error);
+    res.status(500).json({ message: 'Failed to fetch suami perokok data' });
+  }
+});
+
+// Get Distribusi IMT per Kelurahan
+router.get('/imt-distribution-kelurahan', async (req, res) => {
+  try {
+    const [results] = await db.query(`
+      SELECT 
+        COALESCE(i.kelurahan, 'Tidak Diketahui') as kelurahan,
+        COUNT(i.id) as total_ibu,
+        
+        -- Underweight (IMT < 18.5)
+        SUM(CASE 
+          WHEN i.tinggi_badan IS NOT NULL AND i.beratbadan IS NOT NULL 
+          AND (i.beratbadan / POWER(i.tinggi_badan / 100, 2)) < 18.5 
+          THEN 1 ELSE 0 
+        END) as underweight_count,
+        
+        -- Normal (IMT 18.5-24.9)
+        SUM(CASE 
+          WHEN i.tinggi_badan IS NOT NULL AND i.beratbadan IS NOT NULL 
+          AND (i.beratbadan / POWER(i.tinggi_badan / 100, 2)) >= 18.5 
+          AND (i.beratbadan / POWER(i.tinggi_badan / 100, 2)) < 25.0 
+          THEN 1 ELSE 0 
+        END) as normal_count,
+        
+        -- Overweight (IMT 25.0-29.9)
+        SUM(CASE 
+          WHEN i.tinggi_badan IS NOT NULL AND i.beratbadan IS NOT NULL 
+          AND (i.beratbadan / POWER(i.tinggi_badan / 100, 2)) >= 25.0 
+          AND (i.beratbadan / POWER(i.tinggi_badan / 100, 2)) < 30.0 
+          THEN 1 ELSE 0 
+        END) as overweight_count,
+        
+        -- Obesitas (IMT >= 30.0)
+        SUM(CASE 
+          WHEN i.tinggi_badan IS NOT NULL AND i.beratbadan IS NOT NULL 
+          AND (i.beratbadan / POWER(i.tinggi_badan / 100, 2)) >= 30.0 
+          THEN 1 ELSE 0 
+        END) as obesitas_count,
+        
+        -- Data tidak lengkap
+        SUM(CASE 
+          WHEN i.tinggi_badan IS NULL OR i.beratbadan IS NULL 
+          THEN 1 ELSE 0 
+        END) as no_data_count
+        
+      FROM ibu i
+      GROUP BY i.kelurahan
+      HAVING total_ibu > 0
+      ORDER BY i.kelurahan ASC
+    `);
+    res.json(results);
+  } catch (error) {
+    console.error('Error fetching IMT distribution by kelurahan:', error);
+    res.status(500).json({ message: 'Failed to fetch IMT distribution data' });
+  }
+});
+
 module.exports = router;

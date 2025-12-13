@@ -380,6 +380,7 @@ CREATE TABLE `komplikasi` (
   `waktu_kejadian` enum('Saat Hamil','Bersalin','Nifas') NOT NULL,
   `tanggal_diagnosis` date NOT NULL,
   `rujuk_rs` tinyint(1) DEFAULT '0',
+  `nama_rs` TEXT DEFAULT NULL,
   `tanggal_rujukan` date DEFAULT NULL,
   `tekanan_darah` varchar(10) DEFAULT NULL,
   `protein_urine` varchar(20) DEFAULT NULL,

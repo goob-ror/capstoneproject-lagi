@@ -594,3 +594,346 @@
     grid-template-columns: 1fr;
   }
 }
+/* Medical History Styles */
+.medical-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.medical-history-card {
+  background-color: #F9FAFB;
+  border-radius: 10px;
+  padding: 20px;
+  border: 1px solid #E5E7EB;
+  transition: all 0.2s;
+}
+
+.medical-history-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.medical-history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.medical-history-header h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 5px 0;
+}
+
+.diagnosis-year {
+  font-size: 13px;
+  color: #6B7280;
+  margin: 0;
+}
+
+.medical-history-details {
+  margin-top: 10px;
+  padding: 12px;
+  background-color: white;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #374151;
+  line-height: 1.6;
+}
+
+.badge-secondary {
+  background-color: #F3F4F6;
+  color: #374151;
+}
+
+.badge-warning-light {
+  background-color: #FEF3C7;
+  color: #92400E;
+}
+
+/* Pregnancy History Styles */
+.pregnancy-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.pregnancy-history-card {
+  background-color: #F9FAFB;
+  border-radius: 10px;
+  padding: 20px;
+  border: 1px solid #E5E7EB;
+  transition: all 0.2s;
+}
+
+.pregnancy-history-card.clickable {
+  cursor: pointer;
+}
+
+.pregnancy-history-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.pregnancy-history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #E5E7EB;
+}
+
+.pregnancy-history-header h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 5px 0;
+}
+
+.pregnancy-date {
+  font-size: 13px;
+  color: #6B7280;
+  margin: 0;
+}
+
+.anc-count-badge {
+  background-color: #DBEAFE;
+  color: #1E40AF;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.pregnancy-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.summary-item {
+  font-size: 13px;
+}
+
+.summary-label {
+  font-weight: 600;
+  color: #374151;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal-content {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  max-height: 90vh;
+  overflow-y: auto;
+  width: 100%;
+  max-width: 900px;
+}
+
+.anc-modal {
+  max-width: 1000px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 25px;
+  border-bottom: 2px solid #E5E7EB;
+  background-color: #F9FAFB;
+}
+
+.modal-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 6px;
+  transition: all 0.2s;
+  color: #6B7280;
+}
+
+.modal-close:hover {
+  background-color: #F3F4F6;
+  color: #111827;
+}
+
+.modal-body {
+  padding: 25px;
+}
+
+.pregnancy-info {
+  background-color: #F9FAFB;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 25px;
+  border: 1px solid #E5E7EB;
+}
+
+.anc-visits-list h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 20px 0;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #22C55E;
+}
+
+.anc-visit-card {
+  background-color: #F9FAFB;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 15px;
+  border: 1px solid #E5E7EB;
+}
+
+.anc-visit-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #E5E7EB;
+}
+
+.anc-visit-header h5 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 5px 0;
+}
+
+.visit-date {
+  font-size: 12px;
+  color: #6B7280;
+  margin: 0;
+}
+
+.anc-visit-details {
+  margin-top: 15px;
+}
+
+.detail-item.highlight {
+  background-color: white;
+  padding: 12px;
+  border-radius: 8px;
+  border-left: 4px solid #22C55E;
+}
+
+.detail-value.normal {
+  color: #059669;
+}
+
+.detail-value.anemia {
+  color: #DC2626;
+}
+
+.category {
+  font-size: 11px;
+  margin-left: 5px;
+  opacity: 0.8;
+}
+
+.bmi-info {
+  display: block;
+  font-size: 11px;
+  color: #6B7280;
+  margin-top: 2px;
+}
+
+.weight-change, .bmi-change {
+  display: inline-block;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 8px;
+  font-weight: 600;
+}
+
+.weight-change.increase, .bmi-change.increase {
+  background-color: #DCFCE7;
+  color: #166534;
+}
+
+.weight-change.decrease, .bmi-change.decrease {
+  background-color: #FEE2E2;
+  color: #991B1B;
+}
+
+/* Responsive Modal */
+@media (max-width: 768px) {
+  .modal-overlay {
+    padding: 10px;
+  }
+  
+  .modal-content {
+    max-height: 95vh;
+  }
+  
+  .modal-header {
+    padding: 15px 20px;
+  }
+  
+  .modal-body {
+    padding: 20px;
+  }
+  
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
+/* Enhanced BMI Display Styles */
+.bmi-info {
+  display: block;
+  font-size: 12px;
+  color: #6B7280;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+.changes-info {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.detail-item.highlight .detail-value > div:first-child {
+  margin-bottom: 4px;
+}
+
+.detail-item.highlight .detail-value strong {
+  color: #111827;
+  font-size: 14px;
+}
+
+.bmi-info strong {
+  color: #059669;
+  font-weight: 600;
+}

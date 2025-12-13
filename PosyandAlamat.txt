@@ -1,0 +1,6 @@
+Kelurahan Simpang Pasir
+NO	NAMA POSYANDU	ALAMAT
+1	Amanah	Jl. Bojonegoro Rt. 25 Simpang pasir
+2	Anggrek Bulan	Jl. Mangkujenang Rt. 23 Simpang Pasir
+3	Mawar merah	Jl.Solo I Rt. 18 simpang Pasir
+4	Sumber Waras	Jl. Jakarta Rt. 02 Simpang Pasir
