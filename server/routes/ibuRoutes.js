@@ -6,9 +6,12 @@ const authMiddleware = require('../middleware/auth');
 // Get all ibu (mothers)
 router.get('/', authMiddleware, async (req, res) => {
   try {
-    const [rows] = await pool.query(
-      'SELECT * FROM ibu ORDER BY created_at DESC'
-    );
+    const [rows] = await pool.query(`
+      SELECT i.*, kel.nama_kelurahan as kelurahan_nama
+      FROM ibu i
+      LEFT JOIN kelurahan kel ON i.kelurahan_id = kel.id
+      ORDER BY i.created_at DESC
+    `);
     res.json(rows);
   } catch (error) {
     console.error('Get ibu error:', error);
@@ -19,10 +22,12 @@ router.get('/', authMiddleware, async (req, res) => {
 // Get single ibu by ID
 router.get('/:id', authMiddleware, async (req, res) => {
   try {
-    const [ibuRows] = await pool.query(
-      'SELECT * FROM ibu WHERE id = ?',
-      [req.params.id]
-    );
+    const [ibuRows] = await pool.query(`
+      SELECT i.*, kel.nama_kelurahan as kelurahan_nama
+      FROM ibu i
+      LEFT JOIN kelurahan kel ON i.kelurahan_id = kel.id
+      WHERE i.id = ?
+    `, [req.params.id]);
 
     if (ibuRows.length === 0) {
       return res.status(404).json({ message: 'Ibu not found' });
@@ -78,7 +83,7 @@ router.post('/', authMiddleware, async (req, res) => {
       buku_kia,
       pekerjaan,
       pendidikan,
-      kelurahan,
+      kelurahan_id,
       alamat_lengkap,
       // Data Kehamilan
       gravida,
@@ -108,10 +113,10 @@ router.post('/', authMiddleware, async (req, res) => {
     // Insert ibu data
     const [ibuResult] = await connection.query(
       `INSERT INTO ibu (nik_ibu, nama_lengkap, tanggal_lahir, no_hp, gol_darah, 
-       rhesus, tinggi_badan, beratbadan, buku_kia, pekerjaan, pendidikan, kelurahan, alamat_lengkap) 
+       rhesus, tinggi_badan, beratbadan, buku_kia, pekerjaan, pendidikan, kelurahan_id, alamat_lengkap) 
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [nik_ibu, nama_lengkap, tanggal_lahir, no_hp, gol_darah, rhesus, tinggi_badan,
-       req.body.beratbadan || null, buku_kia, pekerjaan, pendidikan, kelurahan, alamat_lengkap]
+       req.body.beratbadan || null, buku_kia, pekerjaan, pendidikan, kelurahan_id, alamat_lengkap]
     );
 
     const ibuId = ibuResult.insertId;
@@ -193,7 +198,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
       buku_kia,
       pekerjaan,
       pendidikan,
-      kelurahan,
+      kelurahan_id,
       alamat_lengkap,
       // Data Kehamilan
       gravida,
@@ -215,10 +220,10 @@ router.put('/:id', authMiddleware, async (req, res) => {
     const [ibuResult] = await connection.query(
       `UPDATE ibu SET nik_ibu = ?, nama_lengkap = ?, tanggal_lahir = ?, 
        no_hp = ?, gol_darah = ?, rhesus = ?, tinggi_badan = ?, beratbadan = ?, buku_kia = ?, pekerjaan = ?, 
-       pendidikan = ?, kelurahan = ?, alamat_lengkap = ? 
+       pendidikan = ?, kelurahan_id = ?, alamat_lengkap = ? 
        WHERE id = ?`,
       [nik_ibu, nama_lengkap, tanggal_lahir, no_hp, gol_darah, rhesus, tinggi_badan,
-       req.body.beratbadan || null, buku_kia, pekerjaan, pendidikan, kelurahan, alamat_lengkap, req.params.id]
+       req.body.beratbadan || null, buku_kia, pekerjaan, pendidikan, kelurahan_id, alamat_lengkap, req.params.id]
     );
 
     if (ibuResult.affectedRows === 0) {
@@ -371,7 +376,12 @@ router.get('/:id/detail', authMiddleware, async (req, res) => {
     const { id } = req.params;
     
     // Get ibu data
-    const [ibuRows] = await pool.query('SELECT * FROM ibu WHERE id = ?', [id]);
+    const [ibuRows] = await pool.query(`
+      SELECT i.*, kel.nama_kelurahan as kelurahan_nama
+      FROM ibu i
+      LEFT JOIN kelurahan kel ON i.kelurahan_id = kel.id
+      WHERE i.id = ?
+    `, [id]);
     
     if (ibuRows.length === 0) {
       return res.status(404).json({ message: 'Ibu not found' });

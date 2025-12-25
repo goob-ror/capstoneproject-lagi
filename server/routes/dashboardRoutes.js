@@ -58,12 +58,13 @@ router.get('/ibu-by-kelurahan', async (req, res) => {
   try {
     const [results] = await db.query(`
       SELECT 
-        COALESCE(i.kelurahan, 'Tidak Diketahui') as kelurahan,
+        COALESCE(kel.nama_kelurahan, 'Tidak Diketahui') as kelurahan,
         COUNT(DISTINCT k.id) as count
       FROM ibu i
+      LEFT JOIN kelurahan kel ON i.kelurahan_id = kel.id
       JOIN kehamilan k ON i.id = k.forkey_ibu
       WHERE k.status_kehamilan = 'Hamil'
-      GROUP BY i.kelurahan
+      GROUP BY kel.nama_kelurahan
       ORDER BY count DESC
     `);
     res.json(results);
@@ -151,7 +152,7 @@ router.get('/immunization-coverage', async (req, res) => {
   try {
     const [results] = await db.query(`
       SELECT 
-        COALESCE(i.kelurahan, 'Lainnya') as kelurahan,
+        COALESCE(kel.nama_kelurahan, 'Lainnya') as kelurahan,
         
         -- 1. Total Ibu Hamil per Kelurahan
         COUNT(DISTINCT i.id) as total_ibu,
@@ -163,6 +164,7 @@ router.get('/immunization-coverage', async (req, res) => {
         SUM(CASE WHEN stats.jumlah_visit_tt >= 1 THEN 1 ELSE 0 END) as tt_covered_count
 
       FROM ibu i
+      LEFT JOIN kelurahan kel ON i.kelurahan_id = kel.id
       JOIN kehamilan k ON i.id = k.forkey_ibu
       
       -- SUBQUERY: Hitung statistik per kehamilan dulu
@@ -178,8 +180,8 @@ router.get('/immunization-coverage', async (req, res) => {
       ) stats ON k.id = stats.forkey_hamil
 
       WHERE k.status_kehamilan = 'Hamil'
-      GROUP BY i.kelurahan
-      ORDER BY i.kelurahan ASC
+      GROUP BY kel.nama_kelurahan
+      ORDER BY kel.nama_kelurahan ASC
     `);
     
     // Kalkulasi Persentase
@@ -238,7 +240,7 @@ router.get('/nearing-due-dates', async (req, res) => {
     const [results] = await db.query(`
       SELECT 
         i.nama_lengkap,
-        i.kelurahan,
+        COALESCE(kel.nama_kelurahan, 'Tidak Diketahui') as kelurahan,
         i.no_hp,
         k.taksiran_persalinan,
         DATEDIFF(k.taksiran_persalinan, CURDATE()) as days_until_due,
@@ -252,6 +254,7 @@ router.get('/nearing-due-dates', async (req, res) => {
         END as status_risiko
       FROM kehamilan k
       JOIN ibu i ON k.forkey_ibu = i.id
+      LEFT JOIN kelurahan kel ON i.kelurahan_id = kel.id
       WHERE k.status_kehamilan = 'Hamil'
       AND k.taksiran_persalinan IS NOT NULL
       ORDER BY k.taksiran_persalinan ASC
@@ -269,7 +272,7 @@ router.get('/anc-schedule', async (req, res) => {
     const [results] = await db.query(`
       SELECT 
         i.nama_lengkap,
-        i.kelurahan,
+        COALESCE(kel.nama_kelurahan, 'Tidak Diketahui') as kelurahan,
         i.no_hp,
         k.haid_terakhir,
         k.taksiran_persalinan,
@@ -342,6 +345,7 @@ router.get('/anc-schedule', async (req, res) => {
         
       FROM kehamilan k
       JOIN ibu i ON k.forkey_ibu = i.id
+      LEFT JOIN kelurahan kel ON i.kelurahan_id = kel.id
       WHERE k.status_kehamilan = 'Hamil'
       AND k.haid_terakhir IS NOT NULL
       HAVING next_visit_type != 'Selesai'
@@ -373,7 +377,7 @@ router.get('/suami-perokok-kelurahan', async (req, res) => {
   try {
     const [results] = await db.query(`
       SELECT 
-        COALESCE(i.kelurahan, 'Tidak Diketahui') as kelurahan,
+        COALESCE(kel.nama_kelurahan, 'Tidak Diketahui') as kelurahan,
         COUNT(s.id) as total_suami,
         SUM(CASE WHEN s.isPerokok = 1 THEN 1 ELSE 0 END) as perokok_count,
         SUM(CASE WHEN s.isPerokok = 0 THEN 1 ELSE 0 END) as non_perokok_count,
@@ -382,10 +386,11 @@ router.get('/suami-perokok-kelurahan', async (req, res) => {
           ELSE 0 
         END as perokok_percentage
       FROM ibu i
+      LEFT JOIN kelurahan kel ON i.kelurahan_id = kel.id
       LEFT JOIN suami s ON i.id = s.forkey_ibu
       WHERE s.id IS NOT NULL
-      GROUP BY i.kelurahan
-      ORDER BY i.kelurahan ASC
+      GROUP BY kel.nama_kelurahan
+      ORDER BY kel.nama_kelurahan ASC
     `);
     res.json(results);
   } catch (error) {
@@ -399,7 +404,7 @@ router.get('/imt-distribution-kelurahan', async (req, res) => {
   try {
     const [results] = await db.query(`
       SELECT 
-        COALESCE(i.kelurahan, 'Tidak Diketahui') as kelurahan,
+        COALESCE(kel.nama_kelurahan, 'Tidak Diketahui') as kelurahan,
         COUNT(i.id) as total_ibu,
         
         -- Underweight (IMT < 18.5)
@@ -439,9 +444,10 @@ router.get('/imt-distribution-kelurahan', async (req, res) => {
         END) as no_data_count
         
       FROM ibu i
-      GROUP BY i.kelurahan
+      LEFT JOIN kelurahan kel ON i.kelurahan_id = kel.id
+      GROUP BY kel.nama_kelurahan
       HAVING total_ibu > 0
-      ORDER BY i.kelurahan ASC
+      ORDER BY kel.nama_kelurahan ASC
     `);
     res.json(results);
   } catch (error) {

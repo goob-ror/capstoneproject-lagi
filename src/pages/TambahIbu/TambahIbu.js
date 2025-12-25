@@ -24,7 +24,7 @@ const TambahIbu = () => {
     buku_kia: 'Ada',
     pekerjaan: '',
     pendidikan: '',
-    kelurahan: '',
+    kelurahan_id: '',
     alamat_lengkap: '',
     // Data Kehamilan
     gravida: '1',
@@ -56,6 +56,7 @@ const TambahIbu = () => {
   const [user, setUser] = useState(null);
   const [isAddingNewPregnancy, setIsAddingNewPregnancy] = useState(false);
   const [originalPregnancyStatus, setOriginalPregnancyStatus] = useState(null);
+  const [kelurahanOptions, setKelurahanOptions] = useState([]);
 
   const [presenter] = useState(() => new TambahIbuPresenter({
     setLoading,
@@ -90,7 +91,7 @@ const TambahIbu = () => {
         buku_kia: data.buku_kia || 'Ada',
         pekerjaan: data.pekerjaan || '',
         pendidikan: data.pendidikan || '',
-        kelurahan: data.kelurahan || '',
+        kelurahan_id: data.kelurahan_id || '',
         alamat_lengkap: data.alamat_lengkap || '',
         // Data Kehamilan
         gravida: data.kehamilan?.gravida?.toString() || '1',
@@ -145,11 +146,35 @@ const TambahIbu = () => {
     const userData = presenter.getUser();
     setUser(userData);
     
+    // Load kelurahan options
+    loadKelurahanOptions();
+    
     // Load data if in edit mode
     if (isEditMode && editId) {
       presenter.loadIbuData(editId);
     }
   }, [presenter, isEditMode, editId]);
+
+  const loadKelurahanOptions = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/kelurahan', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        setKelurahanOptions(result.data || []);
+      } else {
+        console.error('Failed to load kelurahan options');
+      }
+    } catch (error) {
+      console.error('Error loading kelurahan options:', error);
+    }
+  };
 
   useEffect(() => {
     if (error) {
@@ -275,6 +300,12 @@ const TambahIbu = () => {
               <path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm11 15H4v-2h16v2zm0-5H4V8h5.08L7 10.83 8.62 12 11 8.76l1-1.36 1 1.36L15.38 12 17 10.83 14.92 8H20v6z" fill="currentColor"/>
             </svg>
             Komplikasi
+          </a>
+          <a href="/posyandu" className="nav-item">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor"/>
+            </svg>
+            Posyandu
           </a>
           <a href="/rekapitulasi" className="nav-item">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -595,19 +626,19 @@ const TambahIbu = () => {
 
               <div className="form-row">
                 <div className="form-group full-width">
-                  <label htmlFor="kelurahan">Kelurahan</label>
+                  <label htmlFor="kelurahan_id">Kelurahan</label>
                   <select
-                    id="kelurahan"
-                    name="kelurahan"
-                    value={formData.kelurahan}
+                    id="kelurahan_id"
+                    name="kelurahan_id"
+                    value={formData.kelurahan_id}
                     onChange={handleChange}
                   >
                     <option value="">Pilih Kelurahan</option>
-                    <option value="Rawa Makmur">Rawa Makmur</option>
-                    <option value="Bantuas">Bantuas</option>
-                    <option value="Handil Bakti">Handil Bakti</option>
-                    <option value="Simpang Pasir">Simpang Pasir</option>
-                    <option value="Bukuan">Bukuan</option>
+                    {kelurahanOptions.map(kelurahan => (
+                      <option key={kelurahan.id} value={kelurahan.id}>
+                        {kelurahan.nama_kelurahan}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>

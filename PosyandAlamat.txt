@@ -1,6 +1,47 @@
-Kelurahan Simpang Pasir
-NO	NAMA POSYANDU	ALAMAT
-1	Amanah	Jl. Bojonegoro Rt. 25 Simpang pasir
-2	Anggrek Bulan	Jl. Mangkujenang Rt. 23 Simpang Pasir
-3	Mawar merah	Jl.Solo I Rt. 18 simpang Pasir
-4	Sumber Waras	Jl. Jakarta Rt. 02 Simpang Pasir
+1	Amanah	10,11,12,13, 14, 25	Simpang Pasir
+2	Anggrek Bulan	21,22, 23, 24	Simpang Pasir
+3	Mawar merah	15, 16,17, 18, 19, 20	Simpang Pasir
+4	Sumber Waras	01, 02, 03, 04, 05, 06, 07, 08, 09	Simpang Pasir
+			
+1	Rukun Makmur	12	Rawa Makmur
+2	Melati	29, 30, 31, 32, 33	Rawa Makmur
+3	Sehat Ceria	04, 05, 51, 52	Rawa Makmur
+4	Harmoni	41, 42, 43, 44	Rawa Makmur
+5	Anggrek Hitam	46	Rawa Makmur
+6	Widuri	21	Rawa Makmur
+7	Kasih Ibu	20, 48	Rawa Makmur
+8	Wijaya Kusuma	45, 49	Rawa Makmur
+9	Nusa Indah	18,19,22	Rawa Makmur
+10	Rahmat Jaya	27, 28	Rawa Makmur
+11	Kenanga	39, 40	Rawa Makmur
+12	Anggrek Putih	9,10,11	Rawa Makmur
+13	Tunas Harapan	02, 34	Rawa Makmur
+14	Cempaka  Putih	26, 38	Rawa Makmur
+15	Mekar Harum	23, 24, 25	Rawa Makmur
+16	Flamboyan	35, 36	Rawa Makmur
+17	Sutra Ungu	08, 13, 14, 16, 50	Rawa Makmur
+18	Sri Rejeki	15,17	Rawa Makmur
+			
+1	Kemuning	01,02,03,04,07, 28	Handil Bakti
+2	Menuju Sehat	12, 14, 23, 24	Handil Bakti
+3	Teratai	05, 06, 08, 09, 21, 22	Handil Bakti
+4	Harapan Sehat	18, 19, 20	Handil Bakti
+5	Cerah Ceria	26, 27	Handil Bakti
+6	Mawar Kuning	10, 11, 25, 32	Handil Bakti
+7	Cendrawasih	13, 15, 16, 17, 29, 30, 31	Handil Bakti
+
+
+NOTES :
+There exists kelurahan table in the database with the following data.
+1
+Rawa Makmur
+2025-12-25 10:37:24
+2025-12-25 10:37:24
+2
+Simpang Pasir
+2025-12-25 10:37:24
+2025-12-25 10:37:24
+3
+Handil Bakti
+2025-12-25 10:37:25
+2025-12-25 10:37:25

@@ -147,6 +147,12 @@ const DetailIbu = () => {
             </svg>
             Komplikasi
           </a>
+          <a href="/posyandu" className="nav-item">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor"/>
+            </svg>
+            Posyandu
+          </a>
           <a href="/rekapitulasi" className="nav-item">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" fill="currentColor"/>
@@ -215,7 +221,7 @@ const DetailIbu = () => {
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="currentColor"/>
                     </svg>
-                    {ibuData.ibu.kelurahan}
+                    {ibuData.ibu.kelurahan_nama || ibuData.ibu.kelurahan || 'Tidak Diketahui'}
                   </span>
                   {ibuData.kehamilan && (
                     <span className="stat-item pregnancy-badge">
@@ -327,7 +333,7 @@ const DetailIbu = () => {
                     </div>
                     <div className="info-row">
                       <span className="label">Kelurahan:</span>
-                      <span className="value">{ibuData.ibu.kelurahan || '-'}</span>
+                      <span className="value">{ibuData.ibu.kelurahan_nama || ibuData.ibu.kelurahan || '-'}</span>
                     </div>
                     <div className="info-row">
                       <span className="label">Alamat:</span>

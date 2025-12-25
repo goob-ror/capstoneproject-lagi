@@ -14,7 +14,7 @@ router.get('/', authMiddleware, async (req, res) => {
       const params = [];
       
       if (kelurahan && includeIbu) {
-        conditions.push('i.kelurahan = ?');
+        conditions.push('kel.nama_kelurahan = ?');
         params.push(kelurahan);
       }
       
@@ -48,7 +48,9 @@ router.get('/', authMiddleware, async (req, res) => {
 
     // Get total ibu (filtered by kelurahan only, not by date)
     const totalIbuQuery = kelurahan 
-      ? 'SELECT COUNT(*) as count FROM ibu WHERE kelurahan = ?'
+      ? `SELECT COUNT(*) as count FROM ibu i 
+         LEFT JOIN kelurahan kel ON i.kelurahan_id = kel.id 
+         WHERE kel.nama_kelurahan = ?`
       : 'SELECT COUNT(*) as count FROM ibu';
     const [totalIbuResult] = await pool.query(totalIbuQuery, params);
     const totalIbu = totalIbuResult[0].count;
@@ -57,7 +59,8 @@ router.get('/', authMiddleware, async (req, res) => {
     const totalHamilQuery = kelurahan
       ? `SELECT COUNT(*) as count FROM kehamilan k 
          INNER JOIN ibu i ON k.forkey_ibu = i.id 
-         WHERE k.status_kehamilan = 'Hamil' AND i.kelurahan = ?`
+         LEFT JOIN kelurahan kel ON i.kelurahan_id = kel.id
+         WHERE k.status_kehamilan = 'Hamil' AND kel.nama_kelurahan = ?`
       : "SELECT COUNT(*) as count FROM kehamilan WHERE status_kehamilan = 'Hamil'";
     const [totalHamilResult] = await pool.query(totalHamilQuery, params);
     const totalHamil = totalHamilResult[0].count;
@@ -66,7 +69,7 @@ router.get('/', authMiddleware, async (req, res) => {
     const ancWhere = buildWhereClause(!!kelurahan, true, false);
     const totalANCQuery = `SELECT COUNT(*) as count FROM antenatal_care ac
          INNER JOIN kehamilan k ON ac.forkey_hamil = k.id
-         ${kelurahan ? 'INNER JOIN ibu i ON k.forkey_ibu = i.id' : ''}
+         ${kelurahan ? 'INNER JOIN ibu i ON k.forkey_ibu = i.id LEFT JOIN kelurahan kel ON i.kelurahan_id = kel.id' : ''}
          ${ancWhere.clause}`;
     const [totalANCResult] = await pool.query(totalANCQuery, ancWhere.params);
     const totalANC = totalANCResult[0].count;
@@ -75,7 +78,7 @@ router.get('/', authMiddleware, async (req, res) => {
     const kompWhere = buildWhereClause(!!kelurahan, false, true);
     const totalKomplikasiQuery = `SELECT COUNT(*) as count FROM komplikasi ko
          INNER JOIN kehamilan k ON ko.forkey_hamil = k.id
-         ${kelurahan ? 'INNER JOIN ibu i ON k.forkey_ibu = i.id' : ''}
+         ${kelurahan ? 'INNER JOIN ibu i ON k.forkey_ibu = i.id LEFT JOIN kelurahan kel ON i.kelurahan_id = kel.id' : ''}
          ${kompWhere.clause}`;
     const [totalKomplikasiResult] = await pool.query(totalKomplikasiQuery, kompWhere.params);
     const totalKomplikasi = totalKomplikasiResult[0].count;
@@ -146,14 +149,14 @@ router.get('/', authMiddleware, async (req, res) => {
     // Get ibu distribution by kelurahan (always show all kelurahan)
     const [ibuByKelurahanResult] = await pool.query(`
       SELECT 
-        i.kelurahan,
+        COALESCE(kel.nama_kelurahan, 'Tidak Diketahui') as kelurahan,
         COUNT(*) as total,
         COUNT(CASE WHEN k.status_kehamilan = 'Hamil' THEN 1 END) as hamil,
         ROUND((COUNT(*) * 100.0 / (SELECT COUNT(*) FROM ibu)), 1) as percentage
       FROM ibu i
+      LEFT JOIN kelurahan kel ON i.kelurahan_id = kel.id
       LEFT JOIN kehamilan k ON i.id = k.forkey_ibu AND k.status_kehamilan = 'Hamil'
-      WHERE i.kelurahan IS NOT NULL
-      GROUP BY i.kelurahan 
+      GROUP BY kel.nama_kelurahan 
       ORDER BY total DESC
     `);
 
@@ -268,10 +271,9 @@ router.get('/', authMiddleware, async (req, res) => {
 
     // Get list of all kelurahan for filter dropdown
     const [kelurahanList] = await pool.query(`
-      SELECT DISTINCT kelurahan 
-      FROM ibu 
-      WHERE kelurahan IS NOT NULL 
-      ORDER BY kelurahan
+      SELECT DISTINCT kel.nama_kelurahan as kelurahan
+      FROM kelurahan kel
+      ORDER BY kel.nama_kelurahan
     `);
 
     // Get Obesity statistics (BMI >= 30)
