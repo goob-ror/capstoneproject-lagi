@@ -805,3 +805,58 @@
   background-color: #FEE2E2;
   color: #991B1B;
 }
+/* Posyandu Assignment Styles */
+.posyandu-assignment {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 4px;
+}
+
+.posyandu-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.posyandu-info svg {
+  color: #28a745;
+  flex-shrink: 0;
+}
+
+.posyandu-info div {
+  display: flex;
+  flex-direction: column;
+}
+
+.posyandu-info strong {
+  color: #495057;
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+
+.posyandu-info small {
+  color: #6c757d;
+  font-size: 12px;
+}
+
+/* Form group modifications for RT field */
+.form-group select:disabled {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  cursor: not-allowed;
+}
+
+.form-group small {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #6c757d;
+}
+
+/* Required field indicator */
+.required {
+  color: #dc3545;
+  font-weight: bold;
+}

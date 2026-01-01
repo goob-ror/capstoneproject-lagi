@@ -204,4 +204,95 @@ router.delete('/:id', auth, async (req, res) => {
   }
 });
 
+// Get RT options based on kelurahan
+router.get('/rt-options/:kelurahanId', auth, async (req, res) => {
+  try {
+    const { kelurahanId } = req.params;
+    
+    // Get all posyandu in the selected kelurahan with their RT coverage
+    const query = `
+      SELECT id, nama_posyandu, rt
+      FROM wilker_posyandu
+      WHERE kelurahan_id = ?
+      ORDER BY nama_posyandu
+    `;
+    
+    const [posyanduRows] = await pool.query(query, [kelurahanId]);
+    
+    // Extract all unique RT numbers from all posyandu in this kelurahan
+    const rtSet = new Set();
+    const posyanduRTMap = {};
+    
+    posyanduRows.forEach(posyandu => {
+      const rtNumbers = posyandu.rt.split(',').map(rt => rt.trim().padStart(2, '0'));
+      posyanduRTMap[posyandu.id] = {
+        nama_posyandu: posyandu.nama_posyandu,
+        rt_coverage: rtNumbers
+      };
+      
+      rtNumbers.forEach(rt => rtSet.add(rt));
+    });
+    
+    // Convert Set to sorted array
+    const availableRT = Array.from(rtSet).sort();
+    
+    res.json({
+      success: true,
+      data: {
+        availableRT,
+        posyanduRTMap
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching RT options:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Gagal mengambil data RT'
+    });
+  }
+});
+
+// Get posyandu assignment based on kelurahan and RT
+router.get('/posyandu-assignment/:kelurahanId/:rt', auth, async (req, res) => {
+  try {
+    const { kelurahanId, rt } = req.params;
+    
+    // Find posyandu that covers this RT in the selected kelurahan
+    const query = `
+      SELECT id, nama_posyandu, rt
+      FROM wilker_posyandu
+      WHERE kelurahan_id = ?
+    `;
+    
+    const [posyanduRows] = await pool.query(query, [kelurahanId]);
+    
+    // Check which posyandu covers this RT
+    const rtPadded = rt.padStart(2, '0');
+    let assignedPosyandu = null;
+    
+    for (const posyandu of posyanduRows) {
+      const rtNumbers = posyandu.rt.split(',').map(rt => rt.trim().padStart(2, '0'));
+      if (rtNumbers.includes(rtPadded)) {
+        assignedPosyandu = {
+          id: posyandu.id,
+          nama_posyandu: posyandu.nama_posyandu,
+          rt_coverage: rtNumbers.join(', ')
+        };
+        break;
+      }
+    }
+    
+    res.json({
+      success: true,
+      data: assignedPosyandu
+    });
+  } catch (error) {
+    console.error('Error getting posyandu assignment:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Gagal mendapatkan penugasan posyandu'
+    });
+  }
+});
+
 module.exports = router;

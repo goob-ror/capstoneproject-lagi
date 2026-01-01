@@ -25,6 +25,7 @@ const TambahIbu = () => {
     pekerjaan: '',
     pendidikan: '',
     kelurahan_id: '',
+    rt: '',
     alamat_lengkap: '',
     // Data Kehamilan
     gravida: '1',
@@ -57,6 +58,9 @@ const TambahIbu = () => {
   const [isAddingNewPregnancy, setIsAddingNewPregnancy] = useState(false);
   const [originalPregnancyStatus, setOriginalPregnancyStatus] = useState(null);
   const [kelurahanOptions, setKelurahanOptions] = useState([]);
+  const [rtOptions, setRtOptions] = useState([]);
+  const [assignedPosyandu, setAssignedPosyandu] = useState(null);
+  const [loadingRT, setLoadingRT] = useState(false);
 
   const [presenter] = useState(() => new TambahIbuPresenter({
     setLoading,
@@ -92,6 +96,7 @@ const TambahIbu = () => {
         pekerjaan: data.pekerjaan || '',
         pendidikan: data.pendidikan || '',
         kelurahan_id: data.kelurahan_id || '',
+        rt: data.rt || '',
         alamat_lengkap: data.alamat_lengkap || '',
         // Data Kehamilan
         gravida: data.kehamilan?.gravida?.toString() || '1',
@@ -132,6 +137,14 @@ const TambahIbu = () => {
       }
       
       setLoadingData(false);
+      
+      // Load RT options and posyandu assignment if kelurahan is set
+      if (data.kelurahan_id) {
+        loadRTOptions(data.kelurahan_id);
+        if (data.rt) {
+          checkPosyanduAssignment(data.kelurahan_id, data.rt);
+        }
+      }
     },
     onSuccess: (message) => {
       setSuccess(message || (isEditMode ? 'Data ibu berhasil diperbarui!' : 'Data ibu berhasil ditambahkan!'));
@@ -176,6 +189,66 @@ const TambahIbu = () => {
     }
   };
 
+  const loadRTOptions = async (kelurahanId) => {
+    if (!kelurahanId) {
+      setRtOptions([]);
+      setAssignedPosyandu(null);
+      return;
+    }
+
+    setLoadingRT(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/kelurahan/rt-options/${kelurahanId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        setRtOptions(result.data.availableRT || []);
+      } else {
+        console.error('Failed to load RT options');
+        setRtOptions([]);
+      }
+    } catch (error) {
+      console.error('Error loading RT options:', error);
+      setRtOptions([]);
+    } finally {
+      setLoadingRT(false);
+    }
+  };
+
+  const checkPosyanduAssignment = async (kelurahanId, rt) => {
+    if (!kelurahanId || !rt) {
+      setAssignedPosyandu(null);
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/kelurahan/posyandu-assignment/${kelurahanId}/${rt}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        setAssignedPosyandu(result.data);
+      } else {
+        console.error('Failed to get posyandu assignment');
+        setAssignedPosyandu(null);
+      }
+    } catch (error) {
+      console.error('Error getting posyandu assignment:', error);
+      setAssignedPosyandu(null);
+    }
+  };
+
   useEffect(() => {
     if (error) {
       const timer = setTimeout(() => setError(''), 5000);
@@ -189,6 +262,23 @@ const TambahIbu = () => {
       ...prev,
       [name]: value
     }));
+
+    // Handle kelurahan change - load RT options
+    if (name === 'kelurahan_id') {
+      loadRTOptions(value);
+      // Reset RT and posyandu when kelurahan changes
+      setFormData(prev => ({
+        ...prev,
+        kelurahan_id: value,
+        rt: ''
+      }));
+      setAssignedPosyandu(null);
+    }
+
+    // Handle RT change - check posyandu assignment
+    if (name === 'rt') {
+      checkPosyanduAssignment(formData.kelurahan_id, value);
+    }
   };
 
   const handleSuamiChange = (e) => {
@@ -625,13 +715,14 @@ const TambahIbu = () => {
               </div>
 
               <div className="form-row">
-                <div className="form-group full-width">
-                  <label htmlFor="kelurahan_id">Kelurahan</label>
+                <div className="form-group">
+                  <label htmlFor="kelurahan_id">Kelurahan <span className="required">*</span></label>
                   <select
                     id="kelurahan_id"
                     name="kelurahan_id"
                     value={formData.kelurahan_id}
                     onChange={handleChange}
+                    required
                   >
                     <option value="">Pilih Kelurahan</option>
                     {kelurahanOptions.map(kelurahan => (
@@ -641,7 +732,50 @@ const TambahIbu = () => {
                     ))}
                   </select>
                 </div>
+
+                <div className="form-group">
+                  <label htmlFor="rt">RT <span className="required">*</span></label>
+                  <select
+                    id="rt"
+                    name="rt"
+                    value={formData.rt}
+                    onChange={handleChange}
+                    disabled={!formData.kelurahan_id || loadingRT}
+                    required
+                  >
+                    <option value="">
+                      {!formData.kelurahan_id ? 'Pilih Kelurahan dulu' : 
+                       loadingRT ? 'Memuat RT...' : 'Pilih RT'}
+                    </option>
+                    {rtOptions.map(rt => (
+                      <option key={rt} value={rt}>
+                        RT {rt}
+                      </option>
+                    ))}
+                  </select>
+                  <small>RT akan menentukan Posyandu secara otomatis</small>
+                </div>
               </div>
+
+              {assignedPosyandu && (
+                <div className="form-row">
+                  <div className="form-group full-width">
+                    <label>Posyandu yang Ditugaskan</label>
+                    <div className="posyandu-assignment">
+                      <div className="posyandu-info">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor"/>
+                        </svg>
+                        <div>
+                          <strong>{assignedPosyandu.nama_posyandu}</strong>
+                          <small>Melayani RT: {assignedPosyandu.rt_coverage}</small>
+                        </div>
+                      </div>
+                    </div>
+                    <small>Ibu akan otomatis terdaftar di Posyandu ini berdasarkan alamat RT</small>
+                  </div>
+                </div>
+              )}
 
               <div className="form-row">
                 <div className="form-group full-width">

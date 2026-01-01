@@ -22,6 +22,7 @@ const TambahKomplikasi = () => {
     waktu_kejadian: 'Saat Hamil',
     tanggal_diagnosis: '',
     rujuk_rs: false,
+    nama_rs: '',
     tanggal_rujukan: '',
     tekanan_darah: '',
     protein_urine: '',
@@ -47,6 +48,7 @@ const TambahKomplikasi = () => {
         waktu_kejadian: data.waktu_kejadian || 'Saat Hamil',
         tanggal_diagnosis: data.tanggal_diagnosis || '',
         rujuk_rs: data.rujuk_rs || false,
+        nama_rs: data.nama_rs || '',
         tanggal_rujukan: data.tanggal_rujukan || '',
         tekanan_darah: data.tekanan_darah || '',
         protein_urine: data.protein_urine || '',
@@ -138,6 +140,16 @@ const TambahKomplikasi = () => {
     { value: '+2', label: '+2' },
     { value: '+3', label: '+3' },
     { value: '+4', label: '+4' }
+  ];
+
+  const hospitalOptions = [
+    { value: '', label: '-- Pilih Rumah Sakit --' },
+    { value: 'RS MOEIS', label: 'RS MOEIS' },
+    { value: 'RS Samarinda Medika Citra', label: 'RS Samarinda Medika Citra' },
+    { value: 'RS Hermina', label: 'RS Hermina' },
+    { value: 'RS Aisyiyah', label: 'RS Aisyiyah' },
+    { value: 'RS Jimmy Medika Borneo', label: 'RS Jimmy Medika Borneo' },
+    { value: 'RS Abdoel Wahab Sjahranie', label: 'RS Abdoel Wahab Sjahranie' }
   ];
 
   const customSelectStyles = {
@@ -457,6 +469,23 @@ const TambahKomplikasi = () => {
                   />
                   Dirujuk ke Rumah Sakit
                 </label>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="nama_rs">Nama Rumah Sakit</label>
+                <Select
+                  id="nama_rs"
+                  name="nama_rs"
+                  value={hospitalOptions.find(opt => opt.value === formData.nama_rs) || null}
+                  onChange={(selectedOption) => setFormData(prev => ({ ...prev, nama_rs: selectedOption ? selectedOption.value : '' }))}
+                  options={hospitalOptions}
+                  placeholder="-- Pilih Rumah Sakit --"
+                  isClearable
+                  isSearchable
+                  isDisabled={!formData.rujuk_rs}
+                  styles={customSelectStyles}
+                  noOptionsMessage={() => "Tidak ada data"}
+                />
               </div>
 
               <div className="form-group">

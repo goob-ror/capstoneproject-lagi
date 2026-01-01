@@ -7,9 +7,10 @@ const authMiddleware = require('../middleware/auth');
 router.get('/', authMiddleware, async (req, res) => {
   try {
     const [rows] = await pool.query(`
-      SELECT i.*, kel.nama_kelurahan as kelurahan_nama
+      SELECT i.*, kel.nama_kelurahan as kelurahan_nama, p.nama_posyandu
       FROM ibu i
       LEFT JOIN kelurahan kel ON i.kelurahan_id = kel.id
+      LEFT JOIN wilker_posyandu p ON i.posyandu_id = p.id
       ORDER BY i.created_at DESC
     `);
     res.json(rows);
@@ -23,9 +24,10 @@ router.get('/', authMiddleware, async (req, res) => {
 router.get('/:id', authMiddleware, async (req, res) => {
   try {
     const [ibuRows] = await pool.query(`
-      SELECT i.*, kel.nama_kelurahan as kelurahan_nama
+      SELECT i.*, kel.nama_kelurahan as kelurahan_nama, p.nama_posyandu
       FROM ibu i
       LEFT JOIN kelurahan kel ON i.kelurahan_id = kel.id
+      LEFT JOIN wilker_posyandu p ON i.posyandu_id = p.id
       WHERE i.id = ?
     `, [req.params.id]);
 
@@ -84,6 +86,7 @@ router.post('/', authMiddleware, async (req, res) => {
       pekerjaan,
       pendidikan,
       kelurahan_id,
+      rt,
       alamat_lengkap,
       // Data Kehamilan
       gravida,
@@ -110,13 +113,31 @@ router.post('/', authMiddleware, async (req, res) => {
     // Start transaction
     await connection.beginTransaction();
 
+    // Find posyandu assignment based on kelurahan and RT
+    let posyandu_id = null;
+    if (kelurahan_id && rt) {
+      const [posyanduRows] = await connection.query(
+        'SELECT id, rt FROM wilker_posyandu WHERE kelurahan_id = ?',
+        [kelurahan_id]
+      );
+      
+      const rtPadded = rt.toString().padStart(2, '0');
+      for (const posyandu of posyanduRows) {
+        const rtNumbers = posyandu.rt.split(',').map(r => r.trim().padStart(2, '0'));
+        if (rtNumbers.includes(rtPadded)) {
+          posyandu_id = posyandu.id;
+          break;
+        }
+      }
+    }
+
     // Insert ibu data
     const [ibuResult] = await connection.query(
       `INSERT INTO ibu (nik_ibu, nama_lengkap, tanggal_lahir, no_hp, gol_darah, 
-       rhesus, tinggi_badan, beratbadan, buku_kia, pekerjaan, pendidikan, kelurahan_id, alamat_lengkap) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       rhesus, tinggi_badan, beratbadan, buku_kia, pekerjaan, pendidikan, kelurahan_id, rt, alamat_lengkap, posyandu_id) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [nik_ibu, nama_lengkap, tanggal_lahir, no_hp, gol_darah, rhesus, tinggi_badan,
-       req.body.beratbadan || null, buku_kia, pekerjaan, pendidikan, kelurahan_id, alamat_lengkap]
+       req.body.beratbadan || null, buku_kia, pekerjaan, pendidikan, kelurahan_id, rt, alamat_lengkap, posyandu_id]
     );
 
     const ibuId = ibuResult.insertId;
@@ -199,6 +220,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
       pekerjaan,
       pendidikan,
       kelurahan_id,
+      rt,
       alamat_lengkap,
       // Data Kehamilan
       gravida,
@@ -216,14 +238,32 @@ router.put('/:id', authMiddleware, async (req, res) => {
     // Start transaction
     await connection.beginTransaction();
 
+    // Find posyandu assignment based on kelurahan and RT
+    let posyandu_id = null;
+    if (kelurahan_id && rt) {
+      const [posyanduRows] = await connection.query(
+        'SELECT id, rt FROM wilker_posyandu WHERE kelurahan_id = ?',
+        [kelurahan_id]
+      );
+      
+      const rtPadded = rt.toString().padStart(2, '0');
+      for (const posyandu of posyanduRows) {
+        const rtNumbers = posyandu.rt.split(',').map(r => r.trim().padStart(2, '0'));
+        if (rtNumbers.includes(rtPadded)) {
+          posyandu_id = posyandu.id;
+          break;
+        }
+      }
+    }
+
     // Update ibu data
     const [ibuResult] = await connection.query(
       `UPDATE ibu SET nik_ibu = ?, nama_lengkap = ?, tanggal_lahir = ?, 
        no_hp = ?, gol_darah = ?, rhesus = ?, tinggi_badan = ?, beratbadan = ?, buku_kia = ?, pekerjaan = ?, 
-       pendidikan = ?, kelurahan_id = ?, alamat_lengkap = ? 
+       pendidikan = ?, kelurahan_id = ?, rt = ?, alamat_lengkap = ?, posyandu_id = ? 
        WHERE id = ?`,
       [nik_ibu, nama_lengkap, tanggal_lahir, no_hp, gol_darah, rhesus, tinggi_badan,
-       req.body.beratbadan || null, buku_kia, pekerjaan, pendidikan, kelurahan_id, alamat_lengkap, req.params.id]
+       req.body.beratbadan || null, buku_kia, pekerjaan, pendidikan, kelurahan_id, rt, alamat_lengkap, posyandu_id, req.params.id]
     );
 
     if (ibuResult.affectedRows === 0) {
@@ -377,9 +417,10 @@ router.get('/:id/detail', authMiddleware, async (req, res) => {
     
     // Get ibu data
     const [ibuRows] = await pool.query(`
-      SELECT i.*, kel.nama_kelurahan as kelurahan_nama
+      SELECT i.*, kel.nama_kelurahan as kelurahan_nama, p.nama_posyandu
       FROM ibu i
       LEFT JOIN kelurahan kel ON i.kelurahan_id = kel.id
+      LEFT JOIN wilker_posyandu p ON i.posyandu_id = p.id
       WHERE i.id = ?
     `, [id]);
     

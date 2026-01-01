@@ -59,6 +59,10 @@ const DataIbu = () => {
             data: 'kelurahan_nama',
             render: (data) => data || '-'
           },
+          { 
+            data: 'nama_posyandu',
+            render: (data) => data || '-'
+          },
           { data: 'gol_darah' },
           { data: 'pekerjaan' },
           {
@@ -243,7 +247,7 @@ const DataIbu = () => {
         <div className="content-header">
           <div>
             <h1>Data Ibu</h1>
-            <p>Kelola data ibu hamil</p>
+            <p>Kelola data ibu hamil dengan sistem penugasan Posyandu otomatis</p>
           </div>
           <button className="btn-add" onClick={handleAddNew}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -284,6 +288,7 @@ const DataIbu = () => {
                   <th>Tanggal Lahir</th>
                   <th>No. HP</th>
                   <th>Kelurahan</th>
+                  <th>Posyandu</th>
                   <th>Gol. Darah</th>
                   <th>Pekerjaan</th>
                   <th>Aksi</th>

@@ -88,6 +88,7 @@ router.post('/', auth, async (req, res) => {
       waktu_kejadian,
       tanggal_diagnosis,
       rujuk_rs,
+      nama_rs,
       tanggal_rujukan,
       tekanan_darah,
       protein_urine,
@@ -103,10 +104,10 @@ router.post('/', auth, async (req, res) => {
     const query = `
       INSERT INTO komplikasi (
         kode_diagnosis, nama_komplikasi, waktu_kejadian, tanggal_diagnosis,
-        rujuk_rs, tanggal_rujukan, tekanan_darah, protein_urine,
+        rujuk_rs, nama_rs, tanggal_rujukan, tekanan_darah, protein_urine,
         gejala_penyerta, terapi_diberikan, tingkat_keparahan,
         status_penanganan, keterangan, forkey_hamil, forkey_anc
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     const [result] = await db.execute(query, [
@@ -115,6 +116,7 @@ router.post('/', auth, async (req, res) => {
       waktu_kejadian,
       tanggal_diagnosis,
       rujuk_rs ? 1 : 0,
+      nama_rs || null,
       tanggal_rujukan || null,
       tekanan_darah || null,
       protein_urine || null,
@@ -147,6 +149,7 @@ router.put('/:id', auth, async (req, res) => {
       waktu_kejadian,
       tanggal_diagnosis,
       rujuk_rs,
+      nama_rs,
       tanggal_rujukan,
       tekanan_darah,
       protein_urine,
@@ -162,7 +165,7 @@ router.put('/:id', auth, async (req, res) => {
     const query = `
       UPDATE komplikasi SET
         kode_diagnosis = ?, nama_komplikasi = ?, waktu_kejadian = ?,
-        tanggal_diagnosis = ?, rujuk_rs = ?, tanggal_rujukan = ?,
+        tanggal_diagnosis = ?, rujuk_rs = ?, nama_rs = ?, tanggal_rujukan = ?,
         tekanan_darah = ?, protein_urine = ?, gejala_penyerta = ?,
         terapi_diberikan = ?, tingkat_keparahan = ?, status_penanganan = ?,
         keterangan = ?, forkey_hamil = ?, forkey_anc = ?,
@@ -176,6 +179,7 @@ router.put('/:id', auth, async (req, res) => {
       waktu_kejadian,
       tanggal_diagnosis,
       rujuk_rs ? 1 : 0,
+      nama_rs || null,
       tanggal_rujukan || null,
       tekanan_darah || null,
       protein_urine || null,
