@@ -647,3 +647,145 @@
   content: '✓ ';
   margin-right: 2px;
 }
+
+/* Form Tabs Styles */
+.form-tabs-container {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  border-radius: 12px 12px 0 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.form-tab-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background-color: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: #6B7280;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Montserrat', sans-serif;
+  position: relative;
+  bottom: -2px;
+}
+
+.form-tab-button:hover {
+  color: #22C55E;
+  background-color: #F9FAFB;
+}
+
+.form-tab-button.active {
+  color: #22C55E;
+  border-bottom-color: #22C55E;
+  background-color: #ECFDF5;
+}
+
+.form-tab-button svg {
+  flex-shrink: 0;
+}
+
+.anc-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.anc-btn-add-complication {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: #22C55E;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.anc-btn-add-complication:hover {
+  background-color: #16A34A;
+  transform: translateY(-1px);
+}
+
+.anc-complication-card {
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.anc-complication-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.anc-complication-header h4 {
+  margin: 0;
+  color: #374151;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.anc-btn-remove-complication {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background-color: #EF4444;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.anc-btn-remove-complication:hover {
+  background-color: #DC2626;
+  transform: scale(1.1);
+}
+
+/* Responsive Form Tabs */
+@media (max-width: 768px) {
+  .form-tabs-container {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .form-tab-button {
+    width: 100%;
+    justify-content: flex-start;
+    border-bottom: none;
+    border-left: 3px solid transparent;
+  }
+
+  .form-tab-button.active {
+    border-bottom: none;
+    border-left-color: #22C55E;
+  }
+
+  .anc-section-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .anc-btn-add-complication {
+    justify-content: center;
+  }
+}

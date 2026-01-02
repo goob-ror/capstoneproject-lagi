@@ -22,16 +22,22 @@ class RekapitulasiModel {
         ? `${this.baseURL}?${params.toString()}`
         : this.baseURL;
         
+      console.log('Fetching from:', url);
+      
       const response = await fetch(url, {
         method: 'GET',
         headers: this.getAuthHeaders()
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch summary data');
+        const errorText = await response.text();
+        console.error('Server response:', response.status, errorText);
+        throw new Error(`Server error (${response.status}): ${errorText}`);
       }
 
-      return await response.json();
+      const data = await response.json();
+      console.log('Received data:', data);
+      return data;
     } catch (error) {
       console.error('Error fetching summary:', error);
       throw error;

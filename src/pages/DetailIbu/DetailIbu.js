@@ -757,8 +757,8 @@ const DetailIbu = () => {
                             </div>
                             
                             <div className="detail-item">
-                              <span className="detail-label">DJJ:</span>
-                              <span className="detail-value">{anc.denyut_jantung_janin ? `${anc.denyut_jantung_janin} bpm` : '-'}</span>
+                              <span className="detail-label">Konfirmasi USG:</span>
+                              <span className="detail-value">{anc.confirm_usg ? 'Ya' : 'Tidak'}</span>
                             </div>
                             
                             <div className="detail-item">

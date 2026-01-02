@@ -170,7 +170,7 @@ router.post('/', auth, async (req, res) => {
   try {
     const {
       tanggal_kunjungan, jenis_kunjungan, jenis_akses, pemeriksa,
-      berat_badan, selisih_beratbadan, tekanan_darah, lila, tinggi_fundus, denyut_jantung_janin,
+      berat_badan, selisih_beratbadan, tekanan_darah, lila, tinggi_fundus, confirm_usg,
       status_imunisasi_tt, beri_tablet_fe, hasil_lab_hb, lab_protein_urine,
       lab_gula_darah, hasil_lab_lainnya, skrining_hiv, skrining_sifilis,
       skrining_hbsag, skrining_tb, terapi_malaria, terapi_kecacingan,
@@ -182,7 +182,7 @@ router.post('/', auth, async (req, res) => {
     const query = `
       INSERT INTO antenatal_care (
         tanggal_kunjungan, jenis_kunjungan, jenis_akses, pemeriksa,
-        berat_badan, selisih_beratbadan, tekanan_darah, lila, tinggi_fundus, denyut_jantung_janin,
+        berat_badan, selisih_beratbadan, tekanan_darah, lila, tinggi_fundus, confirm_usg,
         status_imunisasi_tt, beri_tablet_fe, hasil_lab_hb, lab_protein_urine,
         lab_gula_darah, hasil_lab_lainnya, skrining_hiv, skrining_sifilis,
         skrining_hbsag, skrining_tb, terapi_malaria, terapi_kecacingan,
@@ -195,7 +195,7 @@ router.post('/', auth, async (req, res) => {
     const [result] = await db.execute(query, [
       tanggal_kunjungan, jenis_kunjungan, jenis_akses, pemeriksa,
       berat_badan || null, selisih_beratbadan || null, tekanan_darah || null, lila || null, 
-      tinggi_fundus || null, denyut_jantung_janin || null,
+      tinggi_fundus || null, confirm_usg ? 1 : 0,
       status_imunisasi_tt || null, beri_tablet_fe ? 1 : 0, 
       hasil_lab_hb || null, lab_protein_urine || null,
       lab_gula_darah || null, hasil_lab_lainnya || null, 
@@ -224,7 +224,7 @@ router.put('/:id', auth, async (req, res) => {
     const { id } = req.params;
     const {
       tanggal_kunjungan, jenis_kunjungan, jenis_akses, pemeriksa,
-      berat_badan, selisih_beratbadan, tekanan_darah, lila, tinggi_fundus, denyut_jantung_janin,
+      berat_badan, selisih_beratbadan, tekanan_darah, lila, tinggi_fundus, confirm_usg,
       status_imunisasi_tt, beri_tablet_fe, hasil_lab_hb, lab_protein_urine,
       lab_gula_darah, hasil_lab_lainnya, skrining_hiv, skrining_sifilis,
       skrining_hbsag, skrining_tb, terapi_malaria, terapi_kecacingan,
@@ -237,7 +237,7 @@ router.put('/:id', auth, async (req, res) => {
       UPDATE antenatal_care SET
         tanggal_kunjungan = ?, jenis_kunjungan = ?, jenis_akses = ?, pemeriksa = ?,
         berat_badan = ?, selisih_beratbadan = ?, tekanan_darah = ?, lila = ?, tinggi_fundus = ?, 
-        denyut_jantung_janin = ?, status_imunisasi_tt = ?, beri_tablet_fe = ?,
+        confirm_usg = ?, status_imunisasi_tt = ?, beri_tablet_fe = ?,
         hasil_lab_hb = ?, lab_protein_urine = ?, lab_gula_darah = ?, 
         hasil_lab_lainnya = ?, skrining_hiv = ?, skrining_sifilis = ?,
         skrining_hbsag = ?, skrining_tb = ?, terapi_malaria = ?, 
@@ -251,7 +251,7 @@ router.put('/:id', auth, async (req, res) => {
     const [result] = await db.execute(query, [
       tanggal_kunjungan, jenis_kunjungan, jenis_akses, pemeriksa,
       berat_badan || null, selisih_beratbadan || null, tekanan_darah || null, lila || null, 
-      tinggi_fundus || null, denyut_jantung_janin || null,
+      tinggi_fundus || null, confirm_usg ? 1 : 0,
       status_imunisasi_tt || null, beri_tablet_fe ? 1 : 0, 
       hasil_lab_hb || null, lab_protein_urine || null,
       lab_gula_darah || null, hasil_lab_lainnya || null, 

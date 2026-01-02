@@ -20,6 +20,7 @@ const TambahANC = () => {
   const [existingVisitId, setExistingVisitId] = useState(null);
   const [existingVisitWarning, setExistingVisitWarning] = useState('');
   const [existingVisitTypes, setExistingVisitTypes] = useState([]);
+  const [activeTab, setActiveTab] = useState('anc');
 
   const [formData, setFormData] = useState({
     tanggal_kunjungan: '',
@@ -30,7 +31,7 @@ const TambahANC = () => {
     tekanan_darah: '',
     lila: '',
     tinggi_fundus: '',
-    denyut_jantung_janin: '',
+    confirm_usg: false,
     status_imunisasi_tt: 'T0',
     beri_tablet_fe: false,
     hasil_lab_hb: '',
@@ -53,6 +54,24 @@ const TambahANC = () => {
     forkey_hamil: '',
     forkey_bidan: ''
   });
+
+  // Complications form data
+  const [complications, setComplications] = useState([{
+    kode_diagnosis: '',
+    nama_komplikasi: '',
+    waktu_kejadian: 'Saat Hamil',
+    tanggal_diagnosis: '',
+    rujuk_rs: false,
+    nama_rs: '',
+    tanggal_rujukan: '',
+    tekanan_darah: '',
+    protein_urine: '',
+    gejala_penyerta: '',
+    terapi_diberikan: '',
+    tingkat_keparahan: 'Ringan',
+    status_penanganan: 'Ditangani',
+    keterangan: ''
+  }]);
 
   const [presenter] = useState(() => new TambahANCPresenter({
     setLoading,
@@ -78,7 +97,7 @@ const TambahANC = () => {
         tekanan_darah: data.tekanan_darah || '',
         lila: data.lila || '',
         tinggi_fundus: data.tinggi_fundus || '',
-        denyut_jantung_janin: data.denyut_jantung_janin || '',
+        confirm_usg: data.confirm_usg || false,
         status_imunisasi_tt: data.status_imunisasi_tt || 'T0',
         beri_tablet_fe: data.beri_tablet_fe || false,
         hasil_lab_hb: data.hasil_lab_hb || '',
@@ -174,7 +193,7 @@ const TambahANC = () => {
       tekanan_darah: '',
       lila: '',
       tinggi_fundus: '',
-      denyut_jantung_janin: '',
+      confirm_usg: false,
       status_imunisasi_tt: 'T0',
       beri_tablet_fe: false,
       hasil_lab_hb: '',
@@ -197,6 +216,38 @@ const TambahANC = () => {
       forkey_hamil: prev.forkey_hamil,
       forkey_bidan: prev.forkey_bidan
     }));
+  };
+
+  // Complications handling functions
+  const addComplication = () => {
+    setComplications([...complications, {
+      kode_diagnosis: '',
+      nama_komplikasi: '',
+      waktu_kejadian: 'Saat Hamil',
+      tanggal_diagnosis: formData.tanggal_kunjungan || '',
+      rujuk_rs: false,
+      nama_rs: '',
+      tanggal_rujukan: '',
+      tekanan_darah: formData.tekanan_darah || '',
+      protein_urine: formData.lab_protein_urine || '',
+      gejala_penyerta: '',
+      terapi_diberikan: '',
+      tingkat_keparahan: 'Ringan',
+      status_penanganan: 'Ditangani',
+      keterangan: ''
+    }]);
+  };
+
+  const removeComplication = (index) => {
+    if (complications.length > 1) {
+      setComplications(complications.filter((_, i) => i !== index));
+    }
+  };
+
+  const updateComplication = (index, field, value) => {
+    const updated = [...complications];
+    updated[index] = { ...updated[index], [field]: value };
+    setComplications(updated);
   };
 
   const handleChange = (e) => {
@@ -248,15 +299,60 @@ const TambahANC = () => {
       selisih_beratbadan: selisih_beratbadan ? parseFloat(selisih_beratbadan) : null
     };
     
-    // If existing visit found, update it instead of creating new
-    const finalEditId = existingVisitId || editId;
-    const finalIsEdit = isEdit || !!existingVisitId;
-    
-    console.log('Submit mode:', finalIsEdit ? 'UPDATE' : 'CREATE');
-    console.log('Visit ID:', finalEditId);
-    console.log('Visit Type:', formData.jenis_kunjungan);
-    
-    await presenter.handleSubmit(submitData, finalIsEdit, finalEditId);
+    // Check if we have complications to submit
+    const hasComplications = activeTab === 'complications' && complications.some(comp => 
+      comp.nama_komplikasi.trim() !== ''
+    );
+
+    if (hasComplications && !isEdit) {
+      // Submit ANC with complications using transaction
+      try {
+        setLoading(true);
+        
+        // Prepare complications data
+        const complicationsData = complications
+          .filter(comp => comp.nama_komplikasi.trim() !== '')
+          .map(comp => ({
+            ...comp,
+            forkey_hamil: formData.forkey_hamil
+          }));
+
+        const response = await fetch('/api/komplikasi/anc-with-complications', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify({
+            ancData: submitData,
+            complications: complicationsData
+          })
+        });
+
+        if (response.ok) {
+          alert('Data ANC dan komplikasi berhasil disimpan');
+          navigate('/kunjungan-anc');
+        } else {
+          const errorData = await response.json();
+          setError(errorData.message || 'Terjadi kesalahan saat menyimpan data');
+        }
+      } catch (error) {
+        console.error('Error submitting ANC with complications:', error);
+        setError('Terjadi kesalahan saat menyimpan data');
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      // Submit only ANC data (existing functionality)
+      const finalEditId = existingVisitId || editId;
+      const finalIsEdit = isEdit || !!existingVisitId;
+      
+      console.log('Submit mode:', finalIsEdit ? 'UPDATE' : 'CREATE');
+      console.log('Visit ID:', finalEditId);
+      console.log('Visit Type:', formData.jenis_kunjungan);
+      
+      await presenter.handleSubmit(submitData, finalIsEdit, finalEditId);
+    }
   };
 
   const handleLogout = () => {
@@ -275,6 +371,16 @@ const TambahANC = () => {
     { value: '+2', label: '+2' },
     { value: '+3', label: '+3' },
     { value: '+4', label: '+4' }
+  ];
+
+  const hospitalOptions = [
+    { value: '', label: '-- Pilih Rumah Sakit --' },
+    { value: 'RS MOEIS', label: 'RS MOEIS' },
+    { value: 'RS Samarinda Medika Citra', label: 'RS Samarinda Medika Citra' },
+    { value: 'RS Hermina', label: 'RS Hermina' },
+    { value: 'RS Aisyiyah', label: 'RS Aisyiyah' },
+    { value: 'RS Jimmy Medika Borneo', label: 'RS Jimmy Medika Borneo' },
+    { value: 'RS Abdoel Wahab Sjahranie', label: 'RS Abdoel Wahab Sjahranie' }
   ];
 
   const customSelectStyles = {
@@ -403,9 +509,34 @@ const TambahANC = () => {
           </div>
         )}
 
+        <div className="form-tabs-container">
+          <button
+            type="button"
+            className={`form-tab-button ${activeTab === 'anc' ? 'active' : ''}`}
+            onClick={() => setActiveTab('anc')}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" fill="currentColor"/>
+            </svg>
+            Kunjungan ANC
+          </button>
+          <button
+            type="button"
+            className={`form-tab-button ${activeTab === 'complications' ? 'active' : ''}`}
+            onClick={() => setActiveTab('complications')}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm11 15H4v-2h16v2zm0-5H4V8h5.08L7 10.83 8.62 12 11 8.76l1-1.36 1 1.36L15.38 12 17 10.83 14.92 8H20v6z" fill="currentColor"/>
+            </svg>
+            Komplikasi
+          </button>
+        </div>
+
         <form onSubmit={handleSubmit} className="anc-form">
-          <div className="form-section">
-            <h3>Informasi Dasar</h3>
+          {activeTab === 'anc' && (
+            <>
+              <div className="form-section">
+                <h3>Informasi Dasar</h3>
             <div className="form-grid">
               <div className="form-group">
                 <label htmlFor="forkey_hamil">Pilih Ibu Hamil *</label>
@@ -573,16 +704,16 @@ const TambahANC = () => {
                 />
               </div>
 
-              <div className="form-group">
-                <label htmlFor="denyut_jantung_janin">Denyut Jantung Janin (bpm)</label>
-                <input
-                  type="number"
-                  id="denyut_jantung_janin"
-                  name="denyut_jantung_janin"
-                  value={formData.denyut_jantung_janin}
-                  onChange={handleChange}
-                  placeholder="Contoh: 140"
-                />
+              <div className="form-group checkbox-group">
+                <label>
+                  <input
+                    type="checkbox"
+                    name="confirm_usg"
+                    checked={formData.confirm_usg}
+                    onChange={handleChange}
+                  />
+                  Konfirmasi USG
+                </label>
               </div>
             </div>
 
@@ -911,6 +1042,210 @@ const TambahANC = () => {
               </div>
             </div>
           </div>
+          </>
+          )}
+
+          {activeTab === 'complications' && (
+            <div className="anc-complications-section">
+              <div className="form-section">
+                <div className="anc-section-header">
+                  <h3>Komplikasi Kehamilan</h3>
+                  <button
+                    type="button"
+                    className="anc-btn-add-complication"
+                    onClick={addComplication}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor"/>
+                    </svg>
+                    Tambah Komplikasi
+                  </button>
+                </div>
+
+                {complications.map((comp, index) => (
+                  <div key={index} className="anc-complication-card">
+                    <div className="anc-complication-header">
+                      <h4>Komplikasi {index + 1}</h4>
+                      {complications.length > 1 && (
+                        <button
+                          type="button"
+                          className="anc-btn-remove-complication"
+                          onClick={() => removeComplication(index)}
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="currentColor"/>
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="form-grid">
+                      <div className="form-group">
+                        <label>Kode Diagnosis (ICD-10)</label>
+                        <input
+                          type="text"
+                          value={comp.kode_diagnosis}
+                          onChange={(e) => updateComplication(index, 'kode_diagnosis', e.target.value)}
+                          placeholder="Contoh: O13, O14.1"
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label>Nama Komplikasi *</label>
+                        <input
+                          type="text"
+                          value={comp.nama_komplikasi}
+                          onChange={(e) => updateComplication(index, 'nama_komplikasi', e.target.value)}
+                          placeholder="Contoh: Hipertensi Gestasional"
+                          required
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label>Waktu Kejadian *</label>
+                        <select
+                          value={comp.waktu_kejadian}
+                          onChange={(e) => updateComplication(index, 'waktu_kejadian', e.target.value)}
+                          required
+                        >
+                          <option value="Saat Hamil">Saat Hamil</option>
+                          <option value="Bersalin">Bersalin</option>
+                          <option value="Nifas">Nifas</option>
+                        </select>
+                      </div>
+
+                      <div className="form-group">
+                        <label>Tanggal Diagnosis *</label>
+                        <input
+                          type="date"
+                          value={comp.tanggal_diagnosis}
+                          onChange={(e) => updateComplication(index, 'tanggal_diagnosis', e.target.value)}
+                          required
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label>Tingkat Keparahan</label>
+                        <select
+                          value={comp.tingkat_keparahan}
+                          onChange={(e) => updateComplication(index, 'tingkat_keparahan', e.target.value)}
+                        >
+                          <option value="Ringan">Ringan</option>
+                          <option value="Sedang">Sedang</option>
+                          <option value="Berat">Berat</option>
+                        </select>
+                      </div>
+
+                      <div className="form-group">
+                        <label>Status Penanganan *</label>
+                        <select
+                          value={comp.status_penanganan}
+                          onChange={(e) => updateComplication(index, 'status_penanganan', e.target.value)}
+                          required
+                        >
+                          <option value="Ditangani">Ditangani</option>
+                          <option value="Dirujuk">Dirujuk</option>
+                          <option value="Selesai">Selesai</option>
+                        </select>
+                      </div>
+
+                      <div className="form-group">
+                        <label>Tekanan Darah</label>
+                        <input
+                          type="text"
+                          value={comp.tekanan_darah}
+                          onChange={(e) => updateComplication(index, 'tekanan_darah', e.target.value)}
+                          placeholder="Contoh: 150/100"
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label>Protein Urine</label>
+                        <Select
+                          value={proteinUrineOptions.find(opt => opt.value === comp.protein_urine) || null}
+                          onChange={(selectedOption) => updateComplication(index, 'protein_urine', selectedOption ? selectedOption.value : '')}
+                          options={proteinUrineOptions}
+                          placeholder="-- Pilih Protein Urine --"
+                          isClearable
+                          isSearchable
+                          styles={customSelectStyles}
+                          noOptionsMessage={() => "Tidak ada data"}
+                        />
+                      </div>
+
+                      <div className="form-group checkbox-group">
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={comp.rujuk_rs}
+                            onChange={(e) => updateComplication(index, 'rujuk_rs', e.target.checked)}
+                          />
+                          Dirujuk ke Rumah Sakit
+                        </label>
+                      </div>
+
+                      {comp.rujuk_rs && (
+                        <>
+                          <div className="form-group">
+                            <label>Nama Rumah Sakit</label>
+                            <Select
+                              value={hospitalOptions.find(opt => opt.value === comp.nama_rs) || null}
+                              onChange={(selectedOption) => updateComplication(index, 'nama_rs', selectedOption ? selectedOption.value : '')}
+                              options={hospitalOptions}
+                              placeholder="-- Pilih Rumah Sakit --"
+                              isClearable
+                              isSearchable
+                              styles={customSelectStyles}
+                              noOptionsMessage={() => "Tidak ada data"}
+                            />
+                          </div>
+
+                          <div className="form-group">
+                            <label>Tanggal Rujukan</label>
+                            <input
+                              type="date"
+                              value={comp.tanggal_rujukan}
+                              onChange={(e) => updateComplication(index, 'tanggal_rujukan', e.target.value)}
+                            />
+                          </div>
+                        </>
+                      )}
+
+                      <div className="form-group full-width">
+                        <label>Gejala Penyerta</label>
+                        <textarea
+                          value={comp.gejala_penyerta}
+                          onChange={(e) => updateComplication(index, 'gejala_penyerta', e.target.value)}
+                          rows="3"
+                          placeholder="Contoh: Sakit kepala, penglihatan kabur, edema..."
+                        />
+                      </div>
+
+                      <div className="form-group full-width">
+                        <label>Terapi yang Diberikan</label>
+                        <textarea
+                          value={comp.terapi_diberikan}
+                          onChange={(e) => updateComplication(index, 'terapi_diberikan', e.target.value)}
+                          rows="3"
+                          placeholder="Contoh: Methyldopa 3x500mg, MgSO4..."
+                        />
+                      </div>
+
+                      <div className="form-group full-width">
+                        <label>Keterangan</label>
+                        <textarea
+                          value={comp.keterangan}
+                          onChange={(e) => updateComplication(index, 'keterangan', e.target.value)}
+                          rows="3"
+                          placeholder="Keterangan tambahan..."
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="form-actions">
             <button type="button" className="btn-cancel" onClick={() => navigate('/kunjungan-anc')}>
