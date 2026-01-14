@@ -52,9 +52,8 @@ const Komplikasi = () => {
             render: (data) => data ? new Date(data).toLocaleDateString('id-ID') : '-'
           },
           { data: 'nama_ibu' },
-          { data: 'kode_diagnosis' },
           { data: 'nama_komplikasi' },
-          { data: 'waktu_kejadian' },
+          { data: 'kejadian' },
           { 
             data: 'tingkat_keparahan',
             render: (data) => {
@@ -262,7 +261,7 @@ const Komplikasi = () => {
               </svg>
               <input
                 type="text"
-                placeholder="Cari berdasarkan nama ibu, komplikasi, kode diagnosis..."
+                placeholder="Cari berdasarkan nama ibu, komplikasi..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -276,7 +275,6 @@ const Komplikasi = () => {
                   <th>No</th>
                   <th>Tanggal</th>
                   <th>Nama Ibu</th>
-                  <th>Kode</th>
                   <th>Komplikasi</th>
                   <th>Waktu</th>
                   <th>Keparahan</th>

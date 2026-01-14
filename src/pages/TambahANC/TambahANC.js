@@ -57,7 +57,6 @@ const TambahANC = () => {
 
   // Complications form data
   const [complications, setComplications] = useState([{
-    kode_diagnosis: '',
     nama_komplikasi: '',
     waktu_kejadian: 'Saat Hamil',
     tanggal_diagnosis: '',
@@ -221,7 +220,6 @@ const TambahANC = () => {
   // Complications handling functions
   const addComplication = () => {
     setComplications([...complications, {
-      kode_diagnosis: '',
       nama_komplikasi: '',
       waktu_kejadian: 'Saat Hamil',
       tanggal_diagnosis: formData.tanggal_kunjungan || '',
@@ -314,6 +312,10 @@ const TambahANC = () => {
           .filter(comp => comp.nama_komplikasi.trim() !== '')
           .map(comp => ({
             ...comp,
+            // Always use ANC data for these fields in ANC form
+            tanggal_diagnosis: formData.tanggal_kunjungan,
+            tekanan_darah: formData.tekanan_darah,
+            protein_urine: formData.lab_protein_urine,
             forkey_hamil: formData.forkey_hamil
           }));
 
@@ -509,7 +511,7 @@ const TambahANC = () => {
           </div>
         )}
 
-        <div className="form-tabs-container">
+        <div className="form-tabs-container" style={{ position: 'sticky', top: 0, zIndex: 100 }}>
           <button
             type="button"
             className={`form-tab-button ${activeTab === 'anc' ? 'active' : ''}`}
@@ -1081,16 +1083,6 @@ const TambahANC = () => {
 
                     <div className="form-grid">
                       <div className="form-group">
-                        <label>Kode Diagnosis (ICD-10)</label>
-                        <input
-                          type="text"
-                          value={comp.kode_diagnosis}
-                          onChange={(e) => updateComplication(index, 'kode_diagnosis', e.target.value)}
-                          placeholder="Contoh: O13, O14.1"
-                        />
-                      </div>
-
-                      <div className="form-group">
                         <label>Nama Komplikasi *</label>
                         <input
                           type="text"
@@ -1112,16 +1104,6 @@ const TambahANC = () => {
                           <option value="Bersalin">Bersalin</option>
                           <option value="Nifas">Nifas</option>
                         </select>
-                      </div>
-
-                      <div className="form-group">
-                        <label>Tanggal Diagnosis *</label>
-                        <input
-                          type="date"
-                          value={comp.tanggal_diagnosis}
-                          onChange={(e) => updateComplication(index, 'tanggal_diagnosis', e.target.value)}
-                          required
-                        />
                       </div>
 
                       <div className="form-group">
@@ -1149,30 +1131,6 @@ const TambahANC = () => {
                         </select>
                       </div>
 
-                      <div className="form-group">
-                        <label>Tekanan Darah</label>
-                        <input
-                          type="text"
-                          value={comp.tekanan_darah}
-                          onChange={(e) => updateComplication(index, 'tekanan_darah', e.target.value)}
-                          placeholder="Contoh: 150/100"
-                        />
-                      </div>
-
-                      <div className="form-group">
-                        <label>Protein Urine</label>
-                        <Select
-                          value={proteinUrineOptions.find(opt => opt.value === comp.protein_urine) || null}
-                          onChange={(selectedOption) => updateComplication(index, 'protein_urine', selectedOption ? selectedOption.value : '')}
-                          options={proteinUrineOptions}
-                          placeholder="-- Pilih Protein Urine --"
-                          isClearable
-                          isSearchable
-                          styles={customSelectStyles}
-                          noOptionsMessage={() => "Tidak ada data"}
-                        />
-                      </div>
-
                       <div className="form-group checkbox-group">
                         <label>
                           <input
@@ -1184,32 +1142,52 @@ const TambahANC = () => {
                         </label>
                       </div>
 
-                      {comp.rujuk_rs && (
-                        <>
-                          <div className="form-group">
-                            <label>Nama Rumah Sakit</label>
-                            <Select
-                              value={hospitalOptions.find(opt => opt.value === comp.nama_rs) || null}
-                              onChange={(selectedOption) => updateComplication(index, 'nama_rs', selectedOption ? selectedOption.value : '')}
-                              options={hospitalOptions}
-                              placeholder="-- Pilih Rumah Sakit --"
-                              isClearable
-                              isSearchable
-                              styles={customSelectStyles}
-                              noOptionsMessage={() => "Tidak ada data"}
-                            />
-                          </div>
+                      <div className="form-group">
+                        <label>Nama Rumah Sakit</label>
+                        <Select
+                          value={hospitalOptions.find(opt => opt.value === comp.nama_rs) || null}
+                          onChange={(selectedOption) => updateComplication(index, 'nama_rs', selectedOption ? selectedOption.value : '')}
+                          options={hospitalOptions}
+                          placeholder="-- Pilih Rumah Sakit --"
+                          isClearable
+                          isSearchable
+                          isDisabled={!comp.rujuk_rs}
+                          styles={{
+                            ...customSelectStyles,
+                            control: (base, state) => ({
+                              ...customSelectStyles.control(base, state),
+                              backgroundColor: !comp.rujuk_rs ? '#F3F4F6' : 'white',
+                              cursor: !comp.rujuk_rs ? 'not-allowed' : 'default'
+                            })
+                          }}
+                          noOptionsMessage={() => "Tidak ada data"}
+                        />
+                        {/* {!comp.rujuk_rs && (
+                          <small style={{ color: '#6B7280', fontSize: '12px' }}>
+                            Centang "Dirujuk ke Rumah Sakit" untuk memilih rumah sakit
+                          </small>
+                        )} */}
+                      </div>
 
-                          <div className="form-group">
-                            <label>Tanggal Rujukan</label>
-                            <input
-                              type="date"
-                              value={comp.tanggal_rujukan}
-                              onChange={(e) => updateComplication(index, 'tanggal_rujukan', e.target.value)}
-                            />
-                          </div>
-                        </>
-                      )}
+                      <div className="form-group">
+                        <label>Tanggal Rujukan</label>
+                        <input
+                          type="date"
+                          value={comp.tanggal_rujukan}
+                          onChange={(e) => updateComplication(index, 'tanggal_rujukan', e.target.value)}
+                          disabled={!comp.rujuk_rs}
+                          style={{
+                            backgroundColor: !comp.rujuk_rs ? '#F3F4F6' : 'white',
+                            cursor: !comp.rujuk_rs ? 'not-allowed' : 'text',
+                            borderColor: !comp.rujuk_rs ? '#D1D5DB' : '#E5E7EB'
+                          }}
+                        />
+                        {/* {!comp.rujuk_rs && (
+                          <small style={{ color: '#6B7280', fontSize: '12px' }}>
+                            Centang "Dirujuk ke Rumah Sakit" untuk mengisi tanggal rujukan
+                          </small>
+                        )} */}
+                      </div>
 
                       <div className="form-group full-width">
                         <label>Gejala Penyerta</label>

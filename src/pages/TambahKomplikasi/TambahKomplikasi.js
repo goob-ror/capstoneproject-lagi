@@ -17,9 +17,8 @@ const TambahKomplikasi = () => {
   const [user, setUser] = useState(null);
 
   const [formData, setFormData] = useState({
-    kode_diagnosis: '',
     nama_komplikasi: '',
-    waktu_kejadian: 'Saat Hamil',
+    kejadian: 'Saat Hamil',
     tanggal_diagnosis: '',
     rujuk_rs: false,
     nama_rs: '',
@@ -43,9 +42,8 @@ const TambahKomplikasi = () => {
     setAncVisits,
     populateForm: (data) => {
       setFormData({
-        kode_diagnosis: data.kode_diagnosis || '',
         nama_komplikasi: data.nama_komplikasi || '',
-        waktu_kejadian: data.waktu_kejadian || 'Saat Hamil',
+        kejadian: data.kejadian || 'Saat Hamil',
         tanggal_diagnosis: data.tanggal_diagnosis || '',
         rujuk_rs: data.rujuk_rs || false,
         nama_rs: data.nama_rs || '',
@@ -317,18 +315,6 @@ const TambahKomplikasi = () => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="kode_diagnosis">Kode Diagnosis (ICD-10)</label>
-                <input
-                  type="text"
-                  id="kode_diagnosis"
-                  name="kode_diagnosis"
-                  value={formData.kode_diagnosis}
-                  onChange={handleChange}
-                  placeholder="Contoh: O13, O14.1"
-                />
-              </div>
-
-              <div className="form-group">
                 <label htmlFor="nama_komplikasi">Nama Komplikasi *</label>
                 <input
                   type="text"
@@ -342,17 +328,18 @@ const TambahKomplikasi = () => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="waktu_kejadian">Waktu Kejadian *</label>
+                <label htmlFor="kejadian">Waktu Kejadian *</label>
                 <select
-                  id="waktu_kejadian"
-                  name="waktu_kejadian"
-                  value={formData.waktu_kejadian}
+                  id="kejadian"
+                  name="kejadian"
+                  value={formData.kejadian}
                   onChange={handleChange}
                   required
                 >
                   <option value="Saat Hamil">Saat Hamil</option>
-                  <option value="Bersalin">Bersalin</option>
-                  <option value="Nifas">Nifas</option>
+                  <option value="Saat Bersalin">Saat Bersalin</option>
+                  <option value="Saat Nifas">Saat Nifas</option>
+                  <option value="Bayi">Bayi</option>
                 </select>
               </div>
 

@@ -937,3 +937,140 @@
   color: #059669;
   font-weight: 600;
 }
+/* Expandable Complications Styles */
+.anc-complications-group {
+  background-color: #F9FAFB;
+  border-radius: 10px;
+  border: 1px solid #E5E7EB;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.anc-group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background-color: #F3F4F6;
+  border-bottom: 1px solid #E5E7EB;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.anc-group-header:hover {
+  background-color: #E5E7EB;
+}
+
+.anc-info h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 5px 0;
+}
+
+.complications-count {
+  font-size: 12px;
+  color: #6B7280;
+  background-color: #DBEAFE;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.expand-toggle {
+  background-color: #22C55E;
+  color: white;
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+
+.expand-toggle:hover {
+  background-color: #16A34A;
+  transform: scale(1.1);
+}
+
+.anc-complications-content {
+  padding: 0 20px 20px 20px;
+}
+
+.anc-complications-content .complication-card {
+  margin-bottom: 15px;
+  background-color: white;
+  border: 1px solid #E5E7EB;
+}
+
+.anc-complications-content .complication-card:last-child {
+  margin-bottom: 0;
+}
+
+.standalone-complications-group {
+  margin-top: 30px;
+}
+
+.group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #22C55E;
+}
+
+.group-header h4 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.standalone-complications-group .complication-card {
+  margin-bottom: 15px;
+}
+
+.standalone-complications-group .complication-card:last-child {
+  margin-bottom: 0;
+}
+
+/* Enhanced complication card styles for nested layout */
+.anc-complications-content .complication-card .complication-header h5 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 5px 0;
+}
+
+.anc-complications-content .complication-card .diagnosis-code {
+  background-color: #FEF3C7;
+  color: #92400E;
+  font-size: 10px;
+}
+
+/* Responsive adjustments for expandable complications */
+@media (max-width: 768px) {
+  .anc-group-header {
+    padding: 12px 15px;
+  }
+  
+  .anc-complications-content {
+    padding: 0 15px 15px 15px;
+  }
+  
+  .anc-info h4 {
+    font-size: 14px;
+  }
+  
+  .expand-toggle {
+    width: 25px;
+    height: 25px;
+    font-size: 16px;
+  }
+}

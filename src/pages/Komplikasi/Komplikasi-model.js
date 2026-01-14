@@ -61,8 +61,7 @@ class KomplikasiModel {
     const searchableFields = [
       { field: 'nama_ibu', weight: 10 },
       { field: 'nama_komplikasi', weight: 9 },
-      { field: 'kode_diagnosis', weight: 8 },
-      { field: 'waktu_kejadian', weight: 6 },
+      { field: 'kejadian', weight: 6 },
       { field: 'tingkat_keparahan', weight: 5 }
     ];
 

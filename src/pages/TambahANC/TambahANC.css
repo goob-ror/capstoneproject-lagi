@@ -328,7 +328,7 @@
   border-top: 2px solid #F3F4F6;
 }
 
-.btn-cancel {
+/* .btn-cancel {
   padding: 12px 24px;
   background-color: #F3F4F6;
   color: #6B7280;
@@ -338,11 +338,11 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
-}
+} */
 
-.btn-cancel:hover {
+/* .btn-cancel:hover {
   background-color: #E5E7EB;
-}
+} */
 
 .btn-submit {
   padding: 12px 24px;
@@ -788,4 +788,29 @@
   .anc-btn-add-complication {
     justify-content: center;
   }
+}
+/* Disabled field styling for complications */
+.anc-complication-card .form-group input:disabled,
+.anc-complication-card .form-group select:disabled {
+  background-color: #F3F4F6;
+  color: #6B7280;
+  cursor: not-allowed;
+  border-color: #D1D5DB;
+}
+
+.anc-complication-card .form-group small {
+  display: block;
+  margin-top: 4px;
+  font-style: italic;
+}
+
+.anc-complication-card .checkbox-group label {
+  color: #166534;
+  font-weight: 500;
+  margin-bottom: 0;
+}
+
+.anc-complication-card .checkbox-group input[type="checkbox"] {
+  accent-color: #22C55E;
+  margin-right: 8px;
 }

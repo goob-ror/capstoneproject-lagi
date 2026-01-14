@@ -310,7 +310,7 @@
   border-top: 2px solid #F3F4F6;
 }
 
-.btn-cancel {
+/* .btn-cancel {
   padding: 12px 24px;
   background-color: #F3F4F6;
   color: #6B7280;
@@ -320,11 +320,11 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
-}
+} */
 
-.btn-cancel:hover {
+/* .btn-cancel:hover {
   background-color: #E5E7EB;
-}
+} */
 
 .btn-submit {
   padding: 12px 24px;

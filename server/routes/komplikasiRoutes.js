@@ -83,9 +83,8 @@ router.get('/:id', auth, async (req, res) => {
 router.post('/', auth, async (req, res) => {
   try {
     const {
-      kode_diagnosis,
       nama_komplikasi,
-      waktu_kejadian,
+      kejadian,
       tanggal_diagnosis,
       rujuk_rs,
       nama_rs,
@@ -103,7 +102,7 @@ router.post('/', auth, async (req, res) => {
 
     const query = `
       INSERT INTO komplikasi (
-        kode_diagnosis, nama_komplikasi, waktu_kejadian, tanggal_diagnosis,
+        nama_komplikasi, kejadian, tanggal_diagnosis,
         rujuk_rs, nama_rs, tanggal_rujukan, tekanan_darah, protein_urine,
         gejala_penyerta, terapi_diberikan, tingkat_keparahan,
         status_penanganan, keterangan, forkey_hamil, forkey_anc
@@ -111,9 +110,8 @@ router.post('/', auth, async (req, res) => {
     `;
 
     const [result] = await db.execute(query, [
-      kode_diagnosis || null,
       nama_komplikasi,
-      waktu_kejadian,
+      kejadian,
       tanggal_diagnosis,
       rujuk_rs ? 1 : 0,
       nama_rs || null,
@@ -144,9 +142,8 @@ router.put('/:id', auth, async (req, res) => {
   try {
     const { id } = req.params;
     const {
-      kode_diagnosis,
       nama_komplikasi,
-      waktu_kejadian,
+      kejadian,
       tanggal_diagnosis,
       rujuk_rs,
       nama_rs,
@@ -164,7 +161,7 @@ router.put('/:id', auth, async (req, res) => {
 
     const query = `
       UPDATE komplikasi SET
-        kode_diagnosis = ?, nama_komplikasi = ?, waktu_kejadian = ?,
+        nama_komplikasi = ?, kejadian = ?,
         tanggal_diagnosis = ?, rujuk_rs = ?, nama_rs = ?, tanggal_rujukan = ?,
         tekanan_darah = ?, protein_urine = ?, gejala_penyerta = ?,
         terapi_diberikan = ?, tingkat_keparahan = ?, status_penanganan = ?,
@@ -174,9 +171,8 @@ router.put('/:id', auth, async (req, res) => {
     `;
 
     const [result] = await db.execute(query, [
-      kode_diagnosis || null,
       nama_komplikasi,
-      waktu_kejadian,
+      kejadian,
       tanggal_diagnosis,
       rujuk_rs ? 1 : 0,
       nama_rs || null,
@@ -288,7 +284,7 @@ router.post('/anc-with-complications', auth, async (req, res) => {
     if (complications && complications.length > 0) {
       for (const comp of complications) {
         const {
-          kode_diagnosis, nama_komplikasi, waktu_kejadian, tanggal_diagnosis,
+          nama_komplikasi, kejadian, tanggal_diagnosis,
           rujuk_rs, nama_rs, tanggal_rujukan, tekanan_darah, protein_urine,
           gejala_penyerta, terapi_diberikan, tingkat_keparahan,
           status_penanganan, keterangan, forkey_hamil
@@ -296,15 +292,15 @@ router.post('/anc-with-complications', auth, async (req, res) => {
 
         const kompQuery = `
           INSERT INTO komplikasi (
-            kode_diagnosis, nama_komplikasi, waktu_kejadian, tanggal_diagnosis,
+            nama_komplikasi, kejadian, tanggal_diagnosis,
             rujuk_rs, nama_rs, tanggal_rujukan, tekanan_darah, protein_urine,
             gejala_penyerta, terapi_diberikan, tingkat_keparahan,
             status_penanganan, keterangan, forkey_hamil, forkey_anc
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
         const [kompResult] = await connection.execute(kompQuery, [
-          kode_diagnosis || null, nama_komplikasi, waktu_kejadian, tanggal_diagnosis,
+          nama_komplikasi, kejadian, tanggal_diagnosis,
           rujuk_rs ? 1 : 0, nama_rs || null, tanggal_rujukan || null,
           tekanan_darah || null, protein_urine || null, gejala_penyerta || null,
           terapi_diberikan || null, tingkat_keparahan || null, status_penanganan,

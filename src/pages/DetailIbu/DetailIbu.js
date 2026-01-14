@@ -295,7 +295,7 @@ const DetailIbu = () => {
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="currentColor"/>
                 </svg>
-                Komplikasi ({ibuData.complications?.length || 0})
+                Komplikasi{ibuData.complications?.length > 0 ? ` (${ibuData.complications.length})` : ''}
               </button>
             </div>
 
@@ -530,86 +530,252 @@ const DetailIbu = () => {
               {activeTab === 'complications' && (
                 <div className="complications-list">
                   {ibuData.complications && ibuData.complications.length > 0 ? (
-                    ibuData.complications.map((comp, index) => (
-                      <div key={comp.id} className="complication-card">
-                        <div className="complication-header">
-                          <div>
-                            <h4>{comp.nama_komplikasi}</h4>
-                            {comp.kode_diagnosis && (
-                              <span className="diagnosis-code">{comp.kode_diagnosis}</span>
-                            )}
-                          </div>
-                          <div className="badges">
-                            <span className={`status-badge ${
-                              comp.tingkat_keparahan === 'Berat' ? 'badge-danger' : 
-                              comp.tingkat_keparahan === 'Sedang' ? 'badge-warning' : 'badge-success'
-                            }`}>
-                              {comp.tingkat_keparahan}
-                            </span>
-                            <span className={`status-badge ${
-                              comp.status_penanganan === 'Dirujuk' ? 'badge-info' : 
-                              comp.status_penanganan === 'Selesai' ? 'badge-success' : 'badge-warning'
-                            }`}>
-                              {comp.status_penanganan}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="complication-details">
-                          <div className="detail-grid">
-                            <div className="detail-item">
-                              <span className="detail-label">Tanggal Diagnosis:</span>
-                              <span className="detail-value">{formatDate(comp.tanggal_diagnosis)}</span>
+                    (() => {
+                      // Group complications by ANC visit and non-ANC
+                      const groupedComplications = {
+                        withANC: [],
+                        withoutANC: []
+                      };
+
+                      ibuData.complications.forEach(comp => {
+                        if (comp.forkey_anc) {
+                          // Find the corresponding ANC visit
+                          const ancVisit = ibuData.ancVisits?.find(anc => anc.id === comp.forkey_anc) ||
+                                          ibuData.pregnancyHistory?.flatMap(p => p.ancVisits || [])
+                                            .find(anc => anc.id === comp.forkey_anc);
+                          
+                          let existingGroup = groupedComplications.withANC.find(g => g.ancId === comp.forkey_anc);
+                          if (!existingGroup) {
+                            existingGroup = {
+                              ancId: comp.forkey_anc,
+                              ancVisit: ancVisit,
+                              complications: []
+                            };
+                            groupedComplications.withANC.push(existingGroup);
+                          }
+                          existingGroup.complications.push(comp);
+                        } else {
+                          groupedComplications.withoutANC.push(comp);
+                        }
+                      });
+
+                      // Sort ANC groups by visit date
+                      groupedComplications.withANC.sort((a, b) => {
+                        const dateA = a.ancVisit?.tanggal_kunjungan ? new Date(a.ancVisit.tanggal_kunjungan) : new Date(0);
+                        const dateB = b.ancVisit?.tanggal_kunjungan ? new Date(b.ancVisit.tanggal_kunjungan) : new Date(0);
+                        return dateB - dateA; // Most recent first
+                      });
+
+                      return (
+                        <>
+                          {/* Complications linked to ANC visits */}
+                          {groupedComplications.withANC.map((group, groupIndex) => (
+                            <div key={`anc-${group.ancId}`} className="anc-complications-group">
+                              <div className="anc-group-header">
+                                <div className="anc-info">
+                                  <h4>
+                                    {group.ancVisit ? 
+                                      `${group.ancVisit.jenis_kunjungan} - ${formatDate(group.ancVisit.tanggal_kunjungan)}` :
+                                      `Kunjungan ANC #${group.ancId}`
+                                    }
+                                  </h4>
+                                  <span className="complications-count">
+                                    {group.complications.length} komplikasi
+                                  </span>
+                                </div>
+                                <button 
+                                  className="expand-toggle"
+                                  onClick={() => {
+                                    const element = document.getElementById(`anc-complications-${group.ancId}`);
+                                    const button = document.querySelector(`[data-anc-id="${group.ancId}"]`);
+                                    if (element.style.display === 'none') {
+                                      element.style.display = 'block';
+                                      button.textContent = '−';
+                                    } else {
+                                      element.style.display = 'none';
+                                      button.textContent = '+';
+                                    }
+                                  }}
+                                  data-anc-id={group.ancId}
+                                >
+                                  −
+                                </button>
+                              </div>
+                              
+                              <div id={`anc-complications-${group.ancId}`} className="anc-complications-content">
+                                {group.complications.map((comp, index) => (
+                                  <div key={comp.id} className="complication-card">
+                                    <div className="complication-header">
+                                      <div>
+                                        <h5>{comp.nama_komplikasi}</h5>
+                                      </div>
+                                      <div className="badges">
+                                        <span className={`status-badge ${
+                                          comp.tingkat_keparahan === 'Berat' ? 'badge-danger' : 
+                                          comp.tingkat_keparahan === 'Sedang' ? 'badge-warning' : 'badge-success'
+                                        }`}>
+                                          {comp.tingkat_keparahan}
+                                        </span>
+                                        <span className={`status-badge ${
+                                          comp.status_penanganan === 'Dirujuk' ? 'badge-info' : 
+                                          comp.status_penanganan === 'Selesai' ? 'badge-success' : 'badge-warning'
+                                        }`}>
+                                          {comp.status_penanganan}
+                                        </span>
+                                      </div>
+                                    </div>
+                                    <div className="complication-details">
+                                      <div className="detail-grid">
+                                        <div className="detail-item">
+                                          <span className="detail-label">Tanggal Diagnosis:</span>
+                                          <span className="detail-value">{formatDate(comp.tanggal_diagnosis)}</span>
+                                        </div>
+                                        <div className="detail-item">
+                                          <span className="detail-label">Kejadian:</span>
+                                          <span className="detail-value">{comp.kejadian}</span>
+                                        </div>
+                                        {comp.tekanan_darah && (
+                                          <div className="detail-item">
+                                            <span className="detail-label">Tekanan Darah:</span>
+                                            <span className="detail-value">{comp.tekanan_darah}</span>
+                                          </div>
+                                        )}
+                                        {comp.protein_urine && (
+                                          <div className="detail-item">
+                                            <span className="detail-label">Protein Urine:</span>
+                                            <span className="detail-value">{comp.protein_urine}</span>
+                                          </div>
+                                        )}
+                                        {comp.rujuk_rs && (
+                                          <div className="detail-item">
+                                            <span className="detail-label">Rujuk RS:</span>
+                                            <span className="detail-value">Ya</span>
+                                          </div>
+                                        )}
+                                        {comp.nama_rs && (
+                                          <div className="detail-item">
+                                            <span className="detail-label">Nama RS:</span>
+                                            <span className="detail-value">{comp.nama_rs}</span>
+                                          </div>
+                                        )}
+                                      </div>
+                                      {comp.gejala_penyerta && (
+                                        <div className="complication-section">
+                                          <strong>Gejala Penyerta:</strong>
+                                          <p>{comp.gejala_penyerta}</p>
+                                        </div>
+                                      )}
+                                      {comp.terapi_diberikan && (
+                                        <div className="complication-section">
+                                          <strong>Terapi:</strong>
+                                          <p>{comp.terapi_diberikan}</p>
+                                        </div>
+                                      )}
+                                      {comp.keterangan && (
+                                        <div className="complication-section">
+                                          <strong>Keterangan:</strong>
+                                          <p>{comp.keterangan}</p>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
                             </div>
-                            <div className="detail-item">
-                              <span className="detail-label">Waktu Kejadian:</span>
-                              <span className="detail-value">{comp.waktu_kejadian}</span>
-                            </div>
-                            {comp.tekanan_darah && (
-                              <div className="detail-item">
-                                <span className="detail-label">Tekanan Darah:</span>
-                                <span className="detail-value">{comp.tekanan_darah}</span>
+                          ))}
+
+                          {/* Complications not linked to ANC visits */}
+                          {groupedComplications.withoutANC.length > 0 && (
+                            <div className="standalone-complications-group">
+                              <div className="group-header">
+                                <h4>Komplikasi Lainnya</h4>
+                                <span className="complications-count">
+                                  {groupedComplications.withoutANC.length} komplikasi
+                                </span>
                               </div>
-                            )}
-                            {comp.protein_urine && (
-                              <div className="detail-item">
-                                <span className="detail-label">Protein Urine:</span>
-                                <span className="detail-value">{comp.protein_urine}</span>
-                              </div>
-                            )}
-                            {comp.rujuk_rs && (
-                              <div className="detail-item">
-                                <span className="detail-label">Rujuk RS:</span>
-                                <span className="detail-value">Ya</span>
-                              </div>
-                            )}
-                            {comp.nama_rs && (
-                              <div className="detail-item">
-                                <span className="detail-label">Nama RS:</span>
-                                <span className="detail-value">{comp.nama_rs}</span>
-                              </div>
-                            )}
-                          </div>
-                          {comp.gejala_penyerta && (
-                            <div className="complication-section">
-                              <strong>Gejala Penyerta:</strong>
-                              <p>{comp.gejala_penyerta}</p>
+                              
+                              {groupedComplications.withoutANC.map((comp, index) => (
+                                <div key={comp.id} className="complication-card">
+                                  <div className="complication-header">
+                                    <div>
+                                      <h5>{comp.nama_komplikasi}</h5>
+                                    </div>
+                                    <div className="badges">
+                                      <span className={`status-badge ${
+                                        comp.tingkat_keparahan === 'Berat' ? 'badge-danger' : 
+                                        comp.tingkat_keparahan === 'Sedang' ? 'badge-warning' : 'badge-success'
+                                      }`}>
+                                        {comp.tingkat_keparahan}
+                                      </span>
+                                      <span className={`status-badge ${
+                                        comp.status_penanganan === 'Dirujuk' ? 'badge-info' : 
+                                        comp.status_penanganan === 'Selesai' ? 'badge-success' : 'badge-warning'
+                                      }`}>
+                                        {comp.status_penanganan}
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <div className="complication-details">
+                                    <div className="detail-grid">
+                                      <div className="detail-item">
+                                        <span className="detail-label">Tanggal Diagnosis:</span>
+                                        <span className="detail-value">{formatDate(comp.tanggal_diagnosis)}</span>
+                                      </div>
+                                      <div className="detail-item">
+                                        <span className="detail-label">Kejadian:</span>
+                                        <span className="detail-value">{comp.kejadian}</span>
+                                      </div>
+                                      {comp.tekanan_darah && (
+                                        <div className="detail-item">
+                                          <span className="detail-label">Tekanan Darah:</span>
+                                          <span className="detail-value">{comp.tekanan_darah}</span>
+                                        </div>
+                                      )}
+                                      {comp.protein_urine && (
+                                        <div className="detail-item">
+                                          <span className="detail-label">Protein Urine:</span>
+                                          <span className="detail-value">{comp.protein_urine}</span>
+                                        </div>
+                                      )}
+                                      {comp.rujuk_rs && (
+                                        <div className="detail-item">
+                                          <span className="detail-label">Rujuk RS:</span>
+                                          <span className="detail-value">Ya</span>
+                                        </div>
+                                      )}
+                                      {comp.nama_rs && (
+                                        <div className="detail-item">
+                                          <span className="detail-label">Nama RS:</span>
+                                          <span className="detail-value">{comp.nama_rs}</span>
+                                        </div>
+                                      )}
+                                    </div>
+                                    {comp.gejala_penyerta && (
+                                      <div className="complication-section">
+                                        <strong>Gejala Penyerta:</strong>
+                                        <p>{comp.gejala_penyerta}</p>
+                                      </div>
+                                    )}
+                                    {comp.terapi_diberikan && (
+                                      <div className="complication-section">
+                                        <strong>Terapi:</strong>
+                                        <p>{comp.terapi_diberikan}</p>
+                                      </div>
+                                    )}
+                                    {comp.keterangan && (
+                                      <div className="complication-section">
+                                        <strong>Keterangan:</strong>
+                                        <p>{comp.keterangan}</p>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
                             </div>
                           )}
-                          {comp.terapi_diberikan && (
-                            <div className="complication-section">
-                              <strong>Terapi:</strong>
-                              <p>{comp.terapi_diberikan}</p>
-                            </div>
-                          )}
-                          {comp.keterangan && (
-                            <div className="complication-section">
-                              <strong>Keterangan:</strong>
-                              <p>{comp.keterangan}</p>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))
+                        </>
+                      );
+                    })()
                   ) : (
                     <div className="empty-state">
                       <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
