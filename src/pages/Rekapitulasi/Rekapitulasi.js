@@ -86,20 +86,20 @@ const Rekapitulasi = () => {
       ['TRIMESTER 1 (0-13 minggu)'],
       ['Normal (≥ 11)', summaryData.hbStatistics?.trimester1_normal || 0],
       ['Anemia Ringan (10.0-10.9)', summaryData.hbStatistics?.trimester1_ringan || 0],
-      ['Anemia Sedang (7.0-9.9)', summaryData.hbStatistics?.trimester1_sedang || 0],
-      ['Anemia Berat (<7.0)', summaryData.hbStatistics?.trimester1_berat || 0],
+      ['Anemia Sedang (8.0-9.9)', summaryData.hbStatistics?.trimester1_sedang || 0],
+      ['Anemia Berat (<7.9)', summaryData.hbStatistics?.trimester1_berat || 0],
       [],
       ['TRIMESTER 2 (14-27 minggu)'],
       ['Normal (≥ 11)', summaryData.hbStatistics?.trimester2_normal || 0],
       ['Anemia Ringan (10.0-10.9)', summaryData.hbStatistics?.trimester2_ringan || 0],
-      ['Anemia Sedang (7.0-9.9)', summaryData.hbStatistics?.trimester2_sedang || 0],
-      ['Anemia Berat (<7.0)', summaryData.hbStatistics?.trimester2_berat || 0],
+      ['Anemia Sedang (8.0-9.9)', summaryData.hbStatistics?.trimester2_sedang || 0],
+      ['Anemia Berat (<7.9)', summaryData.hbStatistics?.trimester2_berat || 0],
       [],
       ['TRIMESTER 3 (28+ minggu)'],
       ['Normal (≥ 11)', summaryData.hbStatistics?.trimester3_normal || 0],
       ['Anemia Ringan (10.0-10.9)', summaryData.hbStatistics?.trimester3_ringan || 0],
-      ['Anemia Sedang (7.0-9.9)', summaryData.hbStatistics?.trimester3_sedang || 0],
-      ['Anemia Berat (<7.0)', summaryData.hbStatistics?.trimester3_berat || 0],
+      ['Anemia Sedang (8.0-9.9)', summaryData.hbStatistics?.trimester3_sedang || 0],
+      ['Anemia Berat (<7.9)', summaryData.hbStatistics?.trimester3_berat || 0],
       [],
       ['Tablet Fe Diberikan', summaryData.feStatistics?.total_fe_given || 0, `${summaryData.feStatistics?.percentage_fe || 0}%`],
     ];
@@ -197,20 +197,20 @@ const Rekapitulasi = () => {
     csvContent += 'HEMOGLOBIN TRIMESTER 1 (0-13 minggu)\n';
     csvContent += `Normal (≥ 11),${summaryData.hbStatistics?.trimester1_normal || 0}\n`;
     csvContent += `Anemia Ringan (10.0-10.9),${summaryData.hbStatistics?.trimester1_ringan || 0}\n`;
-    csvContent += `Anemia Sedang (7.0-9.9),${summaryData.hbStatistics?.trimester1_sedang || 0}\n`;
-    csvContent += `Anemia Berat (<7.0),${summaryData.hbStatistics?.trimester1_berat || 0}\n\n`;
+    csvContent += `Anemia Sedang (8.0-9.9),${summaryData.hbStatistics?.trimester1_sedang || 0}\n`;
+    csvContent += `Anemia Berat (<7.9),${summaryData.hbStatistics?.trimester1_berat || 0}\n\n`;
     
     csvContent += 'HEMOGLOBIN TRIMESTER 2 (14-27 minggu)\n';
     csvContent += `Normal (≥ 11),${summaryData.hbStatistics?.trimester2_normal || 0}\n`;
     csvContent += `Anemia Ringan (10.0-10.9),${summaryData.hbStatistics?.trimester2_ringan || 0}\n`;
-    csvContent += `Anemia Sedang (7.0-9.9),${summaryData.hbStatistics?.trimester2_sedang || 0}\n`;
-    csvContent += `Anemia Berat (<7.0),${summaryData.hbStatistics?.trimester2_berat || 0}\n\n`;
+    csvContent += `Anemia Sedang (8.0-9.9),${summaryData.hbStatistics?.trimester2_sedang || 0}\n`;
+    csvContent += `Anemia Berat (<7.9),${summaryData.hbStatistics?.trimester2_berat || 0}\n\n`;
     
     csvContent += 'HEMOGLOBIN TRIMESTER 3 (28+ minggu)\n';
     csvContent += `Normal (≥ 11),${summaryData.hbStatistics?.trimester3_normal || 0}\n`;
     csvContent += `Anemia Ringan (10.0-10.9),${summaryData.hbStatistics?.trimester3_ringan || 0}\n`;
-    csvContent += `Anemia Sedang (7.0-9.9),${summaryData.hbStatistics?.trimester3_sedang || 0}\n`;
-    csvContent += `Anemia Berat (<7.0),${summaryData.hbStatistics?.trimester3_berat || 0}\n\n`;
+    csvContent += `Anemia Sedang (8.0-9.9),${summaryData.hbStatistics?.trimester3_sedang || 0}\n`;
+    csvContent += `Anemia Berat (<7.9),${summaryData.hbStatistics?.trimester3_berat || 0}\n\n`;
     
     csvContent += `Tablet Fe Diberikan,${summaryData.feStatistics?.total_fe_given || 0},${summaryData.feStatistics?.percentage_fe || 0}%\n\n`;
 
@@ -738,13 +738,13 @@ const Rekapitulasi = () => {
                       </tr>
                       <tr>
                         <td><span className="status-badge badge-warning">Anemia Sedang</span></td>
-                        <td>7.0 - 9.9</td>
+                        <td>8.0 - 9.9</td>
                         <td>{summaryData?.hbStatistics?.trimester1_sedang || 0}</td>
                         <td>{summaryData?.hbStatistics?.trimester1_total > 0 ? Math.round((summaryData?.hbStatistics?.trimester1_sedang || 0) * 100 / summaryData?.hbStatistics?.trimester1_total) : 0}%</td>
                       </tr>
                       <tr>
                         <td><span className="status-badge badge-danger">Anemia Berat</span></td>
-                        <td>&lt; 7.0</td>
+                        <td>&lt; 7.9</td>
                         <td>{summaryData?.hbStatistics?.trimester1_berat || 0}</td>
                         <td>{summaryData?.hbStatistics?.trimester1_total > 0 ? Math.round((summaryData?.hbStatistics?.trimester1_berat || 0) * 100 / summaryData?.hbStatistics?.trimester1_total) : 0}%</td>
                       </tr>
@@ -784,13 +784,13 @@ const Rekapitulasi = () => {
                       </tr>
                       <tr>
                         <td><span className="status-badge badge-warning">Anemia Sedang</span></td>
-                        <td>7.0 - 9.9</td>
+                        <td>8.0 - 9.9</td>
                         <td>{summaryData?.hbStatistics?.trimester2_sedang || 0}</td>
                         <td>{summaryData?.hbStatistics?.trimester2_total > 0 ? Math.round((summaryData?.hbStatistics?.trimester2_sedang || 0) * 100 / summaryData?.hbStatistics?.trimester2_total) : 0}%</td>
                       </tr>
                       <tr>
                         <td><span className="status-badge badge-danger">Anemia Berat</span></td>
-                        <td>&lt; 7.0</td>
+                        <td>&lt; 7.9</td>
                         <td>{summaryData?.hbStatistics?.trimester2_berat || 0}</td>
                         <td>{summaryData?.hbStatistics?.trimester2_total > 0 ? Math.round((summaryData?.hbStatistics?.trimester2_berat || 0) * 100 / summaryData?.hbStatistics?.trimester2_total) : 0}%</td>
                       </tr>
@@ -830,13 +830,13 @@ const Rekapitulasi = () => {
                       </tr>
                       <tr>
                         <td><span className="status-badge badge-warning">Anemia Sedang</span></td>
-                        <td>7.0 - 9.9</td>
+                        <td>8.0 - 9.9</td>
                         <td>{summaryData?.hbStatistics?.trimester3_sedang || 0}</td>
                         <td>{summaryData?.hbStatistics?.trimester3_total > 0 ? Math.round((summaryData?.hbStatistics?.trimester3_sedang || 0) * 100 / summaryData?.hbStatistics?.trimester3_total) : 0}%</td>
                       </tr>
                       <tr>
                         <td><span className="status-badge badge-danger">Anemia Berat</span></td>
-                        <td>&lt; 7.0</td>
+                        <td>&lt; 7.9</td>
                         <td>{summaryData?.hbStatistics?.trimester3_berat || 0}</td>
                         <td>{summaryData?.hbStatistics?.trimester3_total > 0 ? Math.round((summaryData?.hbStatistics?.trimester3_berat || 0) * 100 / summaryData?.hbStatistics?.trimester3_total) : 0}%</td>
                       </tr>

@@ -31,28 +31,44 @@ const TambahANC = () => {
     tekanan_darah: '',
     lila: '',
     tinggi_fundus: '',
+    denyut_jantung_janin: '',
+    detak_jantung: '',
     confirm_usg: false,
     status_imunisasi_tt: 'T0',
     beri_tablet_fe: false,
-    hasil_lab_hb: '',
-    lab_protein_urine: 'Negatif',
-    lab_gula_darah: '',
-    hasil_lab_lainnya: '',
-    skrining_hiv: 'Belum Diperiksa',
-    skrining_sifilis: 'Belum Diperiksa',
-    skrining_hbsag: 'Belum Diperiksa',
-    skrining_tb: 'Belum Diperiksa',
-    terapi_malaria: false,
-    terapi_kecacingan: false,
     hasil_usg: '',
     status_kmk_usg: '',
     status_risiko_visit: 'Normal',
-    skrining_jiwa: '',
     hasil_temu_wicara: '',
     tata_laksana_kasus: '',
     keterangan_anc: '',
     forkey_hamil: '',
     forkey_bidan: ''
+  });
+
+  // Lab Screening form data (separate table)
+  const [labScreeningData, setLabScreeningData] = useState({
+    hasil_lab_hb: '',
+    lab_protein_urine: 'Negatif',
+    lab_gula_darah: '',
+    hasil_lab_lainnya: '',
+    skrining_gonorea: 'Belum Diperiksa',
+    skrining_klamidia: 'Belum Diperiksa',
+    skrining_hiv: 'Belum Diperiksa',
+    status_art: '',
+    skrining_sifilis: 'Belum Diperiksa',
+    skrining_hbsag: 'Belum Diperiksa',
+    skrining_tb: 'Belum Diperiksa',
+    malaria_diberi_kelambu: 'Tidak',
+    terapi_malaria: false,
+    status_malaria: 'Belum Diperiksa',
+    terapi_kecacingan: false,
+    status_kecacingan: 'Belum Diperiksa'
+  });
+
+  // Jiwa Screening form data (separate table)
+  const [jiwaScreeningData, setJiwaScreeningData] = useState({
+    skrining_jiwa: ''
   });
 
   // Complications form data
@@ -96,29 +112,49 @@ const TambahANC = () => {
         tekanan_darah: data.tekanan_darah || '',
         lila: data.lila || '',
         tinggi_fundus: data.tinggi_fundus || '',
+        denyut_jantung_janin: data.denyut_jantung_janin || '',
+        detak_jantung: data.detak_jantung || '',
         confirm_usg: data.confirm_usg || false,
         status_imunisasi_tt: data.status_imunisasi_tt || 'T0',
         beri_tablet_fe: data.beri_tablet_fe || false,
-        hasil_lab_hb: data.hasil_lab_hb || '',
-        lab_protein_urine: data.lab_protein_urine || 'Negatif',
-        lab_gula_darah: data.lab_gula_darah || '',
-        hasil_lab_lainnya: data.hasil_lab_lainnya || '',
-        skrining_hiv: data.skrining_hiv || 'Belum Diperiksa',
-        skrining_sifilis: data.skrining_sifilis || 'Belum Diperiksa',
-        skrining_hbsag: data.skrining_hbsag || 'Belum Diperiksa',
-        skrining_tb: data.skrining_tb || 'Belum Diperiksa',
-        terapi_malaria: data.terapi_malaria || false,
-        terapi_kecacingan: data.terapi_kecacingan || false,
         hasil_usg: data.hasil_usg || '',
         status_kmk_usg: data.status_kmk_usg || '',
         status_risiko_visit: data.status_risiko_visit || 'Normal',
-        skrining_jiwa: data.skrining_jiwa || '',
         hasil_temu_wicara: data.hasil_temu_wicara || '',
         tata_laksana_kasus: data.tata_laksana_kasus || '',
         keterangan_anc: data.keterangan_anc || '',
         forkey_hamil: data.forkey_hamil || '',
         forkey_bidan: data.forkey_bidan || ''
       });
+
+      // Populate lab screening data if exists
+      if (data.lab_screening) {
+        setLabScreeningData({
+          hasil_lab_hb: data.lab_screening.hasil_lab_hb || '',
+          lab_protein_urine: data.lab_screening.lab_protein_urine || 'Negatif',
+          lab_gula_darah: data.lab_screening.lab_gula_darah || '',
+          hasil_lab_lainnya: data.lab_screening.hasil_lab_lainnya || '',
+          skrining_gonorea: data.lab_screening.skrining_gonorea || 'Belum Diperiksa',
+          skrining_klamidia: data.lab_screening.skrining_klamidia || 'Belum Diperiksa',
+          skrining_hiv: data.lab_screening.skrining_hiv || 'Belum Diperiksa',
+          status_art: data.lab_screening.status_art || '',
+          skrining_sifilis: data.lab_screening.skrining_sifilis || 'Belum Diperiksa',
+          skrining_hbsag: data.lab_screening.skrining_hbsag || 'Belum Diperiksa',
+          skrining_tb: data.lab_screening.skrining_tb || 'Belum Diperiksa',
+          malaria_diberi_kelambu: data.lab_screening.malaria_diberi_kelambu || 'Tidak',
+          terapi_malaria: data.lab_screening.terapi_malaria || false,
+          status_malaria: data.lab_screening.status_malaria || 'Belum Diperiksa',
+          terapi_kecacingan: data.lab_screening.terapi_kecacingan || false,
+          status_kecacingan: data.lab_screening.status_kecacingan || 'Belum Diperiksa'
+        });
+      }
+
+      // Populate jiwa screening data if exists
+      if (data.jiwa_screening) {
+        setJiwaScreeningData({
+          skrining_jiwa: data.jiwa_screening.skrining_jiwa || ''
+        });
+      }
     },
     onSuccess: (message) => {
       alert(message);
@@ -192,29 +228,43 @@ const TambahANC = () => {
       tekanan_darah: '',
       lila: '',
       tinggi_fundus: '',
+      denyut_jantung_janin: '',
+      detak_jantung: '',
       confirm_usg: false,
       status_imunisasi_tt: 'T0',
       beri_tablet_fe: false,
-      hasil_lab_hb: '',
-      lab_protein_urine: 'Negatif',
-      lab_gula_darah: '',
-      hasil_lab_lainnya: '',
-      skrining_hiv: 'Belum Diperiksa',
-      skrining_sifilis: 'Belum Diperiksa',
-      skrining_hbsag: 'Belum Diperiksa',
-      skrining_tb: 'Belum Diperiksa',
-      terapi_malaria: false,
-      terapi_kecacingan: false,
       hasil_usg: '',
       status_kmk_usg: '',
       status_risiko_visit: 'Normal',
-      skrining_jiwa: '',
       hasil_temu_wicara: '',
       tata_laksana_kasus: '',
       keterangan_anc: '',
       forkey_hamil: prev.forkey_hamil,
       forkey_bidan: prev.forkey_bidan
     }));
+
+    setLabScreeningData({
+      hasil_lab_hb: '',
+      lab_protein_urine: 'Negatif',
+      lab_gula_darah: '',
+      hasil_lab_lainnya: '',
+      skrining_gonorea: 'Belum Diperiksa',
+      skrining_klamidia: 'Belum Diperiksa',
+      skrining_hiv: 'Belum Diperiksa',
+      status_art: '',
+      skrining_sifilis: 'Belum Diperiksa',
+      skrining_hbsag: 'Belum Diperiksa',
+      skrining_tb: 'Belum Diperiksa',
+      malaria_diberi_kelambu: 'Tidak',
+      terapi_malaria: false,
+      status_malaria: 'Belum Diperiksa',
+      terapi_kecacingan: false,
+      status_kecacingan: 'Belum Diperiksa'
+    });
+
+    setJiwaScreeningData({
+      skrining_jiwa: ''
+    });
   };
 
   // Complications handling functions
@@ -264,6 +314,22 @@ const TambahANC = () => {
     }));
   };
 
+  const handleLabScreeningChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setLabScreeningData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+  };
+
+  const handleJiwaScreeningChange = (e) => {
+    const { name, value } = e.target;
+    setJiwaScreeningData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -293,8 +359,12 @@ const TambahANC = () => {
     }
     
     const submitData = {
-      ...formData,
-      selisih_beratbadan: selisih_beratbadan ? parseFloat(selisih_beratbadan) : null
+      ancData: {
+        ...formData,
+        selisih_beratbadan: selisih_beratbadan ? parseFloat(selisih_beratbadan) : null
+      },
+      labScreeningData,
+      jiwaScreeningData
     };
     
     // Check if we have complications to submit
@@ -315,7 +385,7 @@ const TambahANC = () => {
             // Always use ANC data for these fields in ANC form
             tanggal_diagnosis: formData.tanggal_kunjungan,
             tekanan_darah: formData.tekanan_darah,
-            protein_urine: formData.lab_protein_urine,
+            protein_urine: labScreeningData.lab_protein_urine,
             forkey_hamil: formData.forkey_hamil
           }));
 
@@ -326,7 +396,7 @@ const TambahANC = () => {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           },
           body: JSON.stringify({
-            ancData: submitData,
+            ...submitData,
             complications: complicationsData
           })
         });
@@ -524,6 +594,26 @@ const TambahANC = () => {
           </button>
           <button
             type="button"
+            className={`form-tab-button ${activeTab === 'labScreening' ? 'active' : ''}`}
+            onClick={() => setActiveTab('labScreening')}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M7 2v2h1v14c0 2.21 1.79 4 4 4s4-1.79 4-4V4h1V2H7zm2 2h6v3h-2V5h-2v2H9V4zm4 14c-1.1 0-2-.9-2-2h4c0 1.1-.9 2-2 2z" fill="currentColor"/>
+            </svg>
+            Skrining Lab
+          </button>
+          <button
+            type="button"
+            className={`form-tab-button ${activeTab === 'jiwaScreening' ? 'active' : ''}`}
+            onClick={() => setActiveTab('jiwaScreening')}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z" fill="currentColor"/>
+            </svg>
+            Skrining Jiwa
+          </button>
+          <button
+            type="button"
             className={`form-tab-button ${activeTab === 'complications' ? 'active' : ''}`}
             onClick={() => setActiveTab('complications')}
           >
@@ -694,7 +784,7 @@ const TambahANC = () => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="tinggi_fundus">Tinggi Fundus (cm)</label>
+                <label htmlFor="tinggi_fundus">Tinggi Fundus Uteri (cm)</label>
                 <input
                   type="number"
                   step="0.01"
@@ -703,6 +793,30 @@ const TambahANC = () => {
                   value={formData.tinggi_fundus}
                   onChange={handleChange}
                   placeholder="Contoh: 20"
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="denyut_jantung_janin">Denyut Jantung Janin (bpm)</label>
+                <input
+                  type="number"
+                  id="denyut_jantung_janin"
+                  name="denyut_jantung_janin"
+                  value={formData.denyut_jantung_janin}
+                  onChange={handleChange}
+                  placeholder="Contoh: 140"
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="detak_jantung">Detak Jantung Ibu (bpm)</label>
+                <input
+                  type="number"
+                  id="detak_jantung"
+                  name="detak_jantung"
+                  value={formData.detak_jantung}
+                  onChange={handleChange}
+                  placeholder="Contoh: 80"
                 />
               </div>
 
@@ -819,150 +933,6 @@ const TambahANC = () => {
                   Beri Tablet FE
                 </label>
               </div>
-
-              <div className="form-group checkbox-group">
-                <label>
-                  <input
-                    type="checkbox"
-                    name="terapi_malaria"
-                    checked={formData.terapi_malaria}
-                    onChange={handleChange}
-                  />
-                  Terapi Malaria
-                </label>
-              </div>
-
-              <div className="form-group checkbox-group">
-                <label>
-                  <input
-                    type="checkbox"
-                    name="terapi_kecacingan"
-                    checked={formData.terapi_kecacingan}
-                    onChange={handleChange}
-                  />
-                  Terapi Kecacingan
-                </label>
-              </div>
-            </div>
-          </div>
-
-          <div className="form-section">
-            <h3>Pemeriksaan Laboratorium</h3>
-            <div className="form-grid">
-              <div className="form-group">
-                <label htmlFor="hasil_lab_hb">Hasil Lab HB (g/dL)</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  id="hasil_lab_hb"
-                  name="hasil_lab_hb"
-                  value={formData.hasil_lab_hb}
-                  onChange={handleChange}
-                  placeholder="Contoh: 11.5"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="lab_protein_urine">Protein Urine</label>
-                <Select
-                  id="lab_protein_urine"
-                  name="lab_protein_urine"
-                  value={proteinUrineOptions.find(opt => opt.value === formData.lab_protein_urine) || null}
-                  onChange={(selectedOption) => setFormData(prev => ({ ...prev, lab_protein_urine: selectedOption ? selectedOption.value : 'Negatif' }))}
-                  options={proteinUrineOptions}
-                  placeholder="-- Pilih Protein Urine --"
-                  isClearable
-                  isSearchable
-                  styles={customSelectStyles}
-                  noOptionsMessage={() => "Tidak ada data"}
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="lab_gula_darah">Gula Darah</label>
-                <input
-                  type="text"
-                  id="lab_gula_darah"
-                  name="lab_gula_darah"
-                  value={formData.lab_gula_darah}
-                  onChange={handleChange}
-                  placeholder="Contoh: 90 mg/dL"
-                />
-              </div>
-
-              <div className="form-group full-width">
-                <label htmlFor="hasil_lab_lainnya">Hasil Lab Lainnya</label>
-                <textarea
-                  id="hasil_lab_lainnya"
-                  name="hasil_lab_lainnya"
-                  value={formData.hasil_lab_lainnya}
-                  onChange={handleChange}
-                  rows="3"
-                  placeholder="Hasil pemeriksaan laboratorium lainnya..."
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="form-section">
-            <h3>Skrining Penyakit</h3>
-            <div className="form-grid">
-              <div className="form-group">
-                <label htmlFor="skrining_hiv">Skrining HIV</label>
-                <select
-                  id="skrining_hiv"
-                  name="skrining_hiv"
-                  value={formData.skrining_hiv}
-                  onChange={handleChange}
-                >
-                  <option value="Belum Diperiksa">Belum Diperiksa</option>
-                  <option value="Non-Reaktif">Non-Reaktif</option>
-                  <option value="Reaktif">Reaktif</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="skrining_sifilis">Skrining Sifilis</label>
-                <select
-                  id="skrining_sifilis"
-                  name="skrining_sifilis"
-                  value={formData.skrining_sifilis}
-                  onChange={handleChange}
-                >
-                  <option value="Belum Diperiksa">Belum Diperiksa</option>
-                  <option value="Non-Reaktif">Non-Reaktif</option>
-                  <option value="Reaktif">Reaktif</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="skrining_hbsag">Skrining HBsAg</label>
-                <select
-                  id="skrining_hbsag"
-                  name="skrining_hbsag"
-                  value={formData.skrining_hbsag}
-                  onChange={handleChange}
-                >
-                  <option value="Belum Diperiksa">Belum Diperiksa</option>
-                  <option value="Non-Reaktif">Non-Reaktif</option>
-                  <option value="Reaktif">Reaktif</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="skrining_tb">Skrining TB</label>
-                <select
-                  id="skrining_tb"
-                  name="skrining_tb"
-                  value={formData.skrining_tb}
-                  onChange={handleChange}
-                >
-                  <option value="Belum Diperiksa">Belum Diperiksa</option>
-                  <option value="Negatif">Negatif</option>
-                  <option value="Positif">Positif</option>
-                  <option value="Suspek">Suspek</option>
-                </select>
-              </div>
             </div>
           </div>
 
@@ -993,18 +963,6 @@ const TambahANC = () => {
                   <option value="Sesuai">Sesuai</option>
                   <option value="Tidak Sesuai">Tidak Sesuai</option>
                 </select>
-              </div>
-
-              <div className="form-group full-width">
-                <label htmlFor="skrining_jiwa">Skrining Jiwa</label>
-                <textarea
-                  id="skrining_jiwa"
-                  name="skrining_jiwa"
-                  value={formData.skrining_jiwa}
-                  onChange={handleChange}
-                  rows="3"
-                  placeholder="Hasil skrining kesehatan jiwa..."
-                />
               </div>
 
               <div className="form-group full-width">
@@ -1045,6 +1003,260 @@ const TambahANC = () => {
             </div>
           </div>
           </>
+          )}
+
+          {activeTab === 'labScreening' && (
+            <div className="form-section">
+              <h3>Pemeriksaan Laboratorium</h3>
+              <div className="form-grid">
+                <div className="form-group">
+                  <label htmlFor="hasil_lab_hb">Hasil Lab HB (g/dL)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    id="hasil_lab_hb"
+                    name="hasil_lab_hb"
+                    value={labScreeningData.hasil_lab_hb}
+                    onChange={handleLabScreeningChange}
+                    placeholder="Contoh: 11.5"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="lab_protein_urine">Protein Urine</label>
+                  <Select
+                    id="lab_protein_urine"
+                    name="lab_protein_urine"
+                    value={proteinUrineOptions.find(opt => opt.value === labScreeningData.lab_protein_urine) || null}
+                    onChange={(selectedOption) => setLabScreeningData(prev => ({ ...prev, lab_protein_urine: selectedOption ? selectedOption.value : 'Negatif' }))}
+                    options={proteinUrineOptions}
+                    placeholder="-- Pilih Protein Urine --"
+                    isClearable
+                    isSearchable
+                    styles={customSelectStyles}
+                    noOptionsMessage={() => "Tidak ada data"}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="lab_gula_darah">Gula Darah (mg/dL)</label>
+                  <input
+                    type="text"
+                    id="lab_gula_darah"
+                    name="lab_gula_darah"
+                    value={labScreeningData.lab_gula_darah}
+                    onChange={handleLabScreeningChange}
+                    placeholder="Contoh: 90 mg/dL"
+                  />
+                </div>
+
+                <div className="form-group full-width">
+                  <label htmlFor="hasil_lab_lainnya">Hasil Lab Lainnya</label>
+                  <textarea
+                    id="hasil_lab_lainnya"
+                    name="hasil_lab_lainnya"
+                    value={labScreeningData.hasil_lab_lainnya}
+                    onChange={handleLabScreeningChange}
+                    rows="3"
+                    placeholder="Hasil pemeriksaan laboratorium lainnya..."
+                  />
+                </div>
+              </div>
+
+              <h3 style={{ marginTop: '2rem' }}>Skrining Penyakit Menular</h3>
+              <div className="form-grid">
+                <div className="form-group">
+                  <label htmlFor="skrining_gonorea">Skrining Gonorea</label>
+                  <select
+                    id="skrining_gonorea"
+                    name="skrining_gonorea"
+                    value={labScreeningData.skrining_gonorea}
+                    onChange={handleLabScreeningChange}
+                  >
+                    <option value="Belum Diperiksa">Belum Diperiksa</option>
+                    <option value="Non-Reaktif">Non-Reaktif</option>
+                    <option value="Reaktif">Reaktif</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="skrining_klamidia">Skrining Klamidia</label>
+                  <select
+                    id="skrining_klamidia"
+                    name="skrining_klamidia"
+                    value={labScreeningData.skrining_klamidia}
+                    onChange={handleLabScreeningChange}
+                  >
+                    <option value="Belum Diperiksa">Belum Diperiksa</option>
+                    <option value="Non-Reaktif">Non-Reaktif</option>
+                    <option value="Reaktif">Reaktif</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="skrining_hiv">Skrining HIV</label>
+                  <select
+                    id="skrining_hiv"
+                    name="skrining_hiv"
+                    value={labScreeningData.skrining_hiv}
+                    onChange={handleLabScreeningChange}
+                  >
+                    <option value="Belum Diperiksa">Belum Diperiksa</option>
+                    <option value="Non-Reaktif">Non-Reaktif</option>
+                    <option value="Reaktif">Reaktif</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="status_art">Status ART</label>
+                  <select
+                    id="status_art"
+                    name="status_art"
+                    value={labScreeningData.status_art}
+                    onChange={handleLabScreeningChange}
+                  >
+                    <option value="">-- Pilih Status --</option>
+                    <option value="Belum ART">Belum ART</option>
+                    <option value="Sedang ART">Sedang ART</option>
+                    <option value="Putus ART">Putus ART</option>
+                    <option value="Tidak Diketahui">Tidak Diketahui</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="skrining_sifilis">Skrining Sifilis</label>
+                  <select
+                    id="skrining_sifilis"
+                    name="skrining_sifilis"
+                    value={labScreeningData.skrining_sifilis}
+                    onChange={handleLabScreeningChange}
+                  >
+                    <option value="Belum Diperiksa">Belum Diperiksa</option>
+                    <option value="Non-Reaktif">Non-Reaktif</option>
+                    <option value="Reaktif">Reaktif</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="skrining_hbsag">Skrining HBsAg</label>
+                  <select
+                    id="skrining_hbsag"
+                    name="skrining_hbsag"
+                    value={labScreeningData.skrining_hbsag}
+                    onChange={handleLabScreeningChange}
+                  >
+                    <option value="Belum Diperiksa">Belum Diperiksa</option>
+                    <option value="Non-Reaktif">Non-Reaktif</option>
+                    <option value="Reaktif">Reaktif</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="skrining_tb">Skrining TB</label>
+                  <select
+                    id="skrining_tb"
+                    name="skrining_tb"
+                    value={labScreeningData.skrining_tb}
+                    onChange={handleLabScreeningChange}
+                  >
+                    <option value="Belum Diperiksa">Belum Diperiksa</option>
+                    <option value="Negatif">Negatif</option>
+                    <option value="Positif">Positif</option>
+                    <option value="Suspek">Suspek</option>
+                  </select>
+                </div>
+              </div>
+
+              <h3 style={{ marginTop: '2rem' }}>Malaria & Kecacingan</h3>
+              <div className="form-grid">
+                <div className="form-group">
+                  <label htmlFor="status_malaria">Status Malaria</label>
+                  <select
+                    id="status_malaria"
+                    name="status_malaria"
+                    value={labScreeningData.status_malaria}
+                    onChange={handleLabScreeningChange}
+                  >
+                    <option value="Belum Diperiksa">Belum Diperiksa</option>
+                    <option value="Negatif">Negatif</option>
+                    <option value="Positif">Positif</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="malaria_diberi_kelambu">Diberi Kelambu</label>
+                  <select
+                    id="malaria_diberi_kelambu"
+                    name="malaria_diberi_kelambu"
+                    value={labScreeningData.malaria_diberi_kelambu}
+                    onChange={handleLabScreeningChange}
+                  >
+                    <option value="Tidak">Tidak</option>
+                    <option value="Ya">Ya</option>
+                  </select>
+                </div>
+
+                <div className="form-group checkbox-group">
+                  <label>
+                    <input
+                      type="checkbox"
+                      name="terapi_malaria"
+                      checked={labScreeningData.terapi_malaria}
+                      onChange={handleLabScreeningChange}
+                    />
+                    Terapi Malaria
+                  </label>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="status_kecacingan">Status Kecacingan</label>
+                  <select
+                    id="status_kecacingan"
+                    name="status_kecacingan"
+                    value={labScreeningData.status_kecacingan}
+                    onChange={handleLabScreeningChange}
+                  >
+                    <option value="Belum Diperiksa">Belum Diperiksa</option>
+                    <option value="Negatif">Negatif</option>
+                    <option value="Positif">Positif</option>
+                  </select>
+                </div>
+
+                <div className="form-group checkbox-group">
+                  <label>
+                    <input
+                      type="checkbox"
+                      name="terapi_kecacingan"
+                      checked={labScreeningData.terapi_kecacingan}
+                      onChange={handleLabScreeningChange}
+                    />
+                    Terapi Kecacingan
+                  </label>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'jiwaScreening' && (
+            <div className="form-section">
+              <h3>Skrining Kesehatan Jiwa</h3>
+              <div className="form-grid">
+                <div className="form-group full-width">
+                  <label htmlFor="skrining_jiwa">Hasil Skrining Jiwa</label>
+                  <textarea
+                    id="skrining_jiwa"
+                    name="skrining_jiwa"
+                    value={jiwaScreeningData.skrining_jiwa}
+                    onChange={handleJiwaScreeningChange}
+                    rows="8"
+                    placeholder="Hasil skrining kesehatan jiwa ibu hamil..."
+                  />
+                  <small style={{ display: 'block', marginTop: '0.5rem', color: '#6B7280' }}>
+                    Catatan: Skrining kesehatan jiwa meliputi penilaian kondisi psikologis, stres, kecemasan, dan depresi pada ibu hamil.
+                  </small>
+                </div>
+              </div>
+            </div>
           )}
 
           {activeTab === 'complications' && (

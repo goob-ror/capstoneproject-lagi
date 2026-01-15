@@ -918,7 +918,7 @@ const DetailIbu = () => {
                             </div>
                             
                             <div className="detail-item">
-                              <span className="detail-label">Tinggi Fundus:</span>
+                              <span className="detail-label">Tinggi Fundus Uteri:</span>
                               <span className="detail-value">{anc.tinggi_fundus ? `${anc.tinggi_fundus} cm` : '-'}</span>
                             </div>
                             
