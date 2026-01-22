@@ -326,6 +326,22 @@
   background-color: #E5E7EB;
 } */
 
+.btn-cancel {
+  padding: 12px 24px;
+  background-color: #F3F4F6;
+  color: #6B7280;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-cancel:hover {
+  background-color: #E5E7EB;
+}
+
 .btn-submit {
   padding: 12px 24px;
   background-color: #22C55E;

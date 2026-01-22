@@ -1,0 +1,159 @@
+/* TambahPersalinan Page Styles - Extends TambahKomplikasi base styles */
+.form-tabs-container {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  border-radius: 12px 12px 0 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.form-tab-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background-color: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: #6B7280;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Montserrat', sans-serif;
+  position: relative;
+  bottom: -2px;
+}
+
+.form-tab-button:hover {
+  color: #22C55E;
+  background-color: #F9FAFB;
+}
+
+.form-tab-button.active {
+  color: #22C55E;
+  border-bottom-color: #22C55E;
+  background-color: #ECFDF5;
+}
+
+.form-tab-button svg {
+  flex-shrink: 0;
+}
+
+/* Complications section styling */
+.anc-complications-section {
+  background: white;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.section-description {
+  color: #6B7280;
+  font-size: 14px;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+.btn-add-complication {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 8px 16px;
+  background: #22C55E;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-add-complication:hover {
+  background: #16A34A;
+}
+
+.complication-card {
+  border: 2px solid #E5E7EB;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  background: #FAFAFA;
+}
+
+.complication-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.complication-header h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.btn-remove-complication {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 6px 12px;
+  background: #EF4444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-remove-complication:hover {
+  background: #DC2626;
+}
+
+/* Mother data display - unique to Persalinan */
+.mother-info-card {
+  background: #F0F9FF;
+  border: 1px solid #BAE6FD;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.mother-info-card h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0C4A6E;
+}
+
+.mother-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.5rem;
+}
+
+.mother-info-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+.mother-info-label {
+  color: #0369A1;
+  font-weight: 500;
+}
+
+.mother-info-value {
+  color: #0C4A6E;
+  font-weight: 600;
+}

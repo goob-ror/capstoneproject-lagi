@@ -1,27 +1,27 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import DataIbuPresenter from './DataIbu-presenter';
-import './DataIbu.css';
+import PersalinanPresenter from './Persalinan-presenter';
+import './Persalinan.css';
 import $ from 'jquery';
 import 'datatables.net-dt/css/dataTables.dataTables.css';
 import 'datatables.net';
 
-const DataIbu = () => {
+const Persalinan = () => {
   const navigate = useNavigate();
   const tableRef = useRef(null);
   const dataTableRef = useRef(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [ibuData, setIbuData] = useState([]);
+  const [persalinanData, setPersalinanData] = useState([]);
   const [user, setUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const [presenter] = useState(() => new DataIbuPresenter({
+  const [presenter] = useState(() => new PersalinanPresenter({
     setLoading,
     setError,
     clearError: () => setError(''),
-    displayIbuData: (data) => setIbuData(data),
+    displayPersalinanData: (data) => setPersalinanData(data),
     updateTableData: (data) => {
       if (dataTableRef.current) {
         dataTableRef.current.clear();
@@ -35,46 +35,47 @@ const DataIbu = () => {
   useEffect(() => {
     const userData = presenter.getUser();
     setUser(userData);
-    presenter.loadIbuData();
+    presenter.loadPersalinanData();
   }, [presenter]);
 
   useEffect(() => {
-    if (ibuData.length > 0 && tableRef.current && !dataTableRef.current) {
-      // Initialize DataTable
+    if (persalinanData.length > 0 && tableRef.current && !dataTableRef.current) {
       dataTableRef.current = $(tableRef.current).DataTable({
-        data: ibuData,
+        data: persalinanData,
         columns: [
           { 
             data: null,
             render: (data, type, row, meta) => meta.row + 1
           },
+          { 
+            data: 'tanggal_persalinan',
+            render: (data) => data ? new Date(data).toLocaleDateString('id-ID', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            }) : '-'
+          },
+          { data: 'nama_ibu' },
           { data: 'nik_ibu' },
-          { data: 'nama_lengkap' },
+          { data: 'tempat_persalinan' },
+          { data: 'penolong' },
+          { data: 'cara_persalinan' },
           { 
-            data: 'tanggal_lahir',
-            render: (data) => data ? new Date(data).toLocaleDateString('id-ID') : '-'
+            data: 'kondisi_bayi',
+            render: (data) => {
+              if (!data) return '-';
+              const badgeClass = data === 'Sehat' ? 'badge-success' : 
+                                 data === 'Sakit' ? 'badge-warning' : 'badge-danger';
+              return `<span class="status-badge ${badgeClass}">${data}</span>`;
+            }
           },
-          { data: 'no_hp' },
-          { 
-            data: 'kelurahan_nama',
-            render: (data) => data || '-'
-          },
-          { 
-            data: 'nama_posyandu',
-            render: (data) => data || '-'
-          },
-          { data: 'gol_darah' },
-          { data: 'pekerjaan' },
           {
             data: null,
             render: (data, type, row) => {
               return `
                 <div class="action-buttons">
-                  <button class="btn-view" data-id="${row.id}" title="Lihat Detail">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" fill="currentColor"/>
-                    </svg>
-                  </button>
                   <button class="btn-edit" data-id="${row.id}" title="Edit">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="currentColor"/>
@@ -105,16 +106,11 @@ const DataIbu = () => {
           },
           zeroRecords: 'Tidak ada data yang ditemukan'
         },
-        dom: '<"table-controls"l>rt<"table-footer"ip>', // Removed 'f' to hide default search
+        dom: '<"table-controls"l>rt<"table-footer"ip>',
         ordering: true,
-        searching: false, // Disable DataTables search, use custom
-        responsive: true
-      });
-
-      // Handle action button clicks
-      $(tableRef.current).on('click', '.btn-view', function() {
-        const id = $(this).data('id');
-        handleView(id);
+        searching: false,
+        responsive: true,
+        order: [[1, 'desc']]
       });
 
       $(tableRef.current).on('click', '.btn-edit', function() {
@@ -134,36 +130,30 @@ const DataIbu = () => {
         dataTableRef.current = null;
       }
     };
-  }, [ibuData]);
+  }, [persalinanData]);
 
-  // Custom Full-Text Search handler
   useEffect(() => {
-    if (ibuData.length > 0) {
-      // Use presenter's full-text search algorithm
-      presenter.searchIbuData(searchTerm);
+    if (persalinanData.length > 0) {
+      presenter.searchPersalinanData(searchTerm);
     }
-  }, [searchTerm, ibuData, presenter]);
+  }, [searchTerm, persalinanData, presenter]);
 
   const handleLogout = () => {
     presenter.handleLogout();
   };
 
-  const handleView = (id) => {
-    navigate(`/detail-ibu/${id}`);
-  };
-
   const handleEdit = (id) => {
-    navigate(`/tambah-ibu?id=${id}`);
+    navigate(`/tambah-persalinan?id=${id}`);
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus data ini?')) {
-      await presenter.deleteIbu(id);
+    if (window.confirm('Apakah Anda yakin ingin menghapus data persalinan ini?')) {
+      await presenter.deletePersalinan(id);
     }
   };
 
   const handleAddNew = () => {
-    navigate('/tambah-ibu');
+    navigate('/tambah-persalinan');
   };
 
   if (loading) {
@@ -171,7 +161,7 @@ const DataIbu = () => {
       <div className="dashboard-container">
         <div className="loading-spinner">
           <div className="spinner"></div>
-          <p>Memuat data ibu...</p>
+          <p>Memuat data persalinan...</p>
         </div>
       </div>
     );
@@ -192,7 +182,7 @@ const DataIbu = () => {
             </svg>
             Dashboard
           </a>
-          <a href="/data-ibu" className="nav-item active">
+          <a href="/data-ibu" className="nav-item">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="currentColor"/>
             </svg>
@@ -204,7 +194,7 @@ const DataIbu = () => {
             </svg>
             Kunjungan ANC
           </a>
-          <a href="/persalinan" className="nav-item">
+          <a href="/persalinan" className="nav-item active">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor"/>
             </svg>
@@ -252,14 +242,14 @@ const DataIbu = () => {
       <main className="main-content">
         <div className="content-header">
           <div>
-            <h1>Data Ibu</h1>
-            <p>Kelola data ibu hamil dengan sistem penugasan Posyandu otomatis</p>
+            <h1>Persalinan</h1>
+            <p>Kelola data persalinan dan kelahiran</p>
           </div>
           <button className="btn-add" onClick={handleAddNew}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor"/>
             </svg>
-            Tambah Data Ibu
+            Tambah Persalinan
           </button>
         </div>
 
@@ -269,7 +259,7 @@ const DataIbu = () => {
           </div>
         )}
 
-        <div className="data-ibu-section">
+        <div className="persalinan-section">
           <div className="search-bar-container">
             <div className="search-bar">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -277,7 +267,7 @@ const DataIbu = () => {
               </svg>
               <input
                 type="text"
-                placeholder="Cari berdasarkan NIK, nama, kelurahan..."
+                placeholder="Cari berdasarkan nama ibu, tempat persalinan..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -289,14 +279,13 @@ const DataIbu = () => {
               <thead>
                 <tr>
                   <th>No</th>
+                  <th>Tanggal</th>
+                  <th>Nama Ibu</th>
                   <th>NIK</th>
-                  <th>Nama Lengkap</th>
-                  <th>Tanggal Lahir</th>
-                  <th>No. HP</th>
-                  <th>Kelurahan</th>
-                  <th>Posyandu</th>
-                  <th>Gol. Darah</th>
-                  <th>Pekerjaan</th>
+                  <th>Tempat</th>
+                  <th>Penolong</th>
+                  <th>Cara</th>
+                  <th>Kondisi Bayi</th>
                   <th>Aksi</th>
                 </tr>
               </thead>
@@ -310,4 +299,4 @@ const DataIbu = () => {
   );
 };
 
-export default DataIbu;
+export default Persalinan;

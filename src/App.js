@@ -9,6 +9,8 @@ import TambahIbu from './pages/TambahIbu/TambahIbu';
 import DetailIbu from './pages/DetailIbu/DetailIbu';
 import KunjunganANC from './pages/KunjunganANC/KunjunganANC';
 import TambahANC from './pages/TambahANC/TambahANC';
+import Persalinan from './pages/Persalinan/Persalinan';
+import TambahPersalinan from './pages/TambahPersalinan/TambahPersalinan';
 import Komplikasi from './pages/Komplikasi/Komplikasi';
 import TambahKomplikasi from './pages/TambahKomplikasi/TambahKomplikasi';
 import Posyandu from './pages/Posyandu/Posyandu';
@@ -32,7 +34,7 @@ function AppLayout() {
     document.body.className = '';
     
     // Add appropriate class based on route
-    const dashboardRoutes = ['/dashboard', '/data-ibu', '/detail-ibu', '/tambah-ibu', '/kunjungan-anc', '/tambah-anc', '/komplikasi', '/tambah-komplikasi', '/posyandu', '/rekapitulasi'];
+    const dashboardRoutes = ['/dashboard', '/data-ibu', '/detail-ibu', '/tambah-ibu', '/kunjungan-anc', '/tambah-anc', '/persalinan', '/tambah-persalinan', '/komplikasi', '/tambah-komplikasi', '/posyandu', '/rekapitulasi'];
     if (dashboardRoutes.some(route => location.pathname.startsWith(route))) {
       document.body.classList.add('dashboard-page');
     } else {
@@ -40,7 +42,7 @@ function AppLayout() {
     }
   }, [location]);
   
-  const isDashboard = ['/dashboard', '/data-ibu', '/detail-ibu', '/tambah-ibu', '/kunjungan-anc', '/tambah-anc', '/komplikasi', '/tambah-komplikasi', '/posyandu', '/rekapitulasi'].some(route => location.pathname.startsWith(route));
+  const isDashboard = ['/dashboard', '/data-ibu', '/detail-ibu', '/tambah-ibu', '/kunjungan-anc', '/tambah-anc', '/persalinan', '/tambah-persalinan', '/komplikasi', '/tambah-komplikasi', '/posyandu', '/rekapitulasi'].some(route => location.pathname.startsWith(route));
   
   return (
     <div className={isDashboard ? 'App' : 'App centered'}>
@@ -95,6 +97,22 @@ function AppLayout() {
           element={
             <ProtectedRoute>
               <TambahANC />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/persalinan" 
+          element={
+            <ProtectedRoute>
+              <Persalinan />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/tambah-persalinan" 
+          element={
+            <ProtectedRoute>
+              <TambahPersalinan />
             </ProtectedRoute>
           } 
         />
