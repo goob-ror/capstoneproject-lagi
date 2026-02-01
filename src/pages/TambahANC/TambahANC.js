@@ -166,7 +166,7 @@ const TambahANC = () => {
   useEffect(() => {
     const userData = presenter.getUser();
     setUser(userData);
-    
+
     if (userData) {
       setFormData(prev => ({ ...prev, forkey_bidan: userData.id }));
     }
@@ -196,11 +196,11 @@ const TambahANC = () => {
       // Get unique visit types only
       const existingTypes = [...new Set(previousVisits.map(visit => visit.jenis_kunjungan))];
       setExistingVisitTypes(existingTypes);
-      
+
       // Auto-select next available visit type
       const allVisitTypes = ['K1', 'K2', 'K3', 'K4', 'K5', 'K6', 'K7', 'K8'];
       const nextAvailable = allVisitTypes.find(type => !existingTypes.includes(type));
-      
+
       if (nextAvailable && formData.jenis_kunjungan !== nextAvailable) {
         setFormData(prev => ({
           ...prev,
@@ -208,7 +208,7 @@ const TambahANC = () => {
         }));
       }
     }
-  }, [previousVisits, isEdit]);
+  }, [previousVisits, isEdit, formData.jenis_kunjungan]);
 
   // Check for existing visit when pregnancy and visit type are selected (only in add mode, not edit)
   useEffect(() => {
@@ -300,14 +300,14 @@ const TambahANC = () => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
+
     // If changing jenis_kunjungan, reset form fields
     if (name === 'jenis_kunjungan') {
       resetFormFields();
       setExistingVisitId(null);
       setExistingVisitWarning('');
     }
-    
+
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value
@@ -332,7 +332,7 @@ const TambahANC = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // If updating existing visit, confirm with user
     if (existingVisitId && !isEdit) {
       const confirmUpdate = window.confirm(
@@ -342,7 +342,7 @@ const TambahANC = () => {
         return;
       }
     }
-    
+
     // Calculate weight difference
     let selisih_beratbadan = null;
     if (formData.berat_badan && motherData) {
@@ -357,7 +357,7 @@ const TambahANC = () => {
         selisih_beratbadan = (parseFloat(formData.berat_badan) - parseFloat(motherData.beratbadan)).toFixed(2);
       }
     }
-    
+
     const submitData = {
       ancData: {
         ...formData,
@@ -366,9 +366,9 @@ const TambahANC = () => {
       labScreeningData,
       jiwaScreeningData
     };
-    
+
     // Check if we have complications to submit
-    const hasComplications = activeTab === 'complications' && complications.some(comp => 
+    const hasComplications = activeTab === 'complications' && complications.some(comp =>
       comp.nama_komplikasi.trim() !== ''
     );
 
@@ -376,7 +376,7 @@ const TambahANC = () => {
       // Submit ANC with complications using transaction
       try {
         setLoading(true);
-        
+
         // Prepare complications data
         const complicationsData = complications
           .filter(comp => comp.nama_komplikasi.trim() !== '')
@@ -418,11 +418,11 @@ const TambahANC = () => {
       // Submit only ANC data (existing functionality)
       const finalEditId = existingVisitId || editId;
       const finalIsEdit = isEdit || !!existingVisitId;
-      
+
       console.log('Submit mode:', finalIsEdit ? 'UPDATE' : 'CREATE');
       console.log('Visit ID:', finalEditId);
       console.log('Visit Type:', formData.jenis_kunjungan);
-      
+
       await presenter.handleSubmit(submitData, finalIsEdit, finalEditId);
     }
   };
@@ -497,43 +497,49 @@ const TambahANC = () => {
         <nav className="sidebar-nav">
           <a href="/dashboard" className="nav-item">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" fill="currentColor"/>
+              <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" fill="currentColor" />
             </svg>
             Dashboard
           </a>
           <a href="/data-ibu" className="nav-item">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="currentColor"/>
+              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="currentColor" />
             </svg>
             Data Ibu
           </a>
           <a href="/kunjungan-anc" className="nav-item active">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" fill="currentColor"/>
+              <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" fill="currentColor" />
             </svg>
             Kunjungan ANC
           </a>
           <a href="/persalinan" className="nav-item">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor"/>
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor" />
             </svg>
             Persalinan
           </a>
+          <a href="/kunjungan-nifas" className="nav-item">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" fill="currentColor"/>
+            </svg>
+            Kunjungan Nifas
+          </a>
           <a href="/komplikasi" className="nav-item">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm11 15H4v-2h16v2zm0-5H4V8h5.08L7 10.83 8.62 12 11 8.76l1-1.36 1 1.36L15.38 12 17 10.83 14.92 8H20v6z" fill="currentColor"/>
+              <path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm11 15H4v-2h16v2zm0-5H4V8h5.08L7 10.83 8.62 12 11 8.76l1-1.36 1 1.36L15.38 12 17 10.83 14.92 8H20v6z" fill="currentColor" />
             </svg>
             Komplikasi
           </a>
           <a href="/posyandu" className="nav-item">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor"/>
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor" />
             </svg>
             Posyandu
           </a>
           <a href="/rekapitulasi" className="nav-item">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" fill="currentColor"/>
+              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" fill="currentColor" />
             </svg>
             Rekapitulasi
           </a>
@@ -551,7 +557,7 @@ const TambahANC = () => {
           </div>
           <button className="logout-btn" onClick={handleLogout}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z" fill="currentColor"/>
+              <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z" fill="currentColor" />
             </svg>
             Logout
           </button>
@@ -566,7 +572,7 @@ const TambahANC = () => {
           </div>
           <button className="btn-back" onClick={() => navigate('/kunjungan-anc')}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" fill="currentColor"/>
+              <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" fill="currentColor" />
             </svg>
             Kembali
           </button>
@@ -581,7 +587,7 @@ const TambahANC = () => {
         {existingVisitWarning && (
           <div className="warning-banner">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" fill="currentColor"/>
+              <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" fill="currentColor" />
             </svg>
             {existingVisitWarning}
           </div>
@@ -594,7 +600,7 @@ const TambahANC = () => {
             onClick={() => setActiveTab('anc')}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" fill="currentColor"/>
+              <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" fill="currentColor" />
             </svg>
             Kunjungan ANC
           </button>
@@ -604,7 +610,7 @@ const TambahANC = () => {
             onClick={() => setActiveTab('labScreening')}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M7 2v2h1v14c0 2.21 1.79 4 4 4s4-1.79 4-4V4h1V2H7zm2 2h6v3h-2V5h-2v2H9V4zm4 14c-1.1 0-2-.9-2-2h4c0 1.1-.9 2-2 2z" fill="currentColor"/>
+              <path d="M7 2v2h1v14c0 2.21 1.79 4 4 4s4-1.79 4-4V4h1V2H7zm2 2h6v3h-2V5h-2v2H9V4zm4 14c-1.1 0-2-.9-2-2h4c0 1.1-.9 2-2 2z" fill="currentColor" />
             </svg>
             Skrining Lab
           </button>
@@ -614,7 +620,7 @@ const TambahANC = () => {
             onClick={() => setActiveTab('jiwaScreening')}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z" fill="currentColor"/>
+              <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z" fill="currentColor" />
             </svg>
             Skrining Jiwa
           </button>
@@ -624,7 +630,7 @@ const TambahANC = () => {
             onClick={() => setActiveTab('complications')}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm11 15H4v-2h16v2zm0-5H4V8h5.08L7 10.83 8.62 12 11 8.76l1-1.36 1 1.36L15.38 12 17 10.83 14.92 8H20v6z" fill="currentColor"/>
+              <path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm11 15H4v-2h16v2zm0-5H4V8h5.08L7 10.83 8.62 12 11 8.76l1-1.36 1 1.36L15.38 12 17 10.83 14.92 8H20v6z" fill="currentColor" />
             </svg>
             Komplikasi
           </button>
@@ -635,380 +641,380 @@ const TambahANC = () => {
             <>
               <div className="form-section">
                 <h3>Informasi Dasar</h3>
-            <div className="form-grid">
-              <div className="form-group">
-                <label htmlFor="forkey_hamil">Pilih Ibu Hamil *</label>
-                <Select
-                  id="forkey_hamil"
-                  name="forkey_hamil"
-                  value={pregnancyOptions.find(opt => opt.value === formData.forkey_hamil) || null}
-                  onChange={(selectedOption) => setFormData(prev => ({ ...prev, forkey_hamil: selectedOption ? selectedOption.value : '' }))}
-                  options={pregnancyOptions}
-                  placeholder="-- Cari Ibu Hamil --"
-                  isClearable
-                  isSearchable
-                  isDisabled={isEdit}
-                  styles={customSelectStyles}
-                  noOptionsMessage={() => "Tidak ada data"}
-                />
-              </div>
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label htmlFor="forkey_hamil">Pilih Ibu Hamil *</label>
+                    <Select
+                      id="forkey_hamil"
+                      name="forkey_hamil"
+                      value={pregnancyOptions.find(opt => opt.value === formData.forkey_hamil) || null}
+                      onChange={(selectedOption) => setFormData(prev => ({ ...prev, forkey_hamil: selectedOption ? selectedOption.value : '' }))}
+                      options={pregnancyOptions}
+                      placeholder="-- Cari Ibu Hamil --"
+                      isClearable
+                      isSearchable
+                      isDisabled={isEdit}
+                      styles={customSelectStyles}
+                      noOptionsMessage={() => "Tidak ada data"}
+                    />
+                  </div>
 
-              <div className="form-group">
-                <label htmlFor="tanggal_kunjungan">Tanggal Kunjungan *</label>
-                <input
-                  type="date"
-                  id="tanggal_kunjungan"
-                  name="tanggal_kunjungan"
-                  value={formData.tanggal_kunjungan}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
+                  <div className="form-group">
+                    <label htmlFor="tanggal_kunjungan">Tanggal Kunjungan *</label>
+                    <input
+                      type="date"
+                      id="tanggal_kunjungan"
+                      name="tanggal_kunjungan"
+                      value={formData.tanggal_kunjungan}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
 
-              <div className="form-group">
-                <label htmlFor="jenis_kunjungan">Jenis Kunjungan *</label>
-                <div className="visit-type-selector">
-                  <select
-                    id="jenis_kunjungan"
-                    name="jenis_kunjungan"
-                    value={formData.jenis_kunjungan}
-                    onChange={handleChange}
-                    required
-                  >
-                    {['K1', 'K2', 'K3', 'K4', 'K5', 'K6', 'K7', 'K8'].map(type => (
-                      <option key={type} value={type}>
-                        {type} {existingVisitTypes.includes(type) ? '✓ (Ada)' : ''}
-                      </option>
-                    ))}
-                  </select>
-                  {existingVisitTypes.length > 0 && (
-                    <div className="existing-visits-info">
-                      <small>Kunjungan yang sudah ada:</small>
-                      <div className="existing-visits-badges">
-                        {existingVisitTypes
-                          .sort((a, b) => {
-                            // Sort K1, K2, K3, etc. in order
-                            const numA = parseInt(a.replace('K', ''));
-                            const numB = parseInt(b.replace('K', ''));
-                            return numA - numB;
-                          })
-                          .map(type => (
-                            <span key={type} className="visit-badge">{type}</span>
-                          ))}
-                      </div>
+                  <div className="form-group">
+                    <label htmlFor="jenis_kunjungan">Jenis Kunjungan *</label>
+                    <div className="visit-type-selector">
+                      <select
+                        id="jenis_kunjungan"
+                        name="jenis_kunjungan"
+                        value={formData.jenis_kunjungan}
+                        onChange={handleChange}
+                        required
+                      >
+                        {['K1', 'K2', 'K3', 'K4', 'K5', 'K6', 'K7', 'K8'].map(type => (
+                          <option key={type} value={type}>
+                            {type} {existingVisitTypes.includes(type) ? '✓ (Ada)' : ''}
+                          </option>
+                        ))}
+                      </select>
+                      {existingVisitTypes.length > 0 && (
+                        <div className="existing-visits-info">
+                          <small>Kunjungan yang sudah ada:</small>
+                          <div className="existing-visits-badges">
+                            {existingVisitTypes
+                              .sort((a, b) => {
+                                // Sort K1, K2, K3, etc. in order
+                                const numA = parseInt(a.replace('K', ''));
+                                const numB = parseInt(b.replace('K', ''));
+                                return numA - numB;
+                              })
+                              .map(type => (
+                                <span key={type} className="visit-badge">{type}</span>
+                              ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  )}
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="jenis_akses">Jenis Akses *</label>
+                    <select
+                      id="jenis_akses"
+                      name="jenis_akses"
+                      value={formData.jenis_akses}
+                      onChange={handleChange}
+                      required
+                    >
+                      <option value="Murni">Murni</option>
+                      <option value="Akses">Akses</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="pemeriksa">Pemeriksa *</label>
+                    <select
+                      id="pemeriksa"
+                      name="pemeriksa"
+                      value={formData.pemeriksa}
+                      onChange={handleChange}
+                      required
+                    >
+                      <option value="Bidan">Bidan</option>
+                      <option value="Dokter">Dokter</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="status_risiko_visit">Status Risiko *</label>
+                    <select
+                      id="status_risiko_visit"
+                      name="status_risiko_visit"
+                      value={formData.status_risiko_visit}
+                      onChange={handleChange}
+                      required
+                    >
+                      <option value="Normal">Normal</option>
+                      <option value="Risiko Tinggi">Risiko Tinggi</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 
-              <div className="form-group">
-                <label htmlFor="jenis_akses">Jenis Akses *</label>
-                <select
-                  id="jenis_akses"
-                  name="jenis_akses"
-                  value={formData.jenis_akses}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="Murni">Murni</option>
-                  <option value="Akses">Akses</option>
-                </select>
-              </div>
+              <div className="form-section">
+                <h3>Pemeriksaan Fisik</h3>
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label htmlFor="berat_badan">Berat Badan (kg)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      id="berat_badan"
+                      name="berat_badan"
+                      value={formData.berat_badan}
+                      onChange={handleChange}
+                      placeholder="Contoh: 55.5"
+                    />
+                    {motherData && motherData.beratbadan && (
+                      <small>Berat sebelum hamil: {motherData.beratbadan} kg</small>
+                    )}
+                  </div>
 
-              <div className="form-group">
-                <label htmlFor="pemeriksa">Pemeriksa *</label>
-                <select
-                  id="pemeriksa"
-                  name="pemeriksa"
-                  value={formData.pemeriksa}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="Bidan">Bidan</option>
-                  <option value="Dokter">Dokter</option>
-                </select>
-              </div>
+                  <div className="form-group">
+                    <label htmlFor="tekanan_darah">Tekanan Darah</label>
+                    <input
+                      type="text"
+                      id="tekanan_darah"
+                      name="tekanan_darah"
+                      value={formData.tekanan_darah}
+                      onChange={handleChange}
+                      placeholder="Contoh: 120/80"
+                    />
+                  </div>
 
-              <div className="form-group">
-                <label htmlFor="status_risiko_visit">Status Risiko *</label>
-                <select
-                  id="status_risiko_visit"
-                  name="status_risiko_visit"
-                  value={formData.status_risiko_visit}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="Normal">Normal</option>
-                  <option value="Risiko Tinggi">Risiko Tinggi</option>
-                </select>
-              </div>
-            </div>
-          </div>
+                  <div className="form-group">
+                    <label htmlFor="lila">LILA (cm)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      id="lila"
+                      name="lila"
+                      value={formData.lila}
+                      onChange={handleChange}
+                      placeholder="Contoh: 24.5"
+                    />
+                  </div>
 
-          <div className="form-section">
-            <h3>Pemeriksaan Fisik</h3>
-            <div className="form-grid">
-              <div className="form-group">
-                <label htmlFor="berat_badan">Berat Badan (kg)</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  id="berat_badan"
-                  name="berat_badan"
-                  value={formData.berat_badan}
-                  onChange={handleChange}
-                  placeholder="Contoh: 55.5"
-                />
-                {motherData && motherData.beratbadan && (
-                  <small>Berat sebelum hamil: {motherData.beratbadan} kg</small>
+                  <div className="form-group">
+                    <label htmlFor="tinggi_fundus">Tinggi Fundus Uteri (cm)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      id="tinggi_fundus"
+                      name="tinggi_fundus"
+                      value={formData.tinggi_fundus}
+                      onChange={handleChange}
+                      placeholder="Contoh: 20"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="denyut_jantung_janin">Denyut Jantung Janin (bpm)</label>
+                    <input
+                      type="number"
+                      id="denyut_jantung_janin"
+                      name="denyut_jantung_janin"
+                      value={formData.denyut_jantung_janin}
+                      onChange={handleChange}
+                      placeholder="Contoh: 140"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="detak_jantung">Detak Jantung Ibu (bpm)</label>
+                    <input
+                      type="number"
+                      id="detak_jantung"
+                      name="detak_jantung"
+                      value={formData.detak_jantung}
+                      onChange={handleChange}
+                      placeholder="Contoh: 80"
+                    />
+                  </div>
+
+                  <div className="form-group checkbox-group">
+                    <label>
+                      <input
+                        type="checkbox"
+                        name="confirm_usg"
+                        checked={formData.confirm_usg}
+                        onChange={handleChange}
+                      />
+                      Konfirmasi USG
+                    </label>
+                  </div>
+                </div>
+
+                {/* BMI Display */}
+                {motherData && motherData.tinggi_badan && formData.berat_badan && (
+                  <div className="bmi-info-card">
+                    <h4>Indeks Massa Tubuh (IMT)</h4>
+                    <div className="bmi-display">
+                      <div className="bmi-item">
+                        <span className="bmi-label">IMT Saat Ini:</span>
+                        <span className="bmi-value">
+                          {calculateBMI(parseFloat(formData.berat_badan), parseFloat(motherData.tinggi_badan))}
+                        </span>
+                        <span className={`bmi-category ${getBMICategoryColor(getBMICategory(calculateBMI(parseFloat(formData.berat_badan), parseFloat(motherData.tinggi_badan))))}`}>
+                          {getBMICategory(calculateBMI(parseFloat(formData.berat_badan), parseFloat(motherData.tinggi_badan)))}
+                        </span>
+                      </div>
+                      <small className="bmi-reference">Kurus: &lt;18.5 | Normal: 18.5-24.9 | Gemuk: 25-29.9 | Obese: ≥30</small>
+                    </div>
+                  </div>
+                )}
+
+                {/* Weight Difference Tracking */}
+                {motherData && formData.berat_badan && (
+                  <div className="weight-tracking-card">
+                    <h4>Perubahan Berat Badan</h4>
+                    <div className="weight-comparison">
+                      {motherData.beratbadan && (
+                        <div className="weight-item">
+                          <span className="weight-label">Sebelum Hamil:</span>
+                          <span className="weight-value">{motherData.beratbadan} kg</span>
+                        </div>
+                      )}
+
+                      {previousVisits && previousVisits.length > 0 && (
+                        <div className="previous-visits">
+                          <span className="weight-label">Kunjungan Sebelumnya:</span>
+                          {previousVisits.slice(0, 3).map((visit, index) => {
+                            const weightDiff = visit.berat_badan && formData.berat_badan
+                              ? (parseFloat(formData.berat_badan) - parseFloat(visit.berat_badan)).toFixed(1)
+                              : null;
+                            return (
+                              <div key={index} className="visit-weight">
+                                <span className="visit-info">
+                                  {visit.jenis_kunjungan} ({new Date(visit.tanggal_kunjungan).toLocaleDateString('id-ID')}):
+                                </span>
+                                <span className="visit-weight-value">{visit.berat_badan} kg</span>
+                                {weightDiff && (
+                                  <span className={`weight-diff ${parseFloat(weightDiff) >= 0 ? 'positive' : 'negative'}`}>
+                                    ({parseFloat(weightDiff) >= 0 ? '+' : ''}{weightDiff} kg)
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      {motherData.beratbadan && formData.berat_badan && (
+                        <div className="total-weight-change">
+                          <span className="weight-label">Total Perubahan:</span>
+                          <span className={`weight-value-large ${(parseFloat(formData.berat_badan) - parseFloat(motherData.beratbadan)) >= 0 ? 'positive' : 'negative'}`}>
+                            {(parseFloat(formData.berat_badan) - parseFloat(motherData.beratbadan)) >= 0 ? '+' : ''}
+                            {(parseFloat(formData.berat_badan) - parseFloat(motherData.beratbadan)).toFixed(1)} kg
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 )}
               </div>
 
-              <div className="form-group">
-                <label htmlFor="tekanan_darah">Tekanan Darah</label>
-                <input
-                  type="text"
-                  id="tekanan_darah"
-                  name="tekanan_darah"
-                  value={formData.tekanan_darah}
-                  onChange={handleChange}
-                  placeholder="Contoh: 120/80"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="lila">LILA (cm)</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  id="lila"
-                  name="lila"
-                  value={formData.lila}
-                  onChange={handleChange}
-                  placeholder="Contoh: 24.5"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="tinggi_fundus">Tinggi Fundus Uteri (cm)</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  id="tinggi_fundus"
-                  name="tinggi_fundus"
-                  value={formData.tinggi_fundus}
-                  onChange={handleChange}
-                  placeholder="Contoh: 20"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="denyut_jantung_janin">Denyut Jantung Janin (bpm)</label>
-                <input
-                  type="number"
-                  id="denyut_jantung_janin"
-                  name="denyut_jantung_janin"
-                  value={formData.denyut_jantung_janin}
-                  onChange={handleChange}
-                  placeholder="Contoh: 140"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="detak_jantung">Detak Jantung Ibu (bpm)</label>
-                <input
-                  type="number"
-                  id="detak_jantung"
-                  name="detak_jantung"
-                  value={formData.detak_jantung}
-                  onChange={handleChange}
-                  placeholder="Contoh: 80"
-                />
-              </div>
-
-              <div className="form-group checkbox-group">
-                <label>
-                  <input
-                    type="checkbox"
-                    name="confirm_usg"
-                    checked={formData.confirm_usg}
-                    onChange={handleChange}
-                  />
-                  Konfirmasi USG
-                </label>
-              </div>
-            </div>
-
-            {/* BMI Display */}
-            {motherData && motherData.tinggi_badan && formData.berat_badan && (
-              <div className="bmi-info-card">
-                <h4>Indeks Massa Tubuh (IMT)</h4>
-                <div className="bmi-display">
-                  <div className="bmi-item">
-                    <span className="bmi-label">IMT Saat Ini:</span>
-                    <span className="bmi-value">
-                      {calculateBMI(parseFloat(formData.berat_badan), parseFloat(motherData.tinggi_badan))}
-                    </span>
-                    <span className={`bmi-category ${getBMICategoryColor(getBMICategory(calculateBMI(parseFloat(formData.berat_badan), parseFloat(motherData.tinggi_badan))))}`}>
-                      {getBMICategory(calculateBMI(parseFloat(formData.berat_badan), parseFloat(motherData.tinggi_badan)))}
-                    </span>
+              <div className="form-section">
+                <h3>Imunisasi & Terapi</h3>
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label htmlFor="status_imunisasi_tt">Status Imunisasi TT</label>
+                    <select
+                      id="status_imunisasi_tt"
+                      name="status_imunisasi_tt"
+                      value={formData.status_imunisasi_tt}
+                      onChange={handleChange}
+                    >
+                      <option value="T0">T0</option>
+                      <option value="T1">T1</option>
+                      <option value="T2">T2</option>
+                      <option value="T3">T3</option>
+                      <option value="T4">T4</option>
+                      <option value="T5">T5</option>
+                    </select>
                   </div>
-                  <small className="bmi-reference">Kurus: &lt;18.5 | Normal: 18.5-24.9 | Gemuk: 25-29.9 | Obese: ≥30</small>
+
+                  <div className="form-group checkbox-group">
+                    <label>
+                      <input
+                        type="checkbox"
+                        name="beri_tablet_fe"
+                        checked={formData.beri_tablet_fe}
+                        onChange={handleChange}
+                      />
+                      Beri Tablet FE
+                    </label>
+                  </div>
                 </div>
               </div>
-            )}
 
-            {/* Weight Difference Tracking */}
-            {motherData && formData.berat_badan && (
-              <div className="weight-tracking-card">
-                <h4>Perubahan Berat Badan</h4>
-                <div className="weight-comparison">
-                  {motherData.beratbadan && (
-                    <div className="weight-item">
-                      <span className="weight-label">Sebelum Hamil:</span>
-                      <span className="weight-value">{motherData.beratbadan} kg</span>
-                    </div>
-                  )}
-                  
-                  {previousVisits && previousVisits.length > 0 && (
-                    <div className="previous-visits">
-                      <span className="weight-label">Kunjungan Sebelumnya:</span>
-                      {previousVisits.slice(0, 3).map((visit, index) => {
-                        const weightDiff = visit.berat_badan && formData.berat_badan 
-                          ? (parseFloat(formData.berat_badan) - parseFloat(visit.berat_badan)).toFixed(1)
-                          : null;
-                        return (
-                          <div key={index} className="visit-weight">
-                            <span className="visit-info">
-                              {visit.jenis_kunjungan} ({new Date(visit.tanggal_kunjungan).toLocaleDateString('id-ID')}):
-                            </span>
-                            <span className="visit-weight-value">{visit.berat_badan} kg</span>
-                            {weightDiff && (
-                              <span className={`weight-diff ${parseFloat(weightDiff) >= 0 ? 'positive' : 'negative'}`}>
-                                ({parseFloat(weightDiff) >= 0 ? '+' : ''}{weightDiff} kg)
-                              </span>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
+              <div className="form-section">
+                <h3>USG & Pemeriksaan Lainnya</h3>
+                <div className="form-grid">
+                  <div className="form-group full-width">
+                    <label htmlFor="hasil_usg">Hasil USG</label>
+                    <textarea
+                      id="hasil_usg"
+                      name="hasil_usg"
+                      value={formData.hasil_usg}
+                      onChange={handleChange}
+                      rows="3"
+                      placeholder="Hasil pemeriksaan USG..."
+                    />
+                  </div>
 
-                  {motherData.beratbadan && formData.berat_badan && (
-                    <div className="total-weight-change">
-                      <span className="weight-label">Total Perubahan:</span>
-                      <span className={`weight-value-large ${(parseFloat(formData.berat_badan) - parseFloat(motherData.beratbadan)) >= 0 ? 'positive' : 'negative'}`}>
-                        {(parseFloat(formData.berat_badan) - parseFloat(motherData.beratbadan)) >= 0 ? '+' : ''}
-                        {(parseFloat(formData.berat_badan) - parseFloat(motherData.beratbadan)).toFixed(1)} kg
-                      </span>
-                    </div>
-                  )}
+                  <div className="form-group">
+                    <label htmlFor="status_kmk_usg">Status KMK USG</label>
+                    <select
+                      id="status_kmk_usg"
+                      name="status_kmk_usg"
+                      value={formData.status_kmk_usg}
+                      onChange={handleChange}
+                    >
+                      <option value="">-- Pilih Status --</option>
+                      <option value="Sesuai">Sesuai</option>
+                      <option value="Tidak Sesuai">Tidak Sesuai</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group full-width">
+                    <label htmlFor="hasil_temu_wicara">Hasil Temu Wicara</label>
+                    <textarea
+                      id="hasil_temu_wicara"
+                      name="hasil_temu_wicara"
+                      value={formData.hasil_temu_wicara}
+                      onChange={handleChange}
+                      rows="3"
+                      placeholder="Hasil temu wicara dengan ibu hamil..."
+                    />
+                  </div>
+
+                  <div className="form-group full-width">
+                    <label htmlFor="tata_laksana_kasus">Tata Laksana Kasus</label>
+                    <textarea
+                      id="tata_laksana_kasus"
+                      name="tata_laksana_kasus"
+                      value={formData.tata_laksana_kasus}
+                      onChange={handleChange}
+                      rows="3"
+                      placeholder="Tata laksana kasus jika ada..."
+                    />
+                  </div>
+
+                  <div className="form-group full-width">
+                    <label htmlFor="keterangan_anc">Keterangan</label>
+                    <textarea
+                      id="keterangan_anc"
+                      name="keterangan_anc"
+                      value={formData.keterangan_anc}
+                      onChange={handleChange}
+                      rows="3"
+                      placeholder="Keterangan tambahan..."
+                    />
+                  </div>
                 </div>
               </div>
-            )}
-          </div>
-
-          <div className="form-section">
-            <h3>Imunisasi & Terapi</h3>
-            <div className="form-grid">
-              <div className="form-group">
-                <label htmlFor="status_imunisasi_tt">Status Imunisasi TT</label>
-                <select
-                  id="status_imunisasi_tt"
-                  name="status_imunisasi_tt"
-                  value={formData.status_imunisasi_tt}
-                  onChange={handleChange}
-                >
-                  <option value="T0">T0</option>
-                  <option value="T1">T1</option>
-                  <option value="T2">T2</option>
-                  <option value="T3">T3</option>
-                  <option value="T4">T4</option>
-                  <option value="T5">T5</option>
-                </select>
-              </div>
-
-              <div className="form-group checkbox-group">
-                <label>
-                  <input
-                    type="checkbox"
-                    name="beri_tablet_fe"
-                    checked={formData.beri_tablet_fe}
-                    onChange={handleChange}
-                  />
-                  Beri Tablet FE
-                </label>
-              </div>
-            </div>
-          </div>
-
-          <div className="form-section">
-            <h3>USG & Pemeriksaan Lainnya</h3>
-            <div className="form-grid">
-              <div className="form-group full-width">
-                <label htmlFor="hasil_usg">Hasil USG</label>
-                <textarea
-                  id="hasil_usg"
-                  name="hasil_usg"
-                  value={formData.hasil_usg}
-                  onChange={handleChange}
-                  rows="3"
-                  placeholder="Hasil pemeriksaan USG..."
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="status_kmk_usg">Status KMK USG</label>
-                <select
-                  id="status_kmk_usg"
-                  name="status_kmk_usg"
-                  value={formData.status_kmk_usg}
-                  onChange={handleChange}
-                >
-                  <option value="">-- Pilih Status --</option>
-                  <option value="Sesuai">Sesuai</option>
-                  <option value="Tidak Sesuai">Tidak Sesuai</option>
-                </select>
-              </div>
-
-              <div className="form-group full-width">
-                <label htmlFor="hasil_temu_wicara">Hasil Temu Wicara</label>
-                <textarea
-                  id="hasil_temu_wicara"
-                  name="hasil_temu_wicara"
-                  value={formData.hasil_temu_wicara}
-                  onChange={handleChange}
-                  rows="3"
-                  placeholder="Hasil temu wicara dengan ibu hamil..."
-                />
-              </div>
-
-              <div className="form-group full-width">
-                <label htmlFor="tata_laksana_kasus">Tata Laksana Kasus</label>
-                <textarea
-                  id="tata_laksana_kasus"
-                  name="tata_laksana_kasus"
-                  value={formData.tata_laksana_kasus}
-                  onChange={handleChange}
-                  rows="3"
-                  placeholder="Tata laksana kasus jika ada..."
-                />
-              </div>
-
-              <div className="form-group full-width">
-                <label htmlFor="keterangan_anc">Keterangan</label>
-                <textarea
-                  id="keterangan_anc"
-                  name="keterangan_anc"
-                  value={formData.keterangan_anc}
-                  onChange={handleChange}
-                  rows="3"
-                  placeholder="Keterangan tambahan..."
-                />
-              </div>
-            </div>
-          </div>
-          </>
+            </>
           )}
 
           {activeTab === 'labScreening' && (
@@ -1276,7 +1282,7 @@ const TambahANC = () => {
                     onClick={addComplication}
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor"/>
+                      <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor" />
                     </svg>
                     Tambah Komplikasi
                   </button>
@@ -1293,7 +1299,7 @@ const TambahANC = () => {
                           onClick={() => removeComplication(index)}
                         >
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="currentColor"/>
+                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="currentColor" />
                           </svg>
                         </button>
                       )}

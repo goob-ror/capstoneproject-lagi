@@ -1,113 +1,92 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import PosyanduPresenter from './Posyandu-presenter';
-import './Posyandu.css';
+import KunjunganNifasPresenter from './KunjunganNifas-presenter';
+import './KunjunganNifas.css';
 import $ from 'jquery';
 import 'datatables.net-dt/css/dataTables.dataTables.css';
 import 'datatables.net';
 
-const Posyandu = () => {
+const KunjunganNifas = () => {
   const navigate = useNavigate();
   const tableRef = useRef(null);
   const dataTableRef = useRef(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [posyanduData, setPosyanduData] = useState([]);
-  const [kelurahanData, setKelurahanData] = useState([]);
+  const [nifasData, setNifasData] = useState([]);
   const [user, setUser] = useState(null);
-  const [showModal, setShowModal] = useState(false);
-  const [editingPosyandu, setEditingPosyandu] = useState(null);
-  const [selectedKelurahan, setSelectedKelurahan] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
 
-  const [formData, setFormData] = useState({
-    nama_posyandu: '',
-    kelurahan_id: '',
-    rt: ''
-  });
-
-  const [presenter] = useState(() => new PosyanduPresenter({
+  const [presenter] = useState(() => new KunjunganNifasPresenter({
     setLoading,
     setError,
-    setSuccess,
     clearError: () => setError(''),
-    clearSuccess: () => setSuccess(''),
-    displayPosyanduData: (data) => {
-      setPosyanduData(data);
-      updateDataTable(data);
+    displayNifasData: (data) => setNifasData(data),
+    updateTableData: (data) => {
+      if (dataTableRef.current) {
+        dataTableRef.current.clear();
+        dataTableRef.current.rows.add(data);
+        dataTableRef.current.draw();
+      }
     },
-    displayKelurahanData: (data) => setKelurahanData(data),
-    onLogout: () => navigate('/login'),
-    onSuccess: (message) => {
-      setSuccess(message || 'Operasi berhasil!');
-      setShowModal(false);
-      setEditingPosyandu(null);
-      setFormData({
-        nama_posyandu: '',
-        kelurahan_id: '',
-        rt: ''
-      });
-    }
+    onLogout: () => navigate('/login')
   }));
 
   useEffect(() => {
-    const userData = presenter.model?.getUser() || presenter.getUser();
+    const userData = presenter.getUser();
     setUser(userData);
-    presenter.loadPosyanduData();
-    presenter.loadKelurahanData();
+    presenter.loadNifasData();
   }, [presenter]);
 
   useEffect(() => {
-    if (error || success) {
-      const timer = setTimeout(() => {
-        setError('');
-        setSuccess('');
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [error, success]);
-
-  // Initialize DataTable
-  useEffect(() => {
-    const handleEdit = (posyandu) => {
-      setEditingPosyandu(posyandu);
-      setFormData({
-        nama_posyandu: posyandu.nama_posyandu,
-        kelurahan_id: posyandu.kelurahan_id.toString(),
-        rt: posyandu.rt
-      });
-      setShowModal(true);
+    const handleEdit = (id) => {
+      navigate(`/tambah-nifas?id=${id}`);
     };
 
     const handleDelete = async (id) => {
-      if (window.confirm('Apakah Anda yakin ingin menghapus posyandu ini?')) {
-        await presenter.deletePosyandu(id);
+      if (window.confirm('Apakah Anda yakin ingin menghapus data kunjungan nifas ini?')) {
+        await presenter.deleteNifas(id);
       }
     };
 
-    if (posyanduData.length > 0 && tableRef.current && !dataTableRef.current) {
+    if (nifasData.length > 0 && tableRef.current && !dataTableRef.current) {
       dataTableRef.current = $(tableRef.current).DataTable({
-        data: posyanduData,
+        data: nifasData,
         columns: [
           {
             data: null,
             render: (data, type, row, meta) => meta.row + 1
           },
-          { data: 'nama_posyandu' },
-          { data: 'nama_kelurahan' },
           {
-            data: 'rt',
+            data: 'jenis_kunjungan',
             render: (data) => {
               if (!data) return '-';
-              return data.split(',').map(rt => `<span class="rt-tag">RT ${rt.trim()}</span>`).join(' ');
+              const badgeClass = data === 'KF1' ? 'badge-primary' :
+                data === 'KF2' ? 'badge-info' :
+                data === 'KF3' ? 'badge-warning' : 'badge-success';
+              return `<span class="visit-badge ${badgeClass}">${data}</span>`;
             }
           },
           {
-            data: 'created_at',
-            render: (data) => data ? new Date(data).toLocaleDateString('id-ID') : '-'
+            data: 'tanggal_kunjungan',
+            render: (data) => data ? new Date(data).toLocaleDateString('id-ID', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            }) : '-'
           },
+          { data: 'nama_ibu' },
+          { data: 'nik_ibu' },
+          { data: 'pemeriksa' },
+          { data: 'tekanan_darah' },
+          {
+            data: 'suhu_badan',
+            render: (data) => data ? `${data}°C` : '-'
+          },
+          { data: 'involusio_uteri' },
+          { data: 'lochea' },
           {
             data: null,
             render: (data, type, row) => {
@@ -146,16 +125,13 @@ const Posyandu = () => {
         dom: '<"table-controls"l>rt<"table-footer"ip>',
         ordering: true,
         searching: false,
-        responsive: true
+        responsive: true,
+        order: [[2, 'desc']]
       });
 
-      // Handle action button clicks
       $(tableRef.current).on('click', '.btn-edit', function () {
         const id = $(this).data('id');
-        const posyandu = posyanduData.find(p => p.id === id);
-        if (posyandu) {
-          handleEdit(posyandu);
-        }
+        handleEdit(id);
       });
 
       $(tableRef.current).on('click', '.btn-delete', function () {
@@ -170,88 +146,20 @@ const Posyandu = () => {
         dataTableRef.current = null;
       }
     };
-  }, [posyanduData, presenter]);
+  }, [nifasData, navigate, presenter]);
 
-  // Update DataTable data
-  const updateDataTable = (data) => {
-    if (dataTableRef.current) {
-      dataTableRef.current.clear();
-      dataTableRef.current.rows.add(data);
-      dataTableRef.current.draw();
-    }
-  };
-
-  // Filter functionality
   useEffect(() => {
-    if (posyanduData.length > 0) {
-      let filteredData = posyanduData;
-
-      // Filter by kelurahan
-      if (selectedKelurahan) {
-        filteredData = filteredData.filter(p => p.kelurahan_id.toString() === selectedKelurahan);
-      }
-
-      // Filter by search term
-      if (searchTerm) {
-        filteredData = filteredData.filter(p =>
-          p.nama_posyandu.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          p.nama_kelurahan.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          p.rt.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-      }
-
-      updateDataTable(filteredData);
+    if (dataTableRef.current) {
+      presenter.searchNifasData(searchTerm);
     }
-  }, [selectedKelurahan, searchTerm, posyanduData]);
+  }, [searchTerm, presenter]);
 
   const handleLogout = () => {
     presenter.handleLogout();
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (editingPosyandu) {
-      await presenter.updatePosyandu(editingPosyandu.id, formData);
-    } else {
-      await presenter.createPosyandu(formData);
-    }
-  };
-
-  const handleAdd = () => {
-    setEditingPosyandu(null);
-    setFormData({
-      nama_posyandu: '',
-      kelurahan_id: '',
-      rt: ''
-    });
-    setShowModal(true);
-  };
-
-
-
-
-
-  const handleCloseModal = () => {
-    setShowModal(false);
-    setEditingPosyandu(null);
-    setFormData({
-      nama_posyandu: '',
-      kelurahan_id: '',
-      rt: ''
-    });
-  };
-
-  const handleKelurahanFilter = (e) => {
-    setSelectedKelurahan(e.target.value);
+  const handleAddNew = () => {
+    navigate('/tambah-nifas');
   };
 
   if (loading) {
@@ -259,7 +167,7 @@ const Posyandu = () => {
       <div className="dashboard-container">
         <div className="loading-spinner">
           <div className="spinner"></div>
-          <p>Memuat data posyandu...</p>
+          <p>Memuat data kunjungan nifas...</p>
         </div>
       </div>
     );
@@ -298,9 +206,9 @@ const Posyandu = () => {
             </svg>
             Persalinan
           </a>
-          <a href="/kunjungan-nifas" className="nav-item">
+          <a href="/kunjungan-nifas" className="nav-item active">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" fill="currentColor"/>
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" fill="currentColor" />
             </svg>
             Kunjungan Nifas
           </a>
@@ -310,7 +218,7 @@ const Posyandu = () => {
             </svg>
             Komplikasi
           </a>
-          <a href="/posyandu" className="nav-item active">
+          <a href="/posyandu" className="nav-item">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor" />
             </svg>
@@ -346,14 +254,14 @@ const Posyandu = () => {
       <main className="main-content">
         <div className="content-header">
           <div>
-            <h1>Posyandu</h1>
-            <p>Kelola data posyandu dan wilayah kerja</p>
+            <h1>Kunjungan Nifas</h1>
+            <p>Kelola data kunjungan masa nifas</p>
           </div>
-          <button className="btn-add" onClick={handleAdd}>
+          <button className="btn-add" onClick={handleAddNew}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor" />
             </svg>
-            Tambah Posyandu
+            Tambah Kunjungan Nifas
           </button>
         </div>
 
@@ -363,40 +271,18 @@ const Posyandu = () => {
           </div>
         )}
 
-        {success && (
-          <div className="success-banner">
-            {success}
-          </div>
-        )}
-
-        <div className="posyandu-section">
-          <div className="filters-container">
+        <div className="nifas-section">
+          <div className="search-bar-container">
             <div className="search-bar">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="currentColor" />
               </svg>
               <input
                 type="text"
-                placeholder="Cari berdasarkan nama posyandu, kelurahan, atau RT..."
+                placeholder="Cari berdasarkan nama ibu, jenis kunjungan..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
-            </div>
-
-            <div className="filter-section">
-              <label htmlFor="kelurahan-filter">Kelurahan:</label>
-              <select
-                id="kelurahan-filter"
-                value={selectedKelurahan}
-                onChange={handleKelurahanFilter}
-              >
-                <option value="">Semua Kelurahan</option>
-                {kelurahanData.map(kelurahan => (
-                  <option key={kelurahan.id} value={kelurahan.id}>
-                    {kelurahan.nama_kelurahan}
-                  </option>
-                ))}
-              </select>
             </div>
           </div>
 
@@ -405,10 +291,15 @@ const Posyandu = () => {
               <thead>
                 <tr>
                   <th>No</th>
-                  <th>Nama Posyandu</th>
-                  <th>Kelurahan</th>
-                  <th>Wilayah Kerja</th>
-                  <th>Tanggal Dibuat</th>
+                  <th>Jenis</th>
+                  <th>Tanggal</th>
+                  <th>Nama Ibu</th>
+                  <th>NIK</th>
+                  <th>Pemeriksa</th>
+                  <th>TD</th>
+                  <th>Suhu</th>
+                  <th>Involusio</th>
+                  <th>Lochea</th>
                   <th>Aksi</th>
                 </tr>
               </thead>
@@ -417,82 +308,9 @@ const Posyandu = () => {
             </table>
           </div>
         </div>
-
-        {/* Modal */}
-        {showModal && (
-          <div className="modal-overlay" onClick={handleCloseModal}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-              <div className="modal-header">
-                <h3>{editingPosyandu ? 'Edit Posyandu' : 'Tambah Posyandu'}</h3>
-                <button className="modal-close" onClick={handleCloseModal}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="currentColor" />
-                  </svg>
-                </button>
-              </div>
-
-              <form onSubmit={handleSubmit} className="modal-form">
-                <div className="form-group">
-                  <label htmlFor="nama_posyandu">Nama Posyandu <span className="required">*</span></label>
-                  <input
-                    type="text"
-                    id="nama_posyandu"
-                    name="nama_posyandu"
-                    value={formData.nama_posyandu}
-                    onChange={handleChange}
-                    placeholder="Masukkan nama posyandu"
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="kelurahan_id">Kelurahan <span className="required">*</span></label>
-                  <select
-                    id="kelurahan_id"
-                    name="kelurahan_id"
-                    value={formData.kelurahan_id}
-                    onChange={handleChange}
-                    required
-                  >
-                    <option value="">Pilih Kelurahan</option>
-                    {kelurahanData.map(kelurahan => (
-                      <option key={kelurahan.id} value={kelurahan.id}>
-                        {kelurahan.nama_kelurahan}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="rt">Wilayah Kerja <span className="required">*</span></label>
-                  <input
-                    type="text"
-                    id="rt"
-                    name="rt"
-                    value={formData.rt}
-                    onChange={handleChange}
-                    placeholder="Contoh: 01,02,03"
-                    pattern="^(\d{2})(,\d{2})*$"
-                    required
-                  />
-                  <small>Format: 01,02,03 (pisahkan dengan koma)</small>
-                </div>
-
-                <div className="modal-actions">
-                  <button type="button" className="btn-secondary" onClick={handleCloseModal}>
-                    Batal
-                  </button>
-                  <button type="submit" className="btn-primary" disabled={loading}>
-                    {loading ? 'Menyimpan...' : (editingPosyandu ? 'Update' : 'Simpan')}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
       </main>
     </div>
   );
 };
 
-export default Posyandu;
+export default KunjunganNifas;

@@ -147,6 +147,12 @@ const DetailIbu = () => {
             </svg>
             Persalinan
           </a>
+          <a href="/kunjungan-nifas" className="nav-item">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" fill="currentColor"/>
+            </svg>
+            Kunjungan Nifas
+          </a>
           <a href="/komplikasi" className="nav-item">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm11 15H4v-2h16v2zm0-5H4V8h5.08L7 10.83 8.62 12 11 8.76l1-1.36 1 1.36L15.38 12 17 10.83 14.92 8H20v6z" fill="currentColor"/>
@@ -510,15 +516,29 @@ const DetailIbu = () => {
                             <span className="anc-count-badge">
                               {pregnancy.ancVisits?.length || 0} ANC
                             </span>
+                            {pregnancy.persalinan && (
+                              <span className="visit-badge">
+                                {pregnancy.persalinan.jenis_kunjungan || 'Persalinan'}
+                              </span>
+                            )}
                           </div>
                         </div>
                         <div className="pregnancy-summary">
                           <div className="summary-item">
                             <span className="summary-label">G{pregnancy.gravida}P{pregnancy.partus}A{pregnancy.abortus}</span>
                           </div>
-                          <div className="summary-item">
-                            <span className="summary-label">Klik untuk melihat detail ANC</span>
-                          </div>
+                          {pregnancy.persalinan ? (
+                            <div className="summary-item">
+                              <span className="summary-label">
+                                Persalinan: {formatDate(pregnancy.persalinan.tanggal_persalinan)} - 
+                                {pregnancy.persalinan.cara_persalinan} di {pregnancy.persalinan.tempat_persalinan}
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="summary-item">
+                              <span className="summary-label">Klik untuk melihat detail ANC</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))

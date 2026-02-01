@@ -453,7 +453,7 @@ router.get('/:id/detail', authMiddleware, async (req, res) => {
       [id]
     );
     
-    // For each pregnancy, get its ANC visits
+    // For each pregnancy, get its ANC visits and persalinan data
     const pregnancyHistory = [];
     for (const pregnancy of pregnancyHistoryRows) {
       const [ancRows] = await pool.query(
@@ -463,9 +463,20 @@ router.get('/:id/detail', authMiddleware, async (req, res) => {
         [pregnancy.id]
       );
       
+      // Get persalinan data for this pregnancy
+      const [persalinanRows] = await pool.query(
+        `SELECT p.*, b.nama_lengkap as nama_bidan 
+         FROM persalinan p
+         LEFT JOIN bidan b ON p.forkey_bidan = b.id
+         WHERE p.forkey_hamil = ? 
+         ORDER BY p.tanggal_persalinan DESC`,
+        [pregnancy.id]
+      );
+      
       pregnancyHistory.push({
         ...pregnancy,
-        ancVisits: ancRows
+        ancVisits: ancRows,
+        persalinan: persalinanRows.length > 0 ? persalinanRows[0] : null
       });
     }
     

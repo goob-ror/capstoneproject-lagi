@@ -1074,3 +1074,20 @@
     font-size: 16px;
   }
 }
+/* Visit Badge for Persalinan - Same as ANC styling */
+.visit-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  background-color: #DCFCE7;
+  color: #166534;
+  border: 1px solid #86EFAC;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.visit-badge::before {
+  content: '✓ ';
+  margin-right: 2px;
+}

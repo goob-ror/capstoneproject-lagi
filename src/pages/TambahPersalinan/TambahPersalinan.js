@@ -246,6 +246,12 @@ const TambahPersalinan = () => {
             </svg>
             Persalinan
           </a>
+          <a href="/kunjungan-nifas" className="nav-item">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" fill="currentColor"/>
+            </svg>
+            Kunjungan Nifas
+          </a>
           <a href="/komplikasi" className="nav-item">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm11 15H4v-2h16v2zm0-5H4V8h5.08L7 10.83 8.62 12 11 8.76l1-1.36 1 1.36L15.38 12 17 10.83 14.92 8H20v6z" fill="currentColor"/>
@@ -334,57 +340,63 @@ const TambahPersalinan = () => {
               <div className="form-section">
                 <h3>Informasi Dasar</h3>
                 <div className="form-grid">
-                  <div className="form-group">
-                    <label htmlFor="forkey_hamil">Pilih Ibu yang Akan Melahirkan *</label>
-                    <Select
-                      id="forkey_hamil"
-                      name="forkey_hamil"
-                      value={pregnancyOptions.find(opt => opt.value === formData.forkey_hamil) || null}
-                      onChange={(selectedOption) => setFormData(prev => ({ ...prev, forkey_hamil: selectedOption ? selectedOption.value : '' }))}
-                      options={pregnancyOptions}
-                      placeholder="-- Cari Ibu Hamil --"
-                      isClearable
-                      isSearchable
-                      isDisabled={isEdit}
-                      styles={customSelectStyles}
-                      noOptionsMessage={() => "Tidak ada ibu hamil yang siap melahirkan"}
-                    />
-                    <small style={{ color: '#6B7280', fontSize: '12px', marginTop: '4px', display: 'block' }}>
-                      Hanya menampilkan ibu hamil yang mendekati HPL atau sudah melewati 37 minggu kehamilan
-                    </small>
-                  </div>
+                  <div className="form-group-with-info">
+                    <div className="form-group">
+                      <label htmlFor="forkey_hamil">Pilih Ibu yang Akan Melahirkan *</label>
+                      <Select
+                        id="forkey_hamil"
+                        name="forkey_hamil"
+                        value={pregnancyOptions.find(opt => opt.value === formData.forkey_hamil) || null}
+                        onChange={(selectedOption) => setFormData(prev => ({ ...prev, forkey_hamil: selectedOption ? selectedOption.value : '' }))}
+                        options={pregnancyOptions}
+                        placeholder="-- Cari Ibu Hamil --"
+                        isClearable
+                        isSearchable
+                        isDisabled={isEdit}
+                        styles={customSelectStyles}
+                        noOptionsMessage={() => "Tidak ada ibu hamil yang siap melahirkan"}
+                      />
+                      <small style={{ color: '#6B7280', fontSize: '12px', marginTop: '4px', display: 'block' }}>
+                        Hanya menampilkan ibu hamil yang mendekati HPL atau sudah melewati 37 minggu kehamilan
+                      </small>
+                    </div>
 
-                  {motherData && (
-                    <div className="mother-info-card">
-                      <h4>Informasi Ibu</h4>
-                      <div className="mother-info-grid">
-                        <div className="mother-info-item">
-                          <span className="mother-info-label">Nama:</span>
-                          <span className="mother-info-value">{motherData.nama_lengkap}</span>
+                    {motherData && (
+                      <div className="mother-info-card">
+                        <div className="mother-info-header">
+                          <h4>Informasi Ibu</h4>
+                          <div className="pregnancy-status-badge">
+                            Siap Melahirkan
+                          </div>
                         </div>
-                        <div className="mother-info-item">
-                          <span className="mother-info-label">NIK:</span>
-                          <span className="mother-info-value">{motherData.nik_ibu}</span>
-                        </div>
-                        <div className="mother-info-item">
-                          <span className="mother-info-label">Usia:</span>
-                          <span className="mother-info-value">{motherData.usia} tahun</span>
-                        </div>
-                        <div className="mother-info-item">
-                          <span className="mother-info-label">Gravida:</span>
-                          <span className="mother-info-value">G{motherData.gravida} P{motherData.partus} A{motherData.abortus}</span>
-                        </div>
-                        <div className="mother-info-item">
-                          <span className="mother-info-label">HPL:</span>
-                          <span className="mother-info-value">{new Date(motherData.taksiran_persalinan).toLocaleDateString('id-ID')}</span>
-                        </div>
-                        <div className="mother-info-item">
-                          <span className="mother-info-label">Usia Kehamilan:</span>
-                          <span className="mother-info-value">{motherData.usia_kehamilan} minggu</span>
+                        <div className="mother-info-grid">
+                          <div className="mother-info-item">
+                            <span className="mother-info-label">Nama</span>
+                            <span className="mother-info-value">{motherData.nama_lengkap}</span>
+                          </div>
+                          <div className="mother-info-item">
+                            <span className="mother-info-label">NIK</span>
+                            <span className="mother-info-value">{motherData.nik_ibu}</span>
+                          </div>
+                          <div className="mother-info-item">
+                            <span className="mother-info-label">Usia</span>
+                            <span className="mother-info-value">{motherData.usia} tahun</span>
+                          </div>
+                          <div className="mother-info-item">
+                            <span className="mother-info-label">Gravida</span>
+                            <span className="mother-info-value">G{motherData.gravida} P{motherData.partus} A{motherData.abortus}</span>
+                          </div>
+                          <div className="mother-info-item">
+                            <span className="mother-info-label">HPL</span>
+                            <span className="mother-info-value">{new Date(motherData.taksiran_persalinan).toLocaleDateString('id-ID')}</span>
+                          </div>
+                          <div className="mother-info-item">
+                            <span className="mother-info-label">Usia Kehamilan</span>
+                            <span className="mother-info-value">{motherData.usia_kehamilan} minggu</span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    )}
                   </div>
 
                   <div className="form-group">
@@ -459,6 +471,7 @@ const TambahPersalinan = () => {
                     </label>
                   </div>
                 </div>
+              </div>
 
               <div className="form-section">
                 <h3>Kondisi Ibu</h3>
@@ -675,9 +688,6 @@ const TambahPersalinan = () => {
                     Tambah Komplikasi
                   </button>
                 </div>
-                <p className="section-description">
-                  Catat komplikasi yang terjadi selama proses persalinan. Data ini akan membantu dalam evaluasi dan tindak lanjut perawatan.
-                </p>
 
                 {complications.map((comp, index) => (
                   <div key={index} className="anc-complication-card">

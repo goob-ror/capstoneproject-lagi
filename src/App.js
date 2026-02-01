@@ -9,8 +9,12 @@ import TambahIbu from './pages/TambahIbu/TambahIbu';
 import DetailIbu from './pages/DetailIbu/DetailIbu';
 import KunjunganANC from './pages/KunjunganANC/KunjunganANC';
 import TambahANC from './pages/TambahANC/TambahANC';
+// eslint-disable-next-line no-unused-vars
 import Persalinan from './pages/Persalinan/Persalinan';
+// eslint-disable-next-line no-unused-vars
 import TambahPersalinan from './pages/TambahPersalinan/TambahPersalinan';
+import KunjunganNifas from './pages/KunjunganNifas/KunjunganNifas';
+import TambahNifas from './pages/TambahNifas/TambahNifas';
 import Komplikasi from './pages/Komplikasi/Komplikasi';
 import TambahKomplikasi from './pages/TambahKomplikasi/TambahKomplikasi';
 import Posyandu from './pages/Posyandu/Posyandu';
@@ -28,22 +32,22 @@ const ProtectedRoute = ({ children }) => {
 // Layout wrapper to handle body classes
 function AppLayout() {
   const location = useLocation();
-  
+
   useEffect(() => {
     // Remove all body classes
     document.body.className = '';
-    
+
     // Add appropriate class based on route
-    const dashboardRoutes = ['/dashboard', '/data-ibu', '/detail-ibu', '/tambah-ibu', '/kunjungan-anc', '/tambah-anc', '/persalinan', '/tambah-persalinan', '/komplikasi', '/tambah-komplikasi', '/posyandu', '/rekapitulasi'];
+    const dashboardRoutes = ['/dashboard', '/data-ibu', '/detail-ibu', '/tambah-ibu', '/kunjungan-anc', '/tambah-anc', '/persalinan', '/tambah-persalinan', '/kunjungan-nifas', '/tambah-nifas', '/komplikasi', '/tambah-komplikasi', '/posyandu', '/rekapitulasi'];
     if (dashboardRoutes.some(route => location.pathname.startsWith(route))) {
       document.body.classList.add('dashboard-page');
     } else {
       document.body.classList.add('login-page');
     }
   }, [location]);
-  
-  const isDashboard = ['/dashboard', '/data-ibu', '/detail-ibu', '/tambah-ibu', '/kunjungan-anc', '/tambah-anc', '/persalinan', '/tambah-persalinan', '/komplikasi', '/tambah-komplikasi', '/posyandu', '/rekapitulasi'].some(route => location.pathname.startsWith(route));
-  
+
+  const isDashboard = ['/dashboard', '/data-ibu', '/detail-ibu', '/tambah-ibu', '/kunjungan-anc', '/tambah-anc', '/persalinan', '/tambah-persalinan', '/kunjungan-nifas', '/tambah-nifas', '/komplikasi', '/tambah-komplikasi', '/posyandu', '/rekapitulasi'].some(route => location.pathname.startsWith(route));
+
   return (
     <div className={isDashboard ? 'App' : 'App centered'}>
       <OfflineIndicator />
@@ -52,101 +56,117 @@ function AppLayout() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/waiting-approval" element={<WaitingApprovalPage />} />
-        <Route 
-          path="/dashboard" 
+        <Route
+          path="/dashboard"
           element={
             <ProtectedRoute>
               <Dashboard />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/data-ibu" 
+        <Route
+          path="/data-ibu"
           element={
             <ProtectedRoute>
               <DataIbu />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/tambah-ibu" 
+        <Route
+          path="/tambah-ibu"
           element={
             <ProtectedRoute>
               <TambahIbu />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/detail-ibu/:id" 
+        <Route
+          path="/detail-ibu/:id"
           element={
             <ProtectedRoute>
               <DetailIbu />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/kunjungan-anc" 
+        <Route
+          path="/kunjungan-anc"
           element={
             <ProtectedRoute>
               <KunjunganANC />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/tambah-anc" 
+        <Route
+          path="/tambah-anc"
           element={
             <ProtectedRoute>
               <TambahANC />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/persalinan" 
+        <Route
+          path="/persalinan"
           element={
             <ProtectedRoute>
               <Persalinan />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/tambah-persalinan" 
+        <Route
+          path="/tambah-persalinan"
           element={
             <ProtectedRoute>
               <TambahPersalinan />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/komplikasi" 
+        <Route
+          path="/kunjungan-nifas"
+          element={
+            <ProtectedRoute>
+              <KunjunganNifas />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/tambah-nifas"
+          element={
+            <ProtectedRoute>
+              <TambahNifas />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/komplikasi"
           element={
             <ProtectedRoute>
               <Komplikasi />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/tambah-komplikasi" 
+        <Route
+          path="/tambah-komplikasi"
           element={
             <ProtectedRoute>
               <TambahKomplikasi />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/posyandu" 
+        <Route
+          path="/posyandu"
           element={
             <ProtectedRoute>
               <Posyandu />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/rekapitulasi" 
+        <Route
+          path="/rekapitulasi"
           element={
             <ProtectedRoute>
               <Rekapitulasi />
             </ProtectedRoute>
-          } 
+          }
         />
       </Routes>
     </div>

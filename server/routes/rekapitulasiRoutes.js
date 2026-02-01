@@ -30,7 +30,20 @@ router.get('/', authMiddleware, async (req, res) => {
     }
     const dateWhereANC = dateFilterANC.length > 0 ? 'AND ' + dateFilterANC.join(' AND ') : '';
 
-    // Helper for komplikasi date filter
+    // Helper for nifas date filter
+    const dateFilterNifas = [];
+    const dateParamsNifas = [];
+    if (year) {
+      dateFilterNifas.push('YEAR(nf.tanggal_kunjungan) = ?');
+      dateParamsNifas.push(year);
+    }
+    if (month) {
+      dateFilterNifas.push('MONTH(nf.tanggal_kunjungan) = ?');
+      dateParamsNifas.push(month);
+    }
+    const dateWhereNifas = dateFilterNifas.length > 0 ? 'AND ' + dateFilterNifas.join(' AND ') : '';
+
+    // Helper for komplikasi date filter (kept for preeklamsia statistics)
     const dateFilterKomp = [];
     const dateParamsKomp = [];
     if (year) {
@@ -67,14 +80,14 @@ router.get('/', authMiddleware, async (req, res) => {
     const [totalANCResult] = await pool.query(totalANCQuery, [...kelurahanParams, ...dateParamsANC]);
     const totalANC = totalANCResult[0].count;
 
-    // 4. Get total complications
-    const totalKomplikasiQuery = `SELECT COUNT(*) as count FROM komplikasi ko
-           INNER JOIN kehamilan k ON ko.forkey_hamil = k.id
+    // 4. Get total nifas visits (moved up from 4.5)
+    const totalNifasQuery = `SELECT COUNT(*) as count FROM kunjungan_nifas nf
+           INNER JOIN kehamilan k ON nf.forkey_hamil = k.id
            INNER JOIN ibu i ON k.forkey_ibu = i.id 
            LEFT JOIN kelurahan kel ON i.kelurahan_id = kel.id
-           WHERE 1=1 ${kelurahanFilter} ${dateWhereKomp}`;
-    const [totalKomplikasiResult] = await pool.query(totalKomplikasiQuery, [...kelurahanParams, ...dateParamsKomp]);
-    const totalKomplikasi = totalKomplikasiResult[0].count;
+           WHERE 1=1 ${kelurahanFilter} ${dateWhereNifas}`;
+    const [totalNifasResult] = await pool.query(totalNifasQuery, [...kelurahanParams, ...dateParamsNifas]);
+    const totalNifas = totalNifasResult[0].count;
 
     // 5. Get ANC by type
     console.log('Query 5: ANC by type');
@@ -96,28 +109,27 @@ router.get('/', authMiddleware, async (req, res) => {
       ORDER BY ac.jenis_kunjungan`;
     const [ancByType] = await pool.query(ancByTypeQuery, [...kelurahanParams, ...dateParamsANC, ...kelurahanParams, ...dateParamsANC]);
 
-    // 6. Get complications by severity
-    console.log('Query 6: Complications by severity');
-    const compBySeverityQuery = `
+    // 6. Get nifas by type
+    console.log('Query 6: Nifas by type');
+    const nifasByTypeQuery = `
       SELECT 
-        ko.tingkat_keparahan,
+        nf.jenis_kunjungan,
         COUNT(*) as count,
-        ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM komplikasi ko2
-          INNER JOIN kehamilan k2 ON ko2.forkey_hamil = k2.id
+        ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM kunjungan_nifas nf2
+          INNER JOIN kehamilan k2 ON nf2.forkey_hamil = k2.id
           INNER JOIN ibu i2 ON k2.forkey_ibu = i2.id
           LEFT JOIN kelurahan kel2 ON i2.kelurahan_id = kel2.id
-          WHERE 1=1 ${kelurahanFilter} ${dateWhereKomp}), 1) as percentage
-      FROM komplikasi ko
-      INNER JOIN kehamilan k ON ko.forkey_hamil = k.id
+          WHERE 1=1 ${kelurahanFilter} ${dateWhereNifas}), 1) as percentage
+      FROM kunjungan_nifas nf
+      INNER JOIN kehamilan k ON nf.forkey_hamil = k.id
       INNER JOIN ibu i ON k.forkey_ibu = i.id
       LEFT JOIN kelurahan kel ON i.kelurahan_id = kel.id
-      WHERE 1=1 ${kelurahanFilter} ${dateWhereKomp}
-      GROUP BY ko.tingkat_keparahan
-      ORDER BY FIELD(ko.tingkat_keparahan, 'Ringan', 'Sedang', 'Berat')`;
-    const [complicationsBySeverity] = await pool.query(compBySeverityQuery, [...kelurahanParams, ...dateParamsKomp, ...kelurahanParams, ...dateParamsKomp]);
+      WHERE 1=1 ${kelurahanFilter} ${dateWhereNifas}
+      GROUP BY nf.jenis_kunjungan
+      ORDER BY FIELD(nf.jenis_kunjungan, 'KF1', 'KF2', 'KF3', 'KF4')`;
+    const [nifasByType] = await pool.query(nifasByTypeQuery, [...kelurahanParams, ...dateParamsNifas, ...kelurahanParams, ...dateParamsNifas]);
 
     // 7. Get risk distribution (uses yearly data, ignores month filter)
-    console.log('Query 7: Risk distribution');
     const yearFilterOnly = year ? 'AND YEAR(ac.tanggal_kunjungan) = ?' : '';
     const yearParamsOnly = year ? [year] : [];
     const riskQuery = `
@@ -138,7 +150,6 @@ router.get('/', authMiddleware, async (req, res) => {
     const [riskDistribution] = await pool.query(riskQuery, [...kelurahanParams, ...yearParamsOnly, ...kelurahanParams, ...yearParamsOnly]);
 
     // 8. Get TT Immunization status (uses yearly data, ignores month filter)
-    console.log('Query 8: TT Immunization');
     const ttQuery = `
       SELECT
         ac.status_imunisasi_tt,
@@ -157,22 +168,40 @@ router.get('/', authMiddleware, async (req, res) => {
       ORDER BY ac.status_imunisasi_tt`;
     const [ttImmunization] = await pool.query(ttQuery, [...kelurahanParams, ...yearParamsOnly, ...kelurahanParams, ...yearParamsOnly]);
 
-    // 9. Get Fe statistics
-    const feQuery = `
+    // // 9. Get Fe statistics
+    // const feQuery = `
+    //   SELECT
+    //     SUM(ac.beri_tablet_fe) as total_fe_given,
+    //     COUNT(*) as total_visits,
+    //     ROUND(SUM(ac.beri_tablet_fe) * 100.0 / COUNT(*), 1) as percentage_fe
+    //   FROM antenatal_care ac
+    //   INNER JOIN kehamilan k ON ac.forkey_hamil = k.id
+    //   INNER JOIN ibu i ON k.forkey_ibu = i.id
+    //   LEFT JOIN kelurahan kel ON i.kelurahan_id = kel.id
+    //   WHERE 1=1 ${kelurahanFilter} ${dateWhereANC}`;
+    // const [feStats] = await pool.query(feQuery, [...kelurahanParams, ...dateParamsANC]);
+    // const feStatistics = {
+    //   total_fe_given: feStats[0].total_fe_given || 0,
+    //   total_visits: feStats[0].total_visits || 0,
+    //   percentage_fe: feStats[0].percentage_fe || 0
+    // };
+
+    // Alt 9. Get KEK statistics (LILA < 23.5 cm indicates KEK)
+    const kekQuery = `
       SELECT
-        SUM(ac.beri_tablet_fe) as total_fe_given,
         COUNT(*) as total_visits,
-        ROUND(SUM(ac.beri_tablet_fe) * 100.0 / COUNT(*), 1) as percentage_fe
+        SUM(CASE WHEN ac.lila < 23.5 THEN 1 ELSE 0 END) as total_kek_given,
+        ROUND(SUM(CASE WHEN ac.lila < 23.5 THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 1) as percentage_kek
       FROM antenatal_care ac
       INNER JOIN kehamilan k ON ac.forkey_hamil = k.id
       INNER JOIN ibu i ON k.forkey_ibu = i.id
       LEFT JOIN kelurahan kel ON i.kelurahan_id = kel.id
-      WHERE 1=1 ${kelurahanFilter} ${dateWhereANC}`;
-    const [feStats] = await pool.query(feQuery, [...kelurahanParams, ...dateParamsANC]);
-    const feStatistics = {
-      total_fe_given: feStats[0].total_fe_given || 0,
-      total_visits: feStats[0].total_visits || 0,
-      percentage_fe: feStats[0].percentage_fe || 0
+      WHERE ac.lila IS NOT NULL ${kelurahanFilter} ${dateWhereANC}`;
+    const [kekstats] = await pool.query(kekQuery, [...kelurahanParams, ...dateParamsANC]);
+    const kekStatistics = {
+      total_kek_given: kekstats[0].total_kek_given || 0,
+      total_visits: kekstats[0].total_visits || 0,
+      percentage_kek: kekstats[0].percentage_kek || 0
     };
 
     // 10. Get HB Statistics (yearly data, uses lab_screening table)
@@ -226,9 +255,8 @@ router.get('/', authMiddleware, async (req, res) => {
     // 12. Get Preeklamsia Statistics (yearly data) - from komplikasi table
     const preeklamsiaQuery = `
       SELECT
-        SUM(CASE WHEN ko.nama_komplikasi LIKE '%eklamsia%' THEN 1 ELSE 0 END) as total_preeklamsia,
-        SUM(CASE WHEN ko.nama_komplikasi LIKE '%Eklamsia%' AND ko.nama_komplikasi NOT LIKE '%Preeklamsia%' THEN 1 ELSE 0 END) as eklamsia_count,
-        SUM(CASE WHEN ko.nama_komplikasi LIKE '%Preeklamsia%' THEN 1 ELSE 0 END) as preeklamsia_count,
+        SUM(CASE WHEN ko.nama_komplikasi LIKE '%Eklamsia%' AND ko.nama_komplikasi NOT LIKE '%Pre%' THEN 1 ELSE 0 END) as eklamsia_count,
+        SUM(CASE WHEN ko.nama_komplikasi LIKE '%Preeklamsia%' OR ko.nama_komplikasi LIKE '%preeklamsia%' THEN 1 ELSE 0 END) as preeklamsia_count,
         SUM(CASE WHEN ko.nama_komplikasi LIKE '%Hipertensi Gestasional%' THEN 1 ELSE 0 END) as hipertensi_gestasional_count
       FROM komplikasi ko
       INNER JOIN kehamilan k ON ko.forkey_hamil = k.id
@@ -236,7 +264,26 @@ router.get('/', authMiddleware, async (req, res) => {
       LEFT JOIN kelurahan kel ON i.kelurahan_id = kel.id
       WHERE 1=1 ${kelurahanFilter} ${year ? 'AND YEAR(ko.tanggal_diagnosis) = ?' : ''}`;
     const [preeklamsiaStats] = await pool.query(preeklamsiaQuery, [...kelurahanParams, ...(year ? [year] : [])]);
-    const preeklamsiaStatistics = preeklamsiaStats[0] || { total_preeklamsia: 0, eklamsia_count: 0, preeklamsia_count: 0, hipertensi_gestasional_count: 0 };
+    const preeklamsiaStatistics = { 
+      eklamsia_count: preeklamsiaStats[0].eklamsia_count || 0,
+      preeklamsia_count: preeklamsiaStats[0].preeklamsia_count || 0,
+      hipertensi_gestasional_count: preeklamsiaStats[0].hipertensi_gestasional_count || 0,
+      total_preeklamsia: (preeklamsiaStats[0].eklamsia_count || 0) + (preeklamsiaStats[0].preeklamsia_count || 0)
+    };
+
+    // 13. Get HIV Statistics (yearly data) - from lab_screening table
+    const hivQuery = `
+      SELECT
+        COUNT(*) as total_screened,
+        SUM(CASE WHEN ls.skrining_hiv = 'Reaktif' THEN 1 ELSE 0 END) as hiv_positive,
+        ROUND(SUM(CASE WHEN ls.skrining_hiv = 'Reaktif' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 1) as hiv_percentage
+      FROM lab_screening ls
+      INNER JOIN kehamilan k ON ls.forkey_hamil = k.id
+      INNER JOIN ibu i ON k.forkey_ibu = i.id
+      LEFT JOIN kelurahan kel ON i.kelurahan_id = kel.id
+      WHERE ls.skrining_hiv IS NOT NULL ${kelurahanFilter} ${year ? 'AND YEAR(ls.created_at) = ?' : ''}`;
+    const [hivStats] = await pool.query(hivQuery, [...kelurahanParams, ...(year ? [year] : [])]);
+    const hivStatistics = hivStats[0] || { total_screened: 0, hiv_positive: 0, hiv_percentage: 0 };
 
     // 13. Get Hepatitis B Statistics (yearly data) - from lab_screening table
     const hepatitisQuery = `
@@ -278,16 +325,17 @@ router.get('/', authMiddleware, async (req, res) => {
       totalIbu,
       totalHamil,
       totalANC,
-      totalKomplikasi,
+      totalNifas,
       ancByType,
-      complicationsBySeverity,
+      nifasByType,
       ibuByKelurahan,
-      feStatistics,
+      kekStatistics,
       riskDistribution,
       ttImmunization,
       hbStatistics,
       obesityStatistics,
       preeklamsiaStatistics,
+      hivStatistics,
       hepatitisStatistics,
       kelurahanList: kelurahanList.map(k => k.kelurahan),
       selectedKelurahan: kelurahan || null

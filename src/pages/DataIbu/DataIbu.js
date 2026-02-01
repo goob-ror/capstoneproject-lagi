@@ -39,6 +39,20 @@ const DataIbu = () => {
   }, [presenter]);
 
   useEffect(() => {
+    const handleView = (id) => {
+      navigate(`/detail-ibu/${id}`);
+    };
+
+    const handleEdit = (id) => {
+      navigate(`/tambah-ibu?id=${id}`);
+    };
+
+    const handleDelete = async (id) => {
+      if (window.confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+        await presenter.deleteIbu(id);
+      }
+    };
+
     if (ibuData.length > 0 && tableRef.current && !dataTableRef.current) {
       // Initialize DataTable
       dataTableRef.current = $(tableRef.current).DataTable({
@@ -134,7 +148,7 @@ const DataIbu = () => {
         dataTableRef.current = null;
       }
     };
-  }, [ibuData]);
+  }, [ibuData, navigate, presenter]);
 
   // Custom Full-Text Search handler
   useEffect(() => {
@@ -148,19 +162,11 @@ const DataIbu = () => {
     presenter.handleLogout();
   };
 
-  const handleView = (id) => {
-    navigate(`/detail-ibu/${id}`);
-  };
 
-  const handleEdit = (id) => {
-    navigate(`/tambah-ibu?id=${id}`);
-  };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus data ini?')) {
-      await presenter.deleteIbu(id);
-    }
-  };
+
+
+
 
   const handleAddNew = () => {
     navigate('/tambah-ibu');
@@ -209,6 +215,12 @@ const DataIbu = () => {
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor"/>
             </svg>
             Persalinan
+          </a>
+          <a href="/kunjungan-nifas" className="nav-item">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" fill="currentColor"/>
+            </svg>
+            Kunjungan Nifas
           </a>
           <a href="/komplikasi" className="nav-item">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

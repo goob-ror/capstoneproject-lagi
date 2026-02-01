@@ -52,7 +52,7 @@ class TambahPersalinanPresenter {
 
       const data = await this.model.getPersalinanById(id);
       this.callbacks.populateForm(data);
-      
+
       // Load mother data for the pregnancy
       if (data.forkey_hamil) {
         await this.loadMotherData(data.forkey_hamil);
@@ -75,32 +75,31 @@ class TambahPersalinanPresenter {
       this.callbacks.clearError();
 
       // Submit persalinan data
-      let persalinanResult;
       if (isEdit) {
-        persalinanResult = await this.model.updatePersalinan(editId, formData);
+        await this.model.updatePersalinan(editId, formData);
       } else {
-        persalinanResult = await this.model.createPersalinan(formData);
+        await this.model.createPersalinan(formData);
       }
 
       // Submit complications if any
       if (complications && complications.length > 0) {
         const validComplications = complications.filter(comp => comp.nama_komplikasi.trim() !== '');
-        
+
         for (const comp of validComplications) {
           const komplikasiData = {
             ...comp,
             forkey_hamil: formData.forkey_hamil,
             forkey_anc: null // No ANC visit for delivery complications
           };
-          
+
           await this.model.createKomplikasi(komplikasiData);
         }
       }
 
-      const successMessage = isEdit 
-        ? 'Data persalinan berhasil diperbarui' 
+      const successMessage = isEdit
+        ? 'Data persalinan berhasil diperbarui'
         : 'Data persalinan berhasil disimpan';
-      
+
       this.callbacks.onSuccess(successMessage);
     } catch (error) {
       console.error('Error saving persalinan data:', error);

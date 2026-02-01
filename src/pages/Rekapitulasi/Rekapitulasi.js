@@ -74,14 +74,14 @@ const Rekapitulasi = () => {
       ['Total Ibu Terdaftar', summaryData.totalIbu || 0],
       ['Ibu Hamil Aktif', summaryData.totalHamil || 0],
       ['Total Kunjungan ANC', summaryData.totalANC || 0],
-      ['Total Komplikasi', summaryData.totalKomplikasi || 0],
+      ['Total Kunjungan Nifas', summaryData.totalNifas || 0],
       [],
       ['STATISTIK KESEHATAN'],
       ['Obesitas (BMI ≥30)', summaryData.obesityStatistics?.obese_count || 0, `${summaryData.obesityStatistics?.obese_percentage || 0}%`],
       ['Preeklamsia', summaryData.preeklamsiaStatistics?.preeklamsia_count || 0],
       ['Eklamsia', summaryData.preeklamsiaStatistics?.eklamsia_count || 0],
       ['Hepatitis B Positif', summaryData.hepatitisStatistics?.hepatitis_b_positive || 0, `${summaryData.hepatitisStatistics?.hepatitis_percentage || 0}%`],
-      ['Rata-rata Hb', `${summaryData.hbStatistics?.avg_hb || 0} g/dL`],
+      ['HIV Positif', summaryData.hivStatistics?.hiv_positive || 0, `${summaryData.hivStatistics?.hiv_percentage || 0}%`],
       [],
       ['TRIMESTER 1 (0-13 minggu)'],
       ['Normal (≥ 11)', summaryData.hbStatistics?.trimester1_normal || 0],
@@ -101,7 +101,7 @@ const Rekapitulasi = () => {
       ['Anemia Sedang (8.0-9.9)', summaryData.hbStatistics?.trimester3_sedang || 0],
       ['Anemia Berat (<7.9)', summaryData.hbStatistics?.trimester3_berat || 0],
       [],
-      ['Tablet Fe Diberikan', summaryData.feStatistics?.total_fe_given || 0, `${summaryData.feStatistics?.percentage_fe || 0}%`],
+      ['Jumlah KEK (LILA < 23.5)', summaryData.kekStatistics?.total_kek_given || 0, `${summaryData.kekStatistics?.percentage_kek || 0}%`],
     ];
     const ws1 = XLSX.utils.aoa_to_sheet(summarySheet);
     XLSX.utils.book_append_sheet(wb, ws1, 'Ringkasan');
@@ -121,19 +121,19 @@ const Rekapitulasi = () => {
       XLSX.utils.book_append_sheet(wb, ws2, 'Kunjungan ANC');
     }
 
-    // Sheet 3: Complications by Severity
-    if (summaryData.complicationsBySeverity && summaryData.complicationsBySeverity.length > 0) {
-      const compData = [
-        ['KOMPLIKASI BERDASARKAN TINGKAT KEPARAHAN'],
-        ['Tingkat Keparahan', 'Jumlah', 'Persentase'],
-        ...summaryData.complicationsBySeverity.map(item => [
-          item.tingkat_keparahan,
+    // Sheet 3: Nifas by Type
+    if (summaryData.nifasByType && summaryData.nifasByType.length > 0) {
+      const nifasData = [
+        ['KUNJUNGAN NIFAS BERDASARKAN JENIS'],
+        ['Jenis Kunjungan', 'Jumlah', 'Persentase'],
+        ...summaryData.nifasByType.map(item => [
+          item.jenis_kunjungan,
           item.count,
           `${item.percentage}%`
         ])
       ];
-      const ws3 = XLSX.utils.aoa_to_sheet(compData);
-      XLSX.utils.book_append_sheet(wb, ws3, 'Komplikasi');
+      const ws3 = XLSX.utils.aoa_to_sheet(nifasData);
+      XLSX.utils.book_append_sheet(wb, ws3, 'Kunjungan Nifas');
     }
 
     // Sheet 4: Ibu by Kelurahan
@@ -185,14 +185,14 @@ const Rekapitulasi = () => {
     csvContent += `Total Ibu Terdaftar,${summaryData.totalIbu || 0}\n`;
     csvContent += `Ibu Hamil Aktif,${summaryData.totalHamil || 0}\n`;
     csvContent += `Total Kunjungan ANC,${summaryData.totalANC || 0}\n`;
-    csvContent += `Total Komplikasi,${summaryData.totalKomplikasi || 0}\n\n`;
+    csvContent += `Total Kunjungan Nifas,${summaryData.totalNifas || 0}\n\n`;
     
     csvContent += 'STATISTIK KESEHATAN\n';
     csvContent += `Obesitas (BMI ≥30),${summaryData.obesityStatistics?.obese_count || 0},${summaryData.obesityStatistics?.obese_percentage || 0}%\n`;
     csvContent += `Preeklamsia,${summaryData.preeklamsiaStatistics?.preeklamsia_count || 0}\n`;
     csvContent += `Eklamsia,${summaryData.preeklamsiaStatistics?.eklamsia_count || 0}\n`;
     csvContent += `Hepatitis B Positif,${summaryData.hepatitisStatistics?.hepatitis_b_positive || 0},${summaryData.hepatitisStatistics?.hepatitis_percentage || 0}%\n`;
-    csvContent += `Rata-rata Hb,${summaryData.hbStatistics?.avg_hb || 0} g/dL\n\n`;
+    csvContent += `HIV Positif,${summaryData.hivStatistics?.hiv_positive || 0},${summaryData.hivStatistics?.hiv_percentage || 0}%\n\n`;
     
     csvContent += 'HEMOGLOBIN TRIMESTER 1 (0-13 minggu)\n';
     csvContent += `Normal (≥ 11),${summaryData.hbStatistics?.trimester1_normal || 0}\n`;
@@ -212,13 +212,23 @@ const Rekapitulasi = () => {
     csvContent += `Anemia Sedang (8.0-9.9),${summaryData.hbStatistics?.trimester3_sedang || 0}\n`;
     csvContent += `Anemia Berat (<7.9),${summaryData.hbStatistics?.trimester3_berat || 0}\n\n`;
     
-    csvContent += `Tablet Fe Diberikan,${summaryData.feStatistics?.total_fe_given || 0},${summaryData.feStatistics?.percentage_fe || 0}%\n\n`;
+    csvContent += `Jumlah KEK (LILA < 23.5),${summaryData.kekStatistics?.total_kek_given || 0},${summaryData.kekStatistics?.percentage_kek || 0}%\n\n`;
 
     // Add ANC data
     if (summaryData.ancByType && summaryData.ancByType.length > 0) {
       csvContent += 'KUNJUNGAN ANC BERDASARKAN JENIS\n';
       csvContent += 'Jenis Kunjungan,Jumlah,Persentase\n';
       summaryData.ancByType.forEach(item => {
+        csvContent += `${item.jenis_kunjungan},${item.count},${item.percentage}%\n`;
+      });
+      csvContent += '\n';
+    }
+
+    // Add Nifas data
+    if (summaryData.nifasByType && summaryData.nifasByType.length > 0) {
+      csvContent += 'KUNJUNGAN NIFAS BERDASARKAN JENIS\n';
+      csvContent += 'Jenis Kunjungan,Jumlah,Persentase\n';
+      summaryData.nifasByType.forEach(item => {
         csvContent += `${item.jenis_kunjungan},${item.count},${item.percentage}%\n`;
       });
       csvContent += '\n';
@@ -239,6 +249,12 @@ const Rekapitulasi = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const getPreeklamsiaEklamsiaTotal = () => {
+    const preeklamsia = Number(summaryData?.preeklamsiaStatistics?.preeklamsia_count || 0);
+    const eklamsia = Number(summaryData?.preeklamsiaStatistics?.eklamsia_count || 0);
+    return preeklamsia + eklamsia;
   };
 
   if (loading) {
@@ -284,6 +300,12 @@ const Rekapitulasi = () => {
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor"/>
             </svg>
             Persalinan
+          </a>
+          <a href="/kunjungan-nifas" className="nav-item">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" fill="currentColor"/>
+            </svg>
+            Kunjungan Nifas
           </a>
           <a href="/komplikasi" className="nav-item">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -467,39 +489,39 @@ const Rekapitulasi = () => {
               <div className="summary-card">
                 <div className="card-icon red">
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="currentColor"/>
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" fill="currentColor"/>
                   </svg>
                 </div>
                 <div className="card-content">
-                  <h3>Komplikasi</h3>
-                  <p className="card-value">{summaryData.totalKomplikasi || 0}</p>
-                  <p className="card-label">Kasus Tercatat</p>
+                  <h3>Kunjungan Nifas</h3>
+                  <p className="card-value">{summaryData.totalNifas || 0}</p>
+                  <p className="card-label">Total Kunjungan</p>
                 </div>
               </div>
 
               <div className="summary-card">
                 <div className="card-icon orange">
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8 18H6v-2h6v2zm0-4H6v-2h6v2zm0-4H6V8h6v2zm6 8h-4v-2h4v2zm0-4h-4v-2h4v2zm0-4h-4V8h4v2z" fill="currentColor"/>
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" fill="currentColor"/>
                   </svg>
                 </div>
                 <div className="card-content">
-                  <h3>Tablet Fe</h3>
-                  <p className="card-value">{summaryData.feStatistics?.total_fe_given || 0}</p>
-                  <p className="card-label">{summaryData.feStatistics?.percentage_fe || 0}% dari kunjungan</p>
+                  <h3>KEK (LILA &lt; 23.5)</h3>
+                  <p className="card-value">{summaryData.kekStatistics?.total_kek_given || 0}</p>
+                  <p className="card-label">{summaryData.kekStatistics?.percentage_kek || 0}% dari kunjungan</p>
                 </div>
               </div>
 
               <div className="summary-card">
                 <div className="card-icon teal">
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor"/>
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" fill="currentColor"/>
                   </svg>
                 </div>
                 <div className="card-content">
-                  <h3>Rata-rata Hb</h3>
-                  <p className="card-value">{summaryData.hbStatistics?.avg_hb || 0}</p>
-                  <p className="card-label">g/dL ({(summaryData.hbStatistics?.total_checked || 0) - ((summaryData.hbStatistics?.trimester1_normal || 0) + (summaryData.hbStatistics?.trimester2_normal || 0) + (summaryData.hbStatistics?.trimester3_normal || 0))} anemia)</p>
+                  <h3>HIV Positif</h3>
+                  <p className="card-value">{summaryData.hivStatistics?.hiv_positive || 0}</p>
+                  <p className="card-label">{summaryData.hivStatistics?.hiv_percentage || 0}% dari yang diskrining</p>
                 </div>
               </div>
 
@@ -524,10 +546,10 @@ const Rekapitulasi = () => {
                 </div>
                 <div className="card-content">
                   <h3>Preeklamsia/Eklamsia</h3>
-                  <p className="card-value">{(summaryData.preeklamsiaStatistics?.preeklamsia_count || 0) + (summaryData.preeklamsiaStatistics?.eklamsia_count || 0)}</p>
+                  <p className="card-value">{getPreeklamsiaEklamsiaTotal()}</p>
                   <p className="card-label">
-                    {summaryData.preeklamsiaStatistics?.eklamsia_count || 0} eklamsia, 
-                    {summaryData.preeklamsiaStatistics?.preeklamsia_count || 0} preeklamsia
+                    {summaryData?.preeklamsiaStatistics?.eklamsia_count || 0} eklamsia, 
+                    {summaryData?.preeklamsiaStatistics?.preeklamsia_count || 0} preeklamsia
                   </p>
                 </div>
               </div>
@@ -582,25 +604,26 @@ const Rekapitulasi = () => {
           </div>
 
           <div className="report-card">
-            <h3>Rekapitulasi Komplikasi</h3>
+            <h3>Rekapitulasi Kunjungan Nifas</h3>
             <div className="table-responsive">
               <table className="report-table">
                 <thead>
                   <tr>
-                    <th>Tingkat Keparahan</th>
+                    <th>Jenis Kunjungan</th>
                     <th>Jumlah</th>
                     <th>Persentase</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {summaryData?.complicationsBySeverity?.map(item => (
-                    <tr key={item.tingkat_keparahan}>
+                  {summaryData?.nifasByType?.map(item => (
+                    <tr key={item.jenis_kunjungan}>
                       <td>
                         <span className={`status-badge ${
-                          item.tingkat_keparahan === 'Berat' ? 'badge-danger' : 
-                          item.tingkat_keparahan === 'Sedang' ? 'badge-warning' : 'badge-success'
+                          item.jenis_kunjungan === 'KF1' ? 'badge-info' : 
+                          item.jenis_kunjungan === 'KF2' ? 'badge-success' : 
+                          item.jenis_kunjungan === 'KF3' ? 'badge-warning' : 'badge-primary'
                         }`}>
-                          {item.tingkat_keparahan}
+                          {item.jenis_kunjungan}
                         </span>
                       </td>
                       <td>{item.count}</td>

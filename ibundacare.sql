@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jan 14, 2026 at 08:38 AM
+-- Generation Time: Jan 31, 2026 at 02:47 PM
 -- Server version: 8.0.30
 -- PHP Version: 8.1.10
 
@@ -75,14 +75,14 @@ INSERT INTO `antenatal_care` (`id`, `tanggal_kunjungan`, `jenis_kunjungan`, `jen
 (11, '2025-08-18 10:45:00', 'K3', 'Akses', 'Bidan', 53.00, '116/76', 25.20, NULL, 22.00, 144, NULL, 0, 'T1', 1, NULL, NULL, 'Normal', NULL, NULL, NULL, 4, 3, NULL, NULL, '2025-11-23 14:23:38', '2025-11-23 14:23:38'),
 (12, '2025-10-22 08:20:00', 'K6', 'Murni', 'Dokter', 60.00, '138/92', 28.50, NULL, 36.00, 158, NULL, 0, 'T2', 1, NULL, NULL, 'Risiko Tinggi', NULL, NULL, NULL, 4, 4, NULL, NULL, '2025-11-23 14:23:38', '2025-11-23 14:23:38'),
 (13, '2025-05-10 09:30:00', 'K1', 'Murni', 'Bidan', 53.50, '114/74', 25.50, NULL, NULL, NULL, NULL, 0, 'T2', 1, NULL, NULL, 'Normal', NULL, NULL, NULL, 5, 1, NULL, NULL, '2025-11-23 14:23:38', '2025-11-23 14:23:38'),
-(14, '2025-06-08 11:15:00', 'K4', 'Akses', 'Dokter', 58.00, '132/88', 27.80, NULL, 32.00, 150, NULL, 0, 'T2', 1, NULL, NULL, 'Risiko Tinggi', NULL, NULL, NULL, 5, 4, NULL, NULL, '2025-11-23 14:23:38', '2025-11-23 14:23:38'),
+(14, '2026-01-15 00:00:00', 'K4', 'Akses', 'Dokter', 58.00, '132/88', 27.80, NULL, 32.00, 150, NULL, 0, 'T2', 1, NULL, NULL, 'Risiko Tinggi', NULL, NULL, NULL, 5, 4, 29, NULL, '2025-11-23 14:23:38', '2026-01-15 00:45:25'),
 (15, '2025-04-05 10:00:00', 'K1', 'Murni', 'Bidan', 51.50, '110/70', 24.20, NULL, NULL, NULL, NULL, 0, 'T1', 1, NULL, NULL, 'Normal', NULL, NULL, NULL, 6, 2, NULL, NULL, '2025-11-23 14:23:38', '2025-11-23 14:23:38'),
 (16, '2025-05-20 09:45:00', 'K2', 'Akses', 'Bidan', 54.00, '118/78', 25.80, NULL, 19.00, 141, NULL, 0, 'T2', 1, NULL, NULL, 'Normal', NULL, NULL, NULL, 6, 3, NULL, NULL, '2025-11-23 14:23:38', '2025-11-23 14:23:38'),
 (17, '2025-07-15 08:55:00', 'K4', 'Murni', 'Bidan', 57.50, '124/82', 27.00, NULL, 28.00, 146, NULL, 0, 'T2', 1, NULL, NULL, 'Normal', NULL, NULL, NULL, 6, 1, NULL, NULL, '2025-11-23 14:23:38', '2025-11-23 14:23:38'),
 (18, '2025-06-01 10:20:00', 'K1', 'Murni', 'Bidan', 50.00, '108/68', 24.00, NULL, NULL, NULL, NULL, 0, 'T0', 1, NULL, NULL, 'Normal', NULL, NULL, NULL, 7, 4, NULL, NULL, '2025-11-23 14:23:38', '2025-11-23 14:23:38'),
 (19, '2025-07-25 09:10:00', 'K3', 'Akses', 'Bidan', 54.50, '120/80', 26.00, NULL, 24.00, 143, NULL, 0, 'T1', 1, NULL, NULL, 'Normal', NULL, NULL, NULL, 7, 2, NULL, NULL, '2025-11-23 14:23:38', '2025-11-23 14:23:38'),
 (20, '2025-09-10 11:30:00', 'K5', 'Murni', 'Dokter', 59.00, '134/90', 28.00, NULL, 33.00, 155, NULL, 0, 'T2', 1, NULL, NULL, 'Risiko Tinggi', NULL, NULL, NULL, 7, 3, NULL, NULL, '2025-11-23 14:23:38', '2025-11-23 14:23:38'),
-(21, '2025-08-05 10:00:00', 'K1', 'Murni', 'Bidan', 52.00, '112/72', 24.80, NULL, NULL, NULL, NULL, 0, 'T1', 1, NULL, NULL, 'Normal', NULL, NULL, NULL, 8, 1, NULL, NULL, '2025-11-23 14:23:38', '2025-11-23 14:23:38'),
+(21, '2026-01-01 00:00:00', 'K1', 'Murni', 'Bidan', 52.00, '112/72', 24.80, -9.00, NULL, NULL, NULL, 0, 'T1', 1, NULL, NULL, 'Normal', NULL, NULL, NULL, 8, 1, 31, NULL, '2025-11-23 14:23:38', '2026-01-15 02:15:17'),
 (22, '2025-09-15 09:30:00', 'K2', 'Akses', 'Bidan', 55.50, '122/80', 26.50, NULL, 20.00, 142, NULL, 0, 'T2', 1, NULL, NULL, 'Normal', NULL, NULL, NULL, 8, 2, NULL, NULL, '2025-11-23 14:23:38', '2025-11-23 14:23:38'),
 (23, '2025-10-25 08:45:00', 'K4', 'Murni', 'Dokter', 61.00, '140/95', 29.00, NULL, 36.00, 160, NULL, 0, 'T2', 1, NULL, NULL, 'Risiko Tinggi', NULL, NULL, NULL, 8, 4, NULL, NULL, '2025-11-23 14:23:38', '2025-11-23 14:23:38'),
 (24, '2025-05-12 10:15:00', 'K1', 'Murni', 'Bidan', 51.00, '110/70', 24.50, NULL, NULL, NULL, NULL, 0, 'T1', 1, NULL, NULL, 'Normal', NULL, NULL, NULL, 9, 3, NULL, NULL, '2025-11-23 14:23:38', '2025-11-23 14:23:38'),
@@ -136,7 +136,10 @@ INSERT INTO `antenatal_care` (`id`, `tanggal_kunjungan`, `jenis_kunjungan`, `jen
 (72, '2025-11-25 00:00:00', 'K1', 'Murni', 'Bidan', 60.00, '112/72', 25.00, NULL, 10.00, 129, NULL, 0, 'T0', 0, NULL, 'Sesuai', 'Normal', NULL, NULL, NULL, 51, 6, NULL, NULL, '2025-11-24 17:16:26', '2025-11-24 17:16:26'),
 (73, '2025-11-24 00:00:00', 'K3', 'Murni', 'Bidan', 60.00, '112/72', 25.00, NULL, 25.00, 139, NULL, 0, 'T1', 1, NULL, 'Sesuai', 'Normal', NULL, NULL, NULL, 53, 6, NULL, NULL, '2025-11-24 17:33:22', '2025-11-24 17:34:12'),
 (74, '2025-11-25 00:00:00', 'K3', 'Murni', 'Bidan', 60.00, '125/82', 25.00, NULL, 19.00, 132, NULL, 0, 'T0', 1, NULL, NULL, 'Normal', NULL, NULL, NULL, 10, 6, NULL, NULL, '2025-11-24 17:37:45', '2025-11-24 17:37:45'),
-(75, '2025-12-09 00:00:00', 'K1', 'Murni', 'Bidan', 60.00, '138/92', 25.00, NULL, 20.00, 140, NULL, 0, 'T0', 1, NULL, 'Sesuai', 'Normal', NULL, NULL, NULL, 51, 6, NULL, NULL, '2025-12-08 16:25:07', '2025-12-08 16:25:07');
+(75, '2025-12-06 00:00:00', 'K1', 'Murni', 'Bidan', 60.00, '138/92', 25.00, NULL, 20.00, 140, 90, 1, 'T0', 1, NULL, 'Sesuai', 'Normal', NULL, NULL, NULL, 51, 6, 27, NULL, '2025-12-08 16:25:07', '2026-01-14 11:13:23'),
+(76, '2026-01-15 00:00:00', 'K6', 'Murni', 'Bidan', 65.00, '110/70', 24.00, 4.50, 25.00, 140, 90, 1, 'T0', 1, NULL, NULL, 'Normal', NULL, NULL, NULL, 16, 1, 28, NULL, '2026-01-15 00:08:19', '2026-01-15 00:08:19'),
+(77, '2026-01-15 00:00:00', 'K1', 'Murni', 'Bidan', 67.01, '112/72', 22.00, 2.01, 20.00, 10, 95, 1, 'T0', 0, NULL, 'Sesuai', 'Normal', NULL, NULL, NULL, 54, 6, 30, NULL, '2026-01-15 01:12:14', '2026-01-15 01:12:14'),
+(78, '2026-01-02 00:00:00', 'K4', 'Murni', 'Bidan', 55.00, '110/78', 25.00, -5.00, 24.00, 128, 90, 0, 'T0', 1, NULL, NULL, 'Normal', NULL, NULL, NULL, 10, 4, 32, NULL, '2026-01-15 02:18:29', '2026-01-15 02:18:29');
 
 -- --------------------------------------------------------
 
@@ -252,7 +255,9 @@ INSERT INTO `ibu` (`id`, `nik_ibu`, `nama_lengkap`, `tanggal_lahir`, `no_hp`, `g
 (49, '6472014301940049', 'Nafa Urbach', '1994-08-08', '081234567049', 'A', 160.00, 59, 'Belum Diperiksa', '+', 'Ada', 'IRT', 'SMK', 2, NULL, 'Jl. Sejati No. 6 RT. 01', NULL, '2025-11-23 14:21:48', '2025-12-25 05:06:13'),
 (50, '6472015002970050', 'Mulan Jameela', '1997-04-01', '081234567050', 'O', NULL, NULL, 'Belum Diperiksa', '+', 'Ada', 'Swasta', 'S1', 3, NULL, 'Jl. Patimura No. 3 RT. 10', NULL, '2025-11-23 14:21:48', '2025-12-25 05:06:13'),
 (51, '6472021109050007', 'Fiqri Abna', '2000-09-09', '080001111100', 'AB', NULL, NULL, 'Belum Diperiksa', '+', 'Ada', 'Guru', 'SMP', 2, NULL, 'Jalan Daeng Mangkona, Citra 3', NULL, '2025-11-23 16:31:35', '2025-12-25 05:06:13'),
-(52, '6472022210050015', 'Asep Bumida', '2000-01-09', '0812312312312', 'B', 165.00, 50, 'Belum Diperiksa', '+', 'Tidak', 'Lainnya', 'SMK', 3, 8, 'Jalan Jalan di RT Sebelah', 25, '2025-11-24 16:56:24', '2025-12-25 15:49:53');
+(52, '6472022210050015', 'Asep Bumida', '2000-01-09', '0812312312312', 'B', 165.00, 50, 'Belum Diperiksa', '+', 'Tidak', 'Lainnya', 'SMK', 3, 8, 'Jalan Jalan di RT Sebelah', 25, '2025-11-24 16:56:24', '2025-12-25 15:49:53'),
+(53, '6472022210050067', 'Manusia Testing', '1991-04-23', '080001111122', 'B', 171.00, 65, 'Belum Diperiksa', '+', 'Ada', 'IRT', 'SMA', 1, 18, 'Alamat Di Suatu Jalan di Kelurahan Rawa Makmur', 13, '2026-01-15 01:08:55', '2026-01-15 01:10:19'),
+(54, '6472014606050003', 'Emilia Putri', '2005-06-05', '0843231123532', 'B', 150.00, 50, 'Belum Diperiksa', '+', 'Ada', 'IRT', 'SMA', 1, 40, 'jalan ampera rt 40 rawa makmur', 15, '2026-01-20 05:58:12', '2026-01-22 02:00:20');
 
 -- --------------------------------------------------------
 
@@ -378,7 +383,9 @@ INSERT INTO `kehamilan` (`id`, `gravida`, `partus`, `abortus`, `haid_pertama`, `
 (50, 1, 1, 0, NULL, '2024-02-01', '2024-11-08', 'Selesai', NULL, 50, '2025-11-23 14:21:48', '2025-11-23 14:21:48'),
 (51, 1, 0, 0, NULL, '2025-10-27', '2026-08-03', 'Hamil', NULL, 52, '2025-11-24 17:14:14', '2025-12-25 15:49:53'),
 (52, 1, 1, 0, NULL, '2024-07-16', '2025-04-22', 'Selesai', NULL, 50, '2025-11-24 17:25:40', '2025-11-24 17:30:27'),
-(53, 2, 1, 0, NULL, '2025-04-20', '2026-01-25', 'Hamil', NULL, 50, '2025-11-24 17:31:01', '2025-11-24 17:31:01');
+(53, 2, 1, 0, NULL, '2025-04-20', '2026-01-25', 'Hamil', NULL, 50, '2025-11-24 17:31:01', '2025-11-24 17:31:01'),
+(54, 1, 0, 0, NULL, '2025-12-10', '2026-09-16', 'Hamil', NULL, 53, '2026-01-15 01:08:55', '2026-01-15 01:10:19'),
+(55, 1, 0, 0, NULL, '2025-04-27', '2026-02-01', 'Hamil', NULL, 54, '2026-01-20 05:58:12', '2026-01-22 02:00:20');
 
 -- --------------------------------------------------------
 
@@ -477,7 +484,7 @@ INSERT INTO `komplikasi` (`id`, `nama_komplikasi`, `kejadian`, `tanggal_diagnosi
 CREATE TABLE `kunjungan_nifas` (
   `id` int NOT NULL,
   `tanggal_kunjungan` datetime NOT NULL,
-  `hari_nifas` int DEFAULT NULL,
+  `jenis_kunjungan` enum('KF1','KF2','KF3','KF4') DEFAULT NULL,
   `pemeriksa` enum('Bidan','Dokter') NOT NULL,
   `tekanan_darah` varchar(10) DEFAULT NULL,
   `suhu_badan` decimal(4,2) DEFAULT NULL,
@@ -498,67 +505,67 @@ CREATE TABLE `kunjungan_nifas` (
 -- Dumping data for table `kunjungan_nifas`
 --
 
-INSERT INTO `kunjungan_nifas` (`id`, `tanggal_kunjungan`, `hari_nifas`, `pemeriksa`, `tekanan_darah`, `suhu_badan`, `involusio_uteri`, `lochea`, `payudara`, `konseling_asi`, `berat_badan_bayi`, `suhu_bayi`, `pemberian_asi`, `keterangan`, `forkey_hamil`, `forkey_bidan`, `created_at`) VALUES
-(1, '2025-09-09 09:00:00', 1, 'Bidan', '110/70', 36.50, 'Baik', 'Rubra', 'Normal', 1, 3.10, 36.60, 'ASI Eksklusif', 'Kondisi ibu baik', 26, 2, '2025-11-23 14:27:43'),
-(2, '2025-09-15 10:00:00', 7, 'Bidan', '110/70', 36.60, 'Baik', 'Seroza', 'Bengkak', 1, 3.20, 36.70, 'ASI Eksklusif', 'Kompres payudara hangat', 26, 3, '2025-11-23 14:27:43'),
-(3, '2025-10-08 09:30:00', 30, 'Bidan', '120/80', 36.50, 'Baik', 'Alba', 'Normal', 1, 3.90, 36.50, 'ASI Eksklusif', 'Ibu sehat', 26, 2, '2025-11-23 14:27:43'),
-(4, '2025-08-23 08:00:00', 1, 'Bidan', '120/80', 36.70, 'Baik', 'Rubra', 'Normal', 1, 2.90, 36.80, 'ASI Eksklusif', 'Observasi perdarahan', 27, 4, '2025-11-23 14:27:43'),
-(5, '2025-08-29 09:00:00', 7, 'Dokter', '110/70', 36.50, 'Baik', 'Seroza', 'Normal', 1, 3.00, 36.70, 'ASI Eksklusif', 'Luka jahitan kering', 27, 1, '2025-11-23 14:27:43'),
-(6, '2025-09-22 10:00:00', 31, 'Bidan', '110/70', 36.60, 'Baik', 'Normal', 'Normal', 1, 3.80, 36.60, 'ASI Eksklusif', 'KB Konseling', 27, 4, '2025-11-23 14:27:43'),
-(7, '2025-10-18 11:00:00', 1, 'Bidan', '130/80', 36.80, 'Baik', 'Rubra', 'Normal', 1, 3.50, 36.50, 'ASI Eksklusif', 'TD sedikit tinggi, pantau', 28, 2, '2025-11-23 14:27:43'),
-(8, '2025-10-24 09:00:00', 7, 'Bidan', '120/80', 36.50, 'Baik', 'Seroza', 'Puting Lecet', 1, 3.60, 36.60, 'ASI Eksklusif', 'Ajarkan posisi menyusui', 28, 3, '2025-11-23 14:27:43'),
-(9, '2025-11-15 08:00:00', 29, 'Bidan', '110/70', 36.50, 'Baik', 'Alba', 'Normal', 1, 4.20, 36.70, 'ASI Eksklusif', 'Bayi tumbuh sehat', 28, 2, '2025-11-23 14:27:43'),
-(10, '2025-09-28 14:00:00', 1, 'Bidan', '110/70', 36.50, 'Baik', 'Rubra', 'Normal', 1, 3.00, 36.60, 'ASI Eksklusif', NULL, 29, 5, '2025-11-23 14:27:43'),
-(11, '2025-10-04 10:00:00', 7, 'Bidan', '110/70', 36.60, 'Baik', 'Seroza', 'Normal', 1, 3.15, 36.50, 'ASI Eksklusif', NULL, 29, 5, '2025-11-23 14:27:43'),
-(12, '2025-10-27 09:00:00', 30, 'Dokter', '120/80', 36.70, 'Baik', 'Alba', 'Normal', 1, 3.80, 36.60, 'ASI Eksklusif', 'Rencana KB suntik', 29, 1, '2025-11-23 14:27:43'),
-(13, '2025-10-13 07:00:00', 1, 'Bidan', '100/60', 36.40, 'Baik', 'Rubra', 'Normal', 1, 2.80, 36.90, 'Formula', 'ASI belum keluar lancar', 30, 3, '2025-11-23 14:27:43'),
-(14, '2025-10-19 09:00:00', 7, 'Bidan', '110/70', 36.50, 'Baik', 'Seroza', 'Normal', 1, 2.90, 36.80, 'ASI + Formula', 'ASI mulai lancar', 30, 3, '2025-11-23 14:27:43'),
-(15, '2025-11-12 10:30:00', 31, 'Bidan', '110/80', 36.60, 'Baik', 'Alba', 'Normal', 1, 3.50, 36.70, 'ASI Eksklusif', 'Full ASI sekarang', 30, 2, '2025-11-23 14:27:43'),
-(16, '2025-08-09 13:00:00', 1, 'Bidan', '120/80', 36.60, 'Baik', 'Rubra', 'Normal', 1, 3.20, 36.50, 'ASI Eksklusif', NULL, 31, 4, '2025-11-23 14:27:43'),
-(17, '2025-08-15 09:00:00', 7, 'Bidan', '110/70', 36.50, 'Baik', 'Seroza', 'Normal', 1, 3.30, 36.60, 'ASI Eksklusif', NULL, 31, 4, '2025-11-23 14:27:43'),
-(18, '2025-09-08 10:00:00', 31, 'Bidan', '120/70', 36.50, 'Baik', 'Alba', 'Normal', 1, 4.00, 36.50, 'ASI Eksklusif', NULL, 31, 2, '2025-11-23 14:27:43'),
-(19, '2025-09-18 10:00:00', 1, 'Bidan', '130/90', 37.00, 'Lambat', 'Rubra', 'Normal', 1, 3.40, 36.70, 'ASI Eksklusif', 'Kontraksi uterus kurang keras', 32, 1, '2025-11-23 14:27:43'),
-(20, '2025-09-24 11:00:00', 7, 'Dokter', '120/80', 36.60, 'Baik', 'Seroza', 'Normal', 1, 3.50, 36.60, 'ASI Eksklusif', 'Involusio membaik', 32, 1, '2025-11-23 14:27:43'),
-(21, '2025-10-17 09:00:00', 30, 'Bidan', '120/80', 36.50, 'Baik', 'Alba', 'Normal', 1, 4.10, 36.50, 'ASI Eksklusif', 'Ibu sehat', 32, 2, '2025-11-23 14:27:43'),
-(22, '2025-11-02 08:00:00', 1, 'Bidan', '110/70', 36.50, 'Baik', 'Rubra', 'Normal', 1, 3.10, 36.60, 'ASI Eksklusif', NULL, 33, 5, '2025-11-23 14:27:43'),
-(23, '2025-11-08 09:00:00', 7, 'Bidan', '110/70', 36.60, 'Baik', 'Seroza', 'Bengkak', 1, 3.25, 36.50, 'ASI Eksklusif', 'Bendungan ASI', 33, 5, '2025-11-23 14:27:43'),
-(24, '2025-11-23 10:00:00', 22, 'Bidan', '110/70', 36.50, 'Baik', 'Alba', 'Normal', 1, 3.80, 36.60, 'ASI Eksklusif', 'Sembuh', 33, 3, '2025-11-23 14:27:43'),
-(25, '2025-09-02 09:00:00', 1, 'Bidan', '120/80', 36.50, 'Baik', 'Rubra', 'Normal', 1, 3.00, 36.70, 'ASI Eksklusif', NULL, 34, 2, '2025-11-23 14:27:43'),
-(26, '2025-09-08 10:00:00', 7, 'Bidan', '110/70', 36.60, 'Baik', 'Seroza', 'Normal', 1, 3.10, 36.60, 'ASI Eksklusif', NULL, 34, 2, '2025-11-23 14:27:43'),
-(27, '2025-10-01 11:00:00', 30, 'Bidan', '110/70', 36.50, 'Baik', 'Alba', 'Normal', 1, 3.75, 36.50, 'ASI Eksklusif', NULL, 34, 4, '2025-11-23 14:27:43'),
-(28, '2025-09-23 08:30:00', 1, 'Bidan', '110/70', 36.60, 'Baik', 'Rubra', 'Normal', 1, 3.30, 36.60, 'ASI Eksklusif', NULL, 35, 3, '2025-11-23 14:27:43'),
-(29, '2025-09-29 09:30:00', 7, 'Bidan', '110/70', 36.50, 'Baik', 'Seroza', 'Normal', 1, 3.40, 36.50, 'ASI Eksklusif', NULL, 35, 3, '2025-11-23 14:27:43'),
-(30, '2025-10-22 10:00:00', 30, 'Bidan', '120/80', 36.50, 'Baik', 'Alba', 'Normal', 1, 4.10, 36.60, 'ASI Eksklusif', NULL, 35, 1, '2025-11-23 14:27:43'),
-(31, '2025-10-23 11:00:00', 1, 'Bidan', '120/80', 36.80, 'Baik', 'Rubra', 'Mastitis', 1, 3.00, 36.80, 'Formula', 'Ibu demam, mastitis', 36, 1, '2025-11-23 14:27:43'),
-(32, '2025-10-29 10:00:00', 7, 'Dokter', '120/80', 36.60, 'Baik', 'Seroza', 'Bengkak', 1, 3.10, 36.70, 'ASI + Formula', 'Sudah diobati', 36, 1, '2025-11-23 14:27:43'),
-(33, '2025-11-20 09:00:00', 29, 'Bidan', '110/70', 36.50, 'Baik', 'Alba', 'Normal', 1, 3.70, 36.60, 'ASI Eksklusif', 'Sudah sembuh total', 36, 2, '2025-11-23 14:27:43'),
-(34, '2025-08-18 09:00:00', 1, 'Bidan', '110/70', 36.50, 'Baik', 'Rubra', 'Normal', 1, 3.10, 36.60, 'ASI Eksklusif', NULL, 37, 5, '2025-11-23 14:27:43'),
-(35, '2025-08-24 10:00:00', 7, 'Bidan', '110/70', 36.50, 'Baik', 'Seroza', 'Normal', 1, 3.20, 36.50, 'ASI Eksklusif', NULL, 37, 5, '2025-11-23 14:27:43'),
-(36, '2025-09-17 11:00:00', 31, 'Bidan', '110/70', 36.50, 'Baik', 'Alba', 'Normal', 1, 3.90, 36.60, 'ASI Eksklusif', NULL, 37, 4, '2025-11-23 14:27:43'),
-(37, '2025-09-13 15:00:00', 1, 'Bidan', '120/80', 36.60, 'Baik', 'Rubra', 'Normal', 1, 2.95, 36.70, 'ASI Eksklusif', NULL, 38, 2, '2025-11-23 14:27:43'),
-(38, '2025-09-19 16:00:00', 7, 'Bidan', '110/80', 36.50, 'Baik', 'Seroza', 'Normal', 1, 3.10, 36.60, 'ASI Eksklusif', NULL, 38, 2, '2025-11-23 14:27:43'),
-(39, '2025-10-12 09:00:00', 30, 'Bidan', '120/80', 36.60, 'Baik', 'Alba', 'Normal', 1, 3.80, 36.50, 'ASI Eksklusif', NULL, 38, 3, '2025-11-23 14:27:43'),
-(40, '2025-11-09 07:30:00', 1, 'Bidan', '110/70', 36.50, 'Baik', 'Rubra', 'Normal', 1, 3.20, 36.60, 'ASI Eksklusif', NULL, 39, 4, '2025-11-23 14:27:43'),
-(41, '2025-11-15 08:30:00', 7, 'Bidan', '110/70', 36.60, 'Baik', 'Seroza', 'Normal', 1, 3.30, 36.50, 'ASI Eksklusif', NULL, 39, 4, '2025-11-23 14:27:43'),
-(42, '2025-11-23 09:00:00', 15, 'Bidan', '110/70', 36.50, 'Baik', 'Alba', 'Normal', 1, 3.50, 36.60, 'ASI Eksklusif', 'Kunjungan dipercepat', 39, 4, '2025-11-23 14:27:43'),
-(43, '2025-08-28 10:00:00', 1, 'Bidan', '130/85', 36.70, 'Baik', 'Rubra', 'Normal', 1, 3.40, 36.70, 'ASI Eksklusif', 'Riwayat PEB', 40, 1, '2025-11-23 14:27:43'),
-(44, '2025-09-03 11:00:00', 7, 'Dokter', '125/80', 36.60, 'Baik', 'Seroza', 'Normal', 1, 3.50, 36.60, 'ASI Eksklusif', 'TD Terkontrol', 40, 1, '2025-11-23 14:27:43'),
-(45, '2025-09-27 10:00:00', 31, 'Bidan', '120/80', 36.50, 'Baik', 'Alba', 'Normal', 1, 4.20, 36.50, 'ASI Eksklusif', 'Sehat', 40, 2, '2025-11-23 14:27:43'),
-(46, '2025-10-02 12:00:00', 1, 'Bidan', '110/70', 36.50, 'Baik', 'Rubra', 'Normal', 1, 3.05, 36.60, 'ASI Eksklusif', NULL, 41, 5, '2025-11-23 14:27:43'),
-(47, '2025-10-08 10:00:00', 7, 'Bidan', '110/70', 36.50, 'Baik', 'Seroza', 'Normal', 1, 3.15, 36.50, 'ASI Eksklusif', NULL, 41, 5, '2025-11-23 14:27:43'),
-(48, '2025-11-01 09:00:00', 31, 'Bidan', '110/70', 36.60, 'Baik', 'Alba', 'Normal', 1, 3.80, 36.60, 'ASI Eksklusif', NULL, 41, 3, '2025-11-23 14:27:43'),
-(49, '2025-10-09 08:00:00', 1, 'Bidan', '120/80', 36.50, 'Baik', 'Rubra', 'Normal', 1, 3.10, 36.70, 'ASI Eksklusif', NULL, 42, 2, '2025-11-23 14:27:43'),
-(50, '2025-10-15 09:00:00', 7, 'Bidan', '120/80', 36.60, 'Baik', 'Seroza', 'Normal', 1, 3.20, 36.60, 'ASI Eksklusif', NULL, 42, 2, '2025-11-23 14:27:43'),
-(51, '2025-11-08 10:00:00', 31, 'Bidan', '110/80', 36.50, 'Baik', 'Alba', 'Normal', 1, 3.90, 36.50, 'ASI Eksklusif', NULL, 42, 4, '2025-11-23 14:27:43'),
-(52, '2025-08-13 14:00:00', 1, 'Bidan', '110/70', 36.50, 'Baik', 'Rubra', 'Normal', 1, 2.90, 36.60, 'ASI Eksklusif', NULL, 43, 3, '2025-11-23 14:27:43'),
-(53, '2025-08-19 10:00:00', 7, 'Bidan', '110/70', 36.50, 'Baik', 'Seroza', 'Normal', 1, 3.00, 36.50, 'ASI Eksklusif', NULL, 43, 3, '2025-11-23 14:27:43'),
-(54, '2025-09-12 11:00:00', 31, 'Bidan', '110/70', 36.60, 'Baik', 'Alba', 'Normal', 1, 3.70, 36.60, 'ASI Eksklusif', NULL, 43, 5, '2025-11-23 14:27:43'),
-(55, '2025-10-07 09:00:00', 1, 'Bidan', '120/80', 36.60, 'Baik', 'Rubra', 'Puting Lecet', 1, 3.30, 36.70, 'ASI Eksklusif', 'Ibu kesakitan saat menyusui', 44, 4, '2025-11-23 14:27:43'),
-(56, '2025-10-13 10:00:00', 7, 'Bidan', '110/70', 36.50, 'Baik', 'Seroza', 'Normal', 1, 3.40, 36.60, 'ASI Eksklusif', 'Lecet sembuh', 44, 4, '2025-11-23 14:27:43'),
-(57, '2025-11-06 11:00:00', 31, 'Bidan', '110/70', 36.50, 'Baik', 'Alba', 'Normal', 1, 4.05, 36.50, 'ASI Eksklusif', NULL, 44, 1, '2025-11-23 14:27:43'),
-(58, '2025-10-28 08:00:00', 1, 'Bidan', '110/70', 36.50, 'Baik', 'Rubra', 'Normal', 1, 3.10, 36.60, 'ASI Eksklusif', NULL, 45, 5, '2025-11-23 14:27:43'),
-(59, '2025-11-03 09:00:00', 7, 'Bidan', '110/70', 36.60, 'Baik', 'Seroza', 'Normal', 1, 3.20, 36.50, 'ASI Eksklusif', NULL, 45, 2, '2025-11-23 14:27:43'),
-(60, '2025-11-23 10:00:00', 27, 'Bidan', '110/70', 36.50, 'Baik', 'Alba', 'Normal', 1, 3.80, 36.60, 'ASI Eksklusif', NULL, 45, 3, '2025-11-23 14:27:43');
+INSERT INTO `kunjungan_nifas` (`id`, `tanggal_kunjungan`, `jenis_kunjungan`, `pemeriksa`, `tekanan_darah`, `suhu_badan`, `involusio_uteri`, `lochea`, `payudara`, `konseling_asi`, `berat_badan_bayi`, `suhu_bayi`, `pemberian_asi`, `keterangan`, `forkey_hamil`, `forkey_bidan`, `created_at`) VALUES
+(1, '2025-09-09 09:00:00', NULL, 'Bidan', '110/70', 36.50, 'Baik', 'Rubra', 'Normal', 1, 3.10, 36.60, 'ASI Eksklusif', 'Kondisi ibu baik', 26, 2, '2025-11-23 14:27:43'),
+(2, '2025-09-15 10:00:00', NULL, 'Bidan', '110/70', 36.60, 'Baik', 'Seroza', 'Bengkak', 1, 3.20, 36.70, 'ASI Eksklusif', 'Kompres payudara hangat', 26, 3, '2025-11-23 14:27:43'),
+(3, '2025-10-08 09:30:00', NULL, 'Bidan', '120/80', 36.50, 'Baik', 'Alba', 'Normal', 1, 3.90, 36.50, 'ASI Eksklusif', 'Ibu sehat', 26, 2, '2025-11-23 14:27:43'),
+(4, '2025-08-23 08:00:00', NULL, 'Bidan', '120/80', 36.70, 'Baik', 'Rubra', 'Normal', 1, 2.90, 36.80, 'ASI Eksklusif', 'Observasi perdarahan', 27, 4, '2025-11-23 14:27:43'),
+(5, '2025-08-29 09:00:00', NULL, 'Dokter', '110/70', 36.50, 'Baik', 'Seroza', 'Normal', 1, 3.00, 36.70, 'ASI Eksklusif', 'Luka jahitan kering', 27, 1, '2025-11-23 14:27:43'),
+(6, '2025-09-22 10:00:00', NULL, 'Bidan', '110/70', 36.60, 'Baik', 'Normal', 'Normal', 1, 3.80, 36.60, 'ASI Eksklusif', 'KB Konseling', 27, 4, '2025-11-23 14:27:43'),
+(7, '2025-10-18 11:00:00', NULL, 'Bidan', '130/80', 36.80, 'Baik', 'Rubra', 'Normal', 1, 3.50, 36.50, 'ASI Eksklusif', 'TD sedikit tinggi, pantau', 28, 2, '2025-11-23 14:27:43'),
+(8, '2025-10-24 09:00:00', NULL, 'Bidan', '120/80', 36.50, 'Baik', 'Seroza', 'Puting Lecet', 1, 3.60, 36.60, 'ASI Eksklusif', 'Ajarkan posisi menyusui', 28, 3, '2025-11-23 14:27:43'),
+(9, '2025-11-15 08:00:00', NULL, 'Bidan', '110/70', 36.50, 'Baik', 'Alba', 'Normal', 1, 4.20, 36.70, 'ASI Eksklusif', 'Bayi tumbuh sehat', 28, 2, '2025-11-23 14:27:43'),
+(10, '2025-09-28 14:00:00', NULL, 'Bidan', '110/70', 36.50, 'Baik', 'Rubra', 'Normal', 1, 3.00, 36.60, 'ASI Eksklusif', NULL, 29, 5, '2025-11-23 14:27:43'),
+(11, '2025-10-04 10:00:00', NULL, 'Bidan', '110/70', 36.60, 'Baik', 'Seroza', 'Normal', 1, 3.15, 36.50, 'ASI Eksklusif', NULL, 29, 5, '2025-11-23 14:27:43'),
+(12, '2025-10-27 09:00:00', NULL, 'Dokter', '120/80', 36.70, 'Baik', 'Alba', 'Normal', 1, 3.80, 36.60, 'ASI Eksklusif', 'Rencana KB suntik', 29, 1, '2025-11-23 14:27:43'),
+(13, '2025-10-13 07:00:00', NULL, 'Bidan', '100/60', 36.40, 'Baik', 'Rubra', 'Normal', 1, 2.80, 36.90, 'Formula', 'ASI belum keluar lancar', 30, 3, '2025-11-23 14:27:43'),
+(14, '2025-10-19 09:00:00', NULL, 'Bidan', '110/70', 36.50, 'Baik', 'Seroza', 'Normal', 1, 2.90, 36.80, 'ASI + Formula', 'ASI mulai lancar', 30, 3, '2025-11-23 14:27:43'),
+(15, '2025-11-12 10:30:00', NULL, 'Bidan', '110/80', 36.60, 'Baik', 'Alba', 'Normal', 1, 3.50, 36.70, 'ASI Eksklusif', 'Full ASI sekarang', 30, 2, '2025-11-23 14:27:43'),
+(16, '2025-08-09 13:00:00', NULL, 'Bidan', '120/80', 36.60, 'Baik', 'Rubra', 'Normal', 1, 3.20, 36.50, 'ASI Eksklusif', NULL, 31, 4, '2025-11-23 14:27:43'),
+(17, '2025-08-15 09:00:00', NULL, 'Bidan', '110/70', 36.50, 'Baik', 'Seroza', 'Normal', 1, 3.30, 36.60, 'ASI Eksklusif', NULL, 31, 4, '2025-11-23 14:27:43'),
+(18, '2025-09-08 10:00:00', NULL, 'Bidan', '120/70', 36.50, 'Baik', 'Alba', 'Normal', 1, 4.00, 36.50, 'ASI Eksklusif', NULL, 31, 2, '2025-11-23 14:27:43'),
+(19, '2025-09-18 10:00:00', NULL, 'Bidan', '130/90', 37.00, 'Lambat', 'Rubra', 'Normal', 1, 3.40, 36.70, 'ASI Eksklusif', 'Kontraksi uterus kurang keras', 32, 1, '2025-11-23 14:27:43'),
+(20, '2025-09-24 11:00:00', NULL, 'Dokter', '120/80', 36.60, 'Baik', 'Seroza', 'Normal', 1, 3.50, 36.60, 'ASI Eksklusif', 'Involusio membaik', 32, 1, '2025-11-23 14:27:43'),
+(21, '2025-10-17 09:00:00', NULL, 'Bidan', '120/80', 36.50, 'Baik', 'Alba', 'Normal', 1, 4.10, 36.50, 'ASI Eksklusif', 'Ibu sehat', 32, 2, '2025-11-23 14:27:43'),
+(22, '2025-11-02 08:00:00', NULL, 'Bidan', '110/70', 36.50, 'Baik', 'Rubra', 'Normal', 1, 3.10, 36.60, 'ASI Eksklusif', NULL, 33, 5, '2025-11-23 14:27:43'),
+(23, '2025-11-08 09:00:00', NULL, 'Bidan', '110/70', 36.60, 'Baik', 'Seroza', 'Bengkak', 1, 3.25, 36.50, 'ASI Eksklusif', 'Bendungan ASI', 33, 5, '2025-11-23 14:27:43'),
+(24, '2025-11-23 10:00:00', NULL, 'Bidan', '110/70', 36.50, 'Baik', 'Alba', 'Normal', 1, 3.80, 36.60, 'ASI Eksklusif', 'Sembuh', 33, 3, '2025-11-23 14:27:43'),
+(25, '2025-09-02 09:00:00', NULL, 'Bidan', '120/80', 36.50, 'Baik', 'Rubra', 'Normal', 1, 3.00, 36.70, 'ASI Eksklusif', NULL, 34, 2, '2025-11-23 14:27:43'),
+(26, '2025-09-08 10:00:00', NULL, 'Bidan', '110/70', 36.60, 'Baik', 'Seroza', 'Normal', 1, 3.10, 36.60, 'ASI Eksklusif', NULL, 34, 2, '2025-11-23 14:27:43'),
+(27, '2025-10-01 11:00:00', NULL, 'Bidan', '110/70', 36.50, 'Baik', 'Alba', 'Normal', 1, 3.75, 36.50, 'ASI Eksklusif', NULL, 34, 4, '2025-11-23 14:27:43'),
+(28, '2025-09-23 08:30:00', NULL, 'Bidan', '110/70', 36.60, 'Baik', 'Rubra', 'Normal', 1, 3.30, 36.60, 'ASI Eksklusif', NULL, 35, 3, '2025-11-23 14:27:43'),
+(29, '2025-09-29 09:30:00', NULL, 'Bidan', '110/70', 36.50, 'Baik', 'Seroza', 'Normal', 1, 3.40, 36.50, 'ASI Eksklusif', NULL, 35, 3, '2025-11-23 14:27:43'),
+(30, '2025-10-22 10:00:00', NULL, 'Bidan', '120/80', 36.50, 'Baik', 'Alba', 'Normal', 1, 4.10, 36.60, 'ASI Eksklusif', NULL, 35, 1, '2025-11-23 14:27:43'),
+(31, '2025-10-23 11:00:00', NULL, 'Bidan', '120/80', 36.80, 'Baik', 'Rubra', 'Mastitis', 1, 3.00, 36.80, 'Formula', 'Ibu demam, mastitis', 36, 1, '2025-11-23 14:27:43'),
+(32, '2025-10-29 10:00:00', NULL, 'Dokter', '120/80', 36.60, 'Baik', 'Seroza', 'Bengkak', 1, 3.10, 36.70, 'ASI + Formula', 'Sudah diobati', 36, 1, '2025-11-23 14:27:43'),
+(33, '2025-11-20 09:00:00', NULL, 'Bidan', '110/70', 36.50, 'Baik', 'Alba', 'Normal', 1, 3.70, 36.60, 'ASI Eksklusif', 'Sudah sembuh total', 36, 2, '2025-11-23 14:27:43'),
+(34, '2025-08-18 09:00:00', NULL, 'Bidan', '110/70', 36.50, 'Baik', 'Rubra', 'Normal', 1, 3.10, 36.60, 'ASI Eksklusif', NULL, 37, 5, '2025-11-23 14:27:43'),
+(35, '2025-08-24 10:00:00', NULL, 'Bidan', '110/70', 36.50, 'Baik', 'Seroza', 'Normal', 1, 3.20, 36.50, 'ASI Eksklusif', NULL, 37, 5, '2025-11-23 14:27:43'),
+(36, '2025-09-17 11:00:00', NULL, 'Bidan', '110/70', 36.50, 'Baik', 'Alba', 'Normal', 1, 3.90, 36.60, 'ASI Eksklusif', NULL, 37, 4, '2025-11-23 14:27:43'),
+(37, '2025-09-13 15:00:00', NULL, 'Bidan', '120/80', 36.60, 'Baik', 'Rubra', 'Normal', 1, 2.95, 36.70, 'ASI Eksklusif', NULL, 38, 2, '2025-11-23 14:27:43'),
+(38, '2025-09-19 16:00:00', NULL, 'Bidan', '110/80', 36.50, 'Baik', 'Seroza', 'Normal', 1, 3.10, 36.60, 'ASI Eksklusif', NULL, 38, 2, '2025-11-23 14:27:43'),
+(39, '2025-10-12 09:00:00', NULL, 'Bidan', '120/80', 36.60, 'Baik', 'Alba', 'Normal', 1, 3.80, 36.50, 'ASI Eksklusif', NULL, 38, 3, '2025-11-23 14:27:43'),
+(40, '2025-11-09 07:30:00', NULL, 'Bidan', '110/70', 36.50, 'Baik', 'Rubra', 'Normal', 1, 3.20, 36.60, 'ASI Eksklusif', NULL, 39, 4, '2025-11-23 14:27:43'),
+(41, '2025-11-15 08:30:00', NULL, 'Bidan', '110/70', 36.60, 'Baik', 'Seroza', 'Normal', 1, 3.30, 36.50, 'ASI Eksklusif', NULL, 39, 4, '2025-11-23 14:27:43'),
+(42, '2025-11-23 09:00:00', NULL, 'Bidan', '110/70', 36.50, 'Baik', 'Alba', 'Normal', 1, 3.50, 36.60, 'ASI Eksklusif', 'Kunjungan dipercepat', 39, 4, '2025-11-23 14:27:43'),
+(43, '2025-08-28 10:00:00', NULL, 'Bidan', '130/85', 36.70, 'Baik', 'Rubra', 'Normal', 1, 3.40, 36.70, 'ASI Eksklusif', 'Riwayat PEB', 40, 1, '2025-11-23 14:27:43'),
+(44, '2025-09-03 11:00:00', NULL, 'Dokter', '125/80', 36.60, 'Baik', 'Seroza', 'Normal', 1, 3.50, 36.60, 'ASI Eksklusif', 'TD Terkontrol', 40, 1, '2025-11-23 14:27:43'),
+(45, '2025-09-27 10:00:00', NULL, 'Bidan', '120/80', 36.50, 'Baik', 'Alba', 'Normal', 1, 4.20, 36.50, 'ASI Eksklusif', 'Sehat', 40, 2, '2025-11-23 14:27:43'),
+(46, '2025-10-02 12:00:00', NULL, 'Bidan', '110/70', 36.50, 'Baik', 'Rubra', 'Normal', 1, 3.05, 36.60, 'ASI Eksklusif', NULL, 41, 5, '2025-11-23 14:27:43'),
+(47, '2025-10-08 10:00:00', NULL, 'Bidan', '110/70', 36.50, 'Baik', 'Seroza', 'Normal', 1, 3.15, 36.50, 'ASI Eksklusif', NULL, 41, 5, '2025-11-23 14:27:43'),
+(48, '2025-11-01 09:00:00', NULL, 'Bidan', '110/70', 36.60, 'Baik', 'Alba', 'Normal', 1, 3.80, 36.60, 'ASI Eksklusif', NULL, 41, 3, '2025-11-23 14:27:43'),
+(49, '2025-10-09 08:00:00', NULL, 'Bidan', '120/80', 36.50, 'Baik', 'Rubra', 'Normal', 1, 3.10, 36.70, 'ASI Eksklusif', NULL, 42, 2, '2025-11-23 14:27:43'),
+(50, '2025-10-15 09:00:00', NULL, 'Bidan', '120/80', 36.60, 'Baik', 'Seroza', 'Normal', 1, 3.20, 36.60, 'ASI Eksklusif', NULL, 42, 2, '2025-11-23 14:27:43'),
+(51, '2025-11-08 10:00:00', NULL, 'Bidan', '110/80', 36.50, 'Baik', 'Alba', 'Normal', 1, 3.90, 36.50, 'ASI Eksklusif', NULL, 42, 4, '2025-11-23 14:27:43'),
+(52, '2025-08-13 14:00:00', NULL, 'Bidan', '110/70', 36.50, 'Baik', 'Rubra', 'Normal', 1, 2.90, 36.60, 'ASI Eksklusif', NULL, 43, 3, '2025-11-23 14:27:43'),
+(53, '2025-08-19 10:00:00', NULL, 'Bidan', '110/70', 36.50, 'Baik', 'Seroza', 'Normal', 1, 3.00, 36.50, 'ASI Eksklusif', NULL, 43, 3, '2025-11-23 14:27:43'),
+(54, '2025-09-12 11:00:00', NULL, 'Bidan', '110/70', 36.60, 'Baik', 'Alba', 'Normal', 1, 3.70, 36.60, 'ASI Eksklusif', NULL, 43, 5, '2025-11-23 14:27:43'),
+(55, '2025-10-07 09:00:00', NULL, 'Bidan', '120/80', 36.60, 'Baik', 'Rubra', 'Puting Lecet', 1, 3.30, 36.70, 'ASI Eksklusif', 'Ibu kesakitan saat menyusui', 44, 4, '2025-11-23 14:27:43'),
+(56, '2025-10-13 10:00:00', NULL, 'Bidan', '110/70', 36.50, 'Baik', 'Seroza', 'Normal', 1, 3.40, 36.60, 'ASI Eksklusif', 'Lecet sembuh', 44, 4, '2025-11-23 14:27:43'),
+(57, '2025-11-06 11:00:00', NULL, 'Bidan', '110/70', 36.50, 'Baik', 'Alba', 'Normal', 1, 4.05, 36.50, 'ASI Eksklusif', NULL, 44, 1, '2025-11-23 14:27:43'),
+(58, '2025-10-28 08:00:00', NULL, 'Bidan', '110/70', 36.50, 'Baik', 'Rubra', 'Normal', 1, 3.10, 36.60, 'ASI Eksklusif', NULL, 45, 5, '2025-11-23 14:27:43'),
+(59, '2025-11-03 09:00:00', NULL, 'Bidan', '110/70', 36.60, 'Baik', 'Seroza', 'Normal', 1, 3.20, 36.50, 'ASI Eksklusif', NULL, 45, 2, '2025-11-23 14:27:43'),
+(60, '2025-11-23 10:00:00', NULL, 'Bidan', '110/70', 36.50, 'Baik', 'Alba', 'Normal', 1, 3.80, 36.60, 'ASI Eksklusif', NULL, 45, 3, '2025-11-23 14:27:43');
 
 -- --------------------------------------------------------
 
@@ -619,7 +626,13 @@ INSERT INTO `lab_screening` (`id`, `hasil_lab_hb`, `lab_protein_urine`, `lab_gul
 (23, 9.70, '+3', NULL, NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Non-Reaktif', NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', 'Tidak', 0, NULL, 0, NULL, 23, '2025-11-23 14:23:38', '2025-11-23 14:23:38'),
 (24, 10.60, '+1', NULL, NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Non-Reaktif', NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', 'Tidak', 0, NULL, 0, NULL, 24, '2025-11-23 14:23:38', '2025-11-23 14:23:38'),
 (25, 13.00, 'Negatif', '90', NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Non-Reaktif', NULL, 'Non-Reaktif', 'Non-Reaktif', 'Negatif', 'Tidak', 0, NULL, 0, NULL, 51, '2025-12-08 16:25:07', '2025-12-08 16:25:07'),
-(26, 12.00, 'Negatif', '100', NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Non-Reaktif', NULL, 'Non-Reaktif', 'Non-Reaktif', 'Negatif', 'Tidak', 0, NULL, 0, NULL, 53, '2025-11-24 17:33:22', '2025-11-24 17:34:12');
+(26, 12.00, 'Negatif', '100', NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Non-Reaktif', NULL, 'Non-Reaktif', 'Non-Reaktif', 'Negatif', 'Tidak', 0, NULL, 0, NULL, 53, '2025-11-24 17:33:22', '2025-11-24 17:34:12'),
+(27, 12.00, 'Negatif', '100', NULL, 'Non-Reaktif', 'Non-Reaktif', 'Non-Reaktif', 'Belum ART', 'Non-Reaktif', 'Non-Reaktif', 'Negatif', 'Tidak', 0, 'Belum Diperiksa', 0, 'Belum Diperiksa', 51, '2026-01-14 11:06:30', '2026-01-14 11:13:23'),
+(28, NULL, 'Negatif', NULL, NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', 'Tidak', 0, 'Belum Diperiksa', 0, 'Belum Diperiksa', 16, '2026-01-15 00:08:19', '2026-01-15 00:08:19'),
+(29, 12.00, 'Negatif', '90', NULL, 'Non-Reaktif', 'Non-Reaktif', 'Non-Reaktif', 'Belum ART', 'Non-Reaktif', 'Non-Reaktif', 'Negatif', 'Tidak', 0, 'Negatif', 0, 'Negatif', 5, '2026-01-15 00:45:25', '2026-01-15 00:45:25'),
+(30, 12.00, 'Negatif', '90', NULL, 'Non-Reaktif', 'Non-Reaktif', 'Non-Reaktif', 'Belum ART', 'Non-Reaktif', 'Non-Reaktif', 'Negatif', 'Tidak', 0, 'Negatif', 0, 'Negatif', 54, '2026-01-15 01:12:14', '2026-01-15 01:12:14'),
+(31, 7.50, 'Negatif', '96', NULL, 'Non-Reaktif', 'Non-Reaktif', 'Non-Reaktif', 'Belum ART', 'Non-Reaktif', 'Non-Reaktif', 'Negatif', 'Tidak', 0, 'Negatif', 0, 'Negatif', 8, '2026-01-15 02:15:17', '2026-01-15 02:15:17'),
+(32, 7.50, 'Negatif', '89', NULL, 'Non-Reaktif', 'Non-Reaktif', 'Non-Reaktif', NULL, 'Non-Reaktif', 'Non-Reaktif', 'Negatif', 'Tidak', 0, 'Negatif', 0, 'Negatif', 10, '2026-01-15 02:18:29', '2026-01-15 02:18:29');
 
 -- --------------------------------------------------------
 
@@ -631,7 +644,7 @@ CREATE TABLE `persalinan` (
   `id` int NOT NULL,
   `tanggal_persalinan` datetime NOT NULL,
   `tempat_persalinan` enum('RS','Puskesmas','Rumah','Klinik') NOT NULL,
-  `penolong` enum('Bidan','Dokter','Keluarga','Lainnya') NOT NULL,
+  `penolong` enum('Bidan','Dokter','Keluarga','Lainnya') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `cara_persalinan` enum('Spontan','Vakum','Forceps','Sectio') NOT NULL,
   `komplikasi_ibu` text,
   `perdarahan` enum('Tidak','Ringan','Sedang','Berat') DEFAULT 'Tidak',
@@ -657,27 +670,27 @@ CREATE TABLE `persalinan` (
 -- Dumping data for table `persalinan`
 --
 
-INSERT INTO `persalinan` (`id`, `tanggal_persalinan`, `tempat_persalinan`, `penolong`, `cara_persalinan`, `komplikasi_ibu`, `perdarahan`, `robekan_jalan_lahir`, `jumlah_bayi`, `jenis_kelamin_bayi`, `berat_badan_bayi`, `panjang_badan_bayi`, `kondisi_bayi`, `asfiksia`, `keterangan_bayi`, `inisiasi_menyusui_dini`, `vitamin_k1`, `salep_mata`, `keterangan`, `forkey_hamil`, `forkey_bidan`, `created_at`) VALUES
-(1, '2025-09-08 22:00:00', 'Puskesmas', 'Bidan', 'Spontan', NULL, 'Tidak', 'Perineum', 1, 'Laki-laki', 3.20, 49.00, 'Sehat', 'Tidak', 'Bayi menangis kuat', 1, 1, 1, 'Persalinan lancar', 26, 2, '2025-11-23 14:29:05'),
-(2, '2025-08-22 15:30:00', 'Klinik', 'Bidan', 'Spontan', NULL, 'Ringan', 'Tidak', 1, 'Perempuan', 3.00, 48.00, 'Sehat', 'Tidak', 'Bayi bugar', 1, 1, 1, 'Lancar', 27, 4, '2025-11-23 14:29:05'),
-(3, '2025-10-17 20:00:00', 'Rumah', 'Bidan', 'Spontan', NULL, 'Tidak', 'Vagina', 1, 'Laki-laki', 3.60, 50.00, 'Sehat', 'Tidak', 'Bayi besar, sehat', 1, 1, 1, 'Lahir di PMB', 28, 2, '2025-11-23 14:29:05'),
-(4, '2025-09-27 10:00:00', 'RS', 'Dokter', 'Sectio', 'KPD', 'Sedang', 'Tidak', 1, 'Perempuan', 3.10, 49.00, 'Sehat', 'Ringan', 'Ketuban pecah dini', 0, 1, 1, 'Rujuk RS karena KPD', 29, 5, '2025-11-23 14:29:05'),
-(5, '2025-10-12 18:45:00', 'Puskesmas', 'Bidan', 'Spontan', NULL, 'Tidak', 'Perineum', 1, 'Perempuan', 2.90, 47.00, 'Sehat', 'Tidak', 'Normal', 1, 1, 1, 'Anak kedua', 30, 3, '2025-11-23 14:29:05'),
-(6, '2025-08-08 23:15:00', 'Klinik', 'Bidan', 'Spontan', NULL, 'Tidak', 'Tidak', 1, 'Laki-laki', 3.30, 50.00, 'Sehat', 'Tidak', 'Normal', 1, 1, 1, 'Tanpa jahitan', 31, 4, '2025-11-23 14:29:05'),
-(7, '2025-09-17 14:00:00', 'RS', 'Dokter', 'Vakum', 'Partus Lama', 'Sedang', 'Perineum', 1, 'Laki-laki', 3.50, 51.00, 'Sehat', 'Ringan', 'Sempat asfiksia ringan', 0, 1, 1, 'Kala II memanjang', 32, 1, '2025-11-23 14:29:05'),
-(8, '2025-11-01 21:00:00', 'Puskesmas', 'Bidan', 'Spontan', NULL, 'Tidak', 'Serviks', 1, 'Perempuan', 3.15, 48.50, 'Sehat', 'Tidak', 'Normal', 1, 1, 1, 'Luka jahit serviks', 33, 5, '2025-11-23 14:29:05'),
-(9, '2025-09-01 16:30:00', 'Rumah', 'Bidan', 'Spontan', NULL, 'Tidak', 'Vagina', 1, 'Perempuan', 3.05, 48.00, 'Sehat', 'Tidak', 'Normal', 1, 1, 1, 'Lahir di PMB', 34, 2, '2025-11-23 14:29:05'),
-(10, '2025-09-22 19:20:00', 'Puskesmas', 'Bidan', 'Spontan', NULL, 'Tidak', 'Tidak', 1, 'Laki-laki', 3.40, 50.00, 'Sehat', 'Tidak', 'Normal', 1, 1, 1, 'Utuh', 35, 3, '2025-11-23 14:29:05'),
-(11, '2025-10-22 08:00:00', 'RS', 'Dokter', 'Sectio', 'Sungsang', 'Tidak', 'Tidak', 1, 'Perempuan', 3.00, 49.00, 'Sehat', 'Tidak', 'Posisi Sungsang', 0, 1, 1, 'SC Elektif', 36, 1, '2025-11-23 14:29:05'),
-(12, '2025-08-17 22:50:00', 'Puskesmas', 'Bidan', 'Spontan', NULL, 'Tidak', 'Perineum', 1, 'Laki-laki', 3.20, 49.50, 'Sehat', 'Tidak', 'Normal', 1, 1, 1, 'Jahitan jelujur', 37, 5, '2025-11-23 14:29:05'),
-(13, '2025-09-12 12:00:00', 'Klinik', 'Bidan', 'Spontan', NULL, 'Tidak', 'Tidak', 1, 'Perempuan', 3.00, 48.00, 'Sehat', 'Tidak', 'Normal', 1, 1, 1, 'Anak pertama', 38, 2, '2025-11-23 14:29:05'),
-(14, '2025-11-08 17:40:00', 'Puskesmas', 'Bidan', 'Spontan', NULL, 'Tidak', 'Perineum', 1, 'Laki-laki', 3.35, 50.00, 'Sehat', 'Tidak', 'Normal', 1, 1, 1, 'Lancar', 39, 4, '2025-11-23 14:29:05'),
-(15, '2025-08-27 05:00:00', 'RS', 'Dokter', 'Sectio', 'Pre-eklampsia Berat', 'Sedang', 'Tidak', 1, 'Perempuan', 3.50, 49.00, 'Sehat', 'Ringan', 'Observasi ketat', 0, 1, 1, 'Cito SC karena PEB', 40, 1, '2025-11-23 14:29:05'),
-(16, '2025-10-01 14:15:00', 'Puskesmas', 'Bidan', 'Spontan', NULL, 'Tidak', 'Vagina', 1, 'Laki-laki', 3.10, 49.00, 'Sehat', 'Tidak', 'Normal', 1, 1, 1, 'Lahir normal', 41, 5, '2025-11-23 14:29:05'),
-(17, '2025-10-08 06:30:00', 'Rumah', 'Bidan', 'Spontan', NULL, 'Tidak', 'Perineum', 1, 'Perempuan', 3.20, 48.50, 'Sehat', 'Tidak', 'Normal', 1, 1, 1, 'Partus presipitatus', 42, 2, '2025-11-23 14:29:05'),
-(18, '2025-08-12 11:20:00', 'Klinik', 'Bidan', 'Spontan', NULL, 'Tidak', 'Tidak', 1, 'Laki-laki', 3.00, 49.00, 'Sehat', 'Tidak', 'Normal', 1, 1, 1, 'Utuh', 43, 3, '2025-11-23 14:29:05'),
-(19, '2025-10-06 19:50:00', 'Puskesmas', 'Bidan', 'Spontan', NULL, 'Tidak', 'Serviks', 1, 'Laki-laki', 3.40, 51.00, 'Sehat', 'Tidak', 'Normal', 1, 1, 1, 'Bayi cukup besar', 44, 4, '2025-11-23 14:29:05'),
-(20, '2025-10-27 23:45:00', 'Puskesmas', 'Bidan', 'Spontan', NULL, 'Tidak', 'Perineum', 1, 'Perempuan', 3.15, 48.00, 'Sehat', 'Tidak', 'Normal', 1, 1, 1, 'Lancar', 45, 5, '2025-11-23 14:29:05');
+INSERT INTO `persalinan` (`id`, `tanggal_persalinan`, `tempat_persalinan`, `penolong`, `cara_persalinan`, `komplikasi_ibu`, `perdarahan`, `robekan_jalan_lahir`, `jumlah_bayi`, `jenis_kelamin_bayi`, `berat_badan_bayi`, `panjang_badan_bayi`, `kondisi_bayi`, `asfiksia`, `keterangan_bayi`, `inisiasi_menyusui_dini`, `vitamin_k1`, `beri_ttd`, `salep_mata`, `keterangan`, `forkey_hamil`, `forkey_bidan`, `created_at`) VALUES
+(1, '2026-01-19 13:29:00', 'Puskesmas', 'Bidan', 'Spontan', NULL, 'Tidak', 'Perineum', 1, 'Laki-laki', 3.20, 49.00, 'Sehat', 'Tidak', 'Bayi menangis kuat', 1, 1, 1, 1, 'Persalinan lancar', 26, 2, '2025-11-23 14:29:05'),
+(2, '2025-08-22 15:30:00', 'Klinik', 'Bidan', 'Spontan', NULL, 'Ringan', 'Tidak', 1, 'Perempuan', 3.00, 48.00, 'Sehat', 'Tidak', 'Bayi bugar', 1, 1, 0, 1, 'Lancar', 27, 4, '2025-11-23 14:29:05'),
+(3, '2025-10-17 20:00:00', 'Rumah', 'Bidan', 'Spontan', NULL, 'Tidak', 'Vagina', 1, 'Laki-laki', 3.60, 50.00, 'Sehat', 'Tidak', 'Bayi besar, sehat', 1, 1, 0, 1, 'Lahir di PMB', 28, 2, '2025-11-23 14:29:05'),
+(4, '2025-09-27 10:00:00', 'RS', 'Dokter', 'Sectio', 'KPD', 'Sedang', 'Tidak', 1, 'Perempuan', 3.10, 49.00, 'Sehat', 'Ringan', 'Ketuban pecah dini', 0, 1, 0, 1, 'Rujuk RS karena KPD', 29, 5, '2025-11-23 14:29:05'),
+(5, '2025-10-12 18:45:00', 'Puskesmas', 'Bidan', 'Spontan', NULL, 'Tidak', 'Perineum', 1, 'Perempuan', 2.90, 47.00, 'Sehat', 'Tidak', 'Normal', 1, 1, 0, 1, 'Anak kedua', 30, 3, '2025-11-23 14:29:05'),
+(6, '2025-08-08 23:15:00', 'Klinik', 'Bidan', 'Spontan', NULL, 'Tidak', 'Tidak', 1, 'Laki-laki', 3.30, 50.00, 'Sehat', 'Tidak', 'Normal', 1, 1, 0, 1, 'Tanpa jahitan', 31, 4, '2025-11-23 14:29:05'),
+(7, '2025-09-17 14:00:00', 'RS', 'Dokter', 'Vakum', 'Partus Lama', 'Sedang', 'Perineum', 1, 'Laki-laki', 3.50, 51.00, 'Sehat', 'Ringan', 'Sempat asfiksia ringan', 0, 1, 0, 1, 'Kala II memanjang', 32, 1, '2025-11-23 14:29:05'),
+(8, '2025-11-01 21:00:00', 'Puskesmas', 'Bidan', 'Spontan', NULL, 'Tidak', 'Serviks', 1, 'Perempuan', 3.15, 48.50, 'Sehat', 'Tidak', 'Normal', 1, 1, 0, 1, 'Luka jahit serviks', 33, 5, '2025-11-23 14:29:05'),
+(9, '2025-09-01 16:30:00', 'Rumah', 'Bidan', 'Spontan', NULL, 'Tidak', 'Vagina', 1, 'Perempuan', 3.05, 48.00, 'Sehat', 'Tidak', 'Normal', 1, 1, 0, 1, 'Lahir di PMB', 34, 2, '2025-11-23 14:29:05'),
+(10, '2025-09-22 19:20:00', 'Puskesmas', 'Bidan', 'Spontan', NULL, 'Tidak', 'Tidak', 1, 'Laki-laki', 3.40, 50.00, 'Sehat', 'Tidak', 'Normal', 1, 1, 0, 1, 'Utuh', 35, 3, '2025-11-23 14:29:05'),
+(11, '2025-10-22 08:00:00', 'RS', 'Dokter', 'Sectio', 'Sungsang', 'Tidak', 'Tidak', 1, 'Perempuan', 3.00, 49.00, 'Sehat', 'Tidak', 'Posisi Sungsang', 0, 1, 0, 1, 'SC Elektif', 36, 1, '2025-11-23 14:29:05'),
+(12, '2025-08-17 22:50:00', 'Puskesmas', 'Bidan', 'Spontan', NULL, 'Tidak', 'Perineum', 1, 'Laki-laki', 3.20, 49.50, 'Sehat', 'Tidak', 'Normal', 1, 1, 0, 1, 'Jahitan jelujur', 37, 5, '2025-11-23 14:29:05'),
+(13, '2025-09-12 12:00:00', 'Klinik', 'Bidan', 'Spontan', NULL, 'Tidak', 'Tidak', 1, 'Perempuan', 3.00, 48.00, 'Sehat', 'Tidak', 'Normal', 1, 1, 0, 1, 'Anak pertama', 38, 2, '2025-11-23 14:29:05'),
+(14, '2025-11-08 17:40:00', 'Puskesmas', 'Bidan', 'Spontan', NULL, 'Tidak', 'Perineum', 1, 'Laki-laki', 3.35, 50.00, 'Sehat', 'Tidak', 'Normal', 1, 1, 0, 1, 'Lancar', 39, 4, '2025-11-23 14:29:05'),
+(15, '2025-08-27 05:00:00', 'RS', 'Dokter', 'Sectio', 'Pre-eklampsia Berat', 'Sedang', 'Tidak', 1, 'Perempuan', 3.50, 49.00, 'Sehat', 'Ringan', 'Observasi ketat', 0, 1, 0, 1, 'Cito SC karena PEB', 40, 1, '2025-11-23 14:29:05'),
+(16, '2025-10-01 14:15:00', 'Puskesmas', 'Bidan', 'Spontan', NULL, 'Tidak', 'Vagina', 1, 'Laki-laki', 3.10, 49.00, 'Sehat', 'Tidak', 'Normal', 1, 1, 0, 1, 'Lahir normal', 41, 5, '2025-11-23 14:29:05'),
+(17, '2025-10-08 06:30:00', 'Rumah', 'Bidan', 'Spontan', NULL, 'Tidak', 'Perineum', 1, 'Perempuan', 3.20, 48.50, 'Sehat', 'Tidak', 'Normal', 1, 1, 0, 1, 'Partus presipitatus', 42, 2, '2025-11-23 14:29:05'),
+(18, '2025-08-12 11:20:00', 'Klinik', 'Bidan', 'Spontan', NULL, 'Tidak', 'Tidak', 1, 'Laki-laki', 3.00, 49.00, 'Sehat', 'Tidak', 'Normal', 1, 1, 0, 1, 'Utuh', 43, 3, '2025-11-23 14:29:05'),
+(19, '2025-10-06 19:50:00', 'Puskesmas', 'Bidan', 'Spontan', NULL, 'Tidak', 'Serviks', 1, 'Laki-laki', 3.40, 51.00, 'Sehat', 'Tidak', 'Normal', 1, 1, 0, 1, 'Bayi cukup besar', 44, 4, '2025-11-23 14:29:05'),
+(20, '2025-10-27 23:45:00', 'Puskesmas', 'Bidan', 'Spontan', NULL, 'Tidak', 'Perineum', 1, 'Perempuan', 3.15, 48.00, 'Sehat', 'Tidak', 'Normal', 1, 1, 0, 1, 'Lancar', 45, 5, '2025-11-23 14:29:05');
 
 -- --------------------------------------------------------
 
@@ -790,7 +803,9 @@ INSERT INTO `suami` (`id`, `nik_suami`, `nama_lengkap`, `tanggal_lahir`, `no_hp`
 (43, '6472013407940043', 'Khofifah Indar', '1994-07-10', '081345678043', 'A', 'PNS', 'S1', 0, 48, '2025-11-23 14:31:06', '2025-11-23 14:31:06'),
 (44, '6472014408860044', 'Erick Thohir', '1986-08-20', '081345678044', 'AB', 'BUMN', 'S2', 0, 49, '2025-11-23 14:31:06', '2025-11-23 14:31:06'),
 (45, '6472015409910045', 'Nadiem Makarim', '1991-09-30', '081345678045', 'B', 'Tech Lead', 'S2', 0, 50, '2025-11-23 14:31:06', '2025-11-23 14:31:06'),
-(46, '6472021837324578', 'Asep Bumida Laki', '1998-03-15', '080001111112', 'B', 'Karyawan', 'D4', 1, 52, '2025-12-08 18:55:45', '2025-12-25 15:49:53');
+(46, '6472021837324578', 'Asep Bumida Laki', '1998-03-15', '080001111112', 'B', 'Karyawan', 'D4', 1, 52, '2025-12-08 18:55:45', '2025-12-25 15:49:53'),
+(47, '6472021837324567', 'Suami Manusia Testing', '1985-04-18', '081234567067', 'A', 'PNS', 'S1', 1, 53, '2026-01-15 01:10:19', '2026-01-15 01:10:19'),
+(48, '6472021837324581', 'Emilia Putra', '1995-04-11', '083434567453', 'B', 'Pedagang', 'SMA', 1, 54, '2026-01-22 02:00:20', '2026-01-22 02:00:20');
 
 -- --------------------------------------------------------
 
@@ -964,7 +979,7 @@ ALTER TABLE `wilker_posyandu`
 -- AUTO_INCREMENT for table `antenatal_care`
 --
 ALTER TABLE `antenatal_care`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=76;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=79;
 
 --
 -- AUTO_INCREMENT for table `bidan`
@@ -976,7 +991,7 @@ ALTER TABLE `bidan`
 -- AUTO_INCREMENT for table `ibu`
 --
 ALTER TABLE `ibu`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=53;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=55;
 
 --
 -- AUTO_INCREMENT for table `jiwa_screening`
@@ -988,7 +1003,7 @@ ALTER TABLE `jiwa_screening`
 -- AUTO_INCREMENT for table `kehamilan`
 --
 ALTER TABLE `kehamilan`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=54;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=56;
 
 --
 -- AUTO_INCREMENT for table `kelurahan`
@@ -1012,7 +1027,7 @@ ALTER TABLE `kunjungan_nifas`
 -- AUTO_INCREMENT for table `lab_screening`
 --
 ALTER TABLE `lab_screening`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- AUTO_INCREMENT for table `persalinan`
@@ -1030,7 +1045,7 @@ ALTER TABLE `riwayat_penyakit`
 -- AUTO_INCREMENT for table `suami`
 --
 ALTER TABLE `suami`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=49;
 
 --
 -- AUTO_INCREMENT for table `wilker_posyandu`

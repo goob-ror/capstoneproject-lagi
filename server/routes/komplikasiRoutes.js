@@ -106,7 +106,7 @@ router.post('/', auth, async (req, res) => {
         rujuk_rs, nama_rs, tanggal_rujukan, tekanan_darah, protein_urine,
         gejala_penyerta, terapi_diberikan, tingkat_keparahan,
         status_penanganan, keterangan, forkey_hamil, forkey_anc
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     const [result] = await db.execute(query, [

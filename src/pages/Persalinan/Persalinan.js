@@ -39,15 +39,25 @@ const Persalinan = () => {
   }, [presenter]);
 
   useEffect(() => {
+    const handleEdit = (id) => {
+      navigate(`/tambah-persalinan?id=${id}`);
+    };
+
+    const handleDelete = async (id) => {
+      if (window.confirm('Apakah Anda yakin ingin menghapus data persalinan ini?')) {
+        await presenter.deletePersalinan(id);
+      }
+    };
+
     if (persalinanData.length > 0 && tableRef.current && !dataTableRef.current) {
       dataTableRef.current = $(tableRef.current).DataTable({
         data: persalinanData,
         columns: [
-          { 
+          {
             data: null,
             render: (data, type, row, meta) => meta.row + 1
           },
-          { 
+          {
             data: 'tanggal_persalinan',
             render: (data) => data ? new Date(data).toLocaleDateString('id-ID', {
               year: 'numeric',
@@ -62,12 +72,12 @@ const Persalinan = () => {
           { data: 'tempat_persalinan' },
           { data: 'penolong' },
           { data: 'cara_persalinan' },
-          { 
+          {
             data: 'kondisi_bayi',
             render: (data) => {
               if (!data) return '-';
-              const badgeClass = data === 'Sehat' ? 'badge-success' : 
-                                 data === 'Sakit' ? 'badge-warning' : 'badge-danger';
+              const badgeClass = data === 'Sehat' ? 'badge-success' :
+                data === 'Sakit' ? 'badge-warning' : 'badge-danger';
               return `<span class="status-badge ${badgeClass}">${data}</span>`;
             }
           },
@@ -113,12 +123,12 @@ const Persalinan = () => {
         order: [[1, 'desc']]
       });
 
-      $(tableRef.current).on('click', '.btn-edit', function() {
+      $(tableRef.current).on('click', '.btn-edit', function () {
         const id = $(this).data('id');
         handleEdit(id);
       });
 
-      $(tableRef.current).on('click', '.btn-delete', function() {
+      $(tableRef.current).on('click', '.btn-delete', function () {
         const id = $(this).data('id');
         handleDelete(id);
       });
@@ -130,7 +140,7 @@ const Persalinan = () => {
         dataTableRef.current = null;
       }
     };
-  }, [persalinanData]);
+  }, [persalinanData, navigate, presenter]);
 
   useEffect(() => {
     if (persalinanData.length > 0) {
@@ -142,15 +152,7 @@ const Persalinan = () => {
     presenter.handleLogout();
   };
 
-  const handleEdit = (id) => {
-    navigate(`/tambah-persalinan?id=${id}`);
-  };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus data persalinan ini?')) {
-      await presenter.deletePersalinan(id);
-    }
-  };
 
   const handleAddNew = () => {
     navigate('/tambah-persalinan');
@@ -178,43 +180,49 @@ const Persalinan = () => {
         <nav className="sidebar-nav">
           <a href="/dashboard" className="nav-item">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" fill="currentColor"/>
+              <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" fill="currentColor" />
             </svg>
             Dashboard
           </a>
           <a href="/data-ibu" className="nav-item">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="currentColor"/>
+              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="currentColor" />
             </svg>
             Data Ibu
           </a>
           <a href="/kunjungan-anc" className="nav-item">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" fill="currentColor"/>
+              <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" fill="currentColor" />
             </svg>
             Kunjungan ANC
           </a>
           <a href="/persalinan" className="nav-item active">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor"/>
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor" />
             </svg>
             Persalinan
           </a>
+          <a href="/kunjungan-nifas" className="nav-item">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" fill="currentColor" />
+            </svg>
+            Kunjungan Nifas
+          </a>
           <a href="/komplikasi" className="nav-item">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm11 15H4v-2h16v2zm0-5H4V8h5.08L7 10.83 8.62 12 11 8.76l1-1.36 1 1.36L15.38 12 17 10.83 14.92 8H20v6z" fill="currentColor"/>
+              <path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm11 15H4v-2h16v2zm0-5H4V8h5.08L7 10.83 8.62 12 11 8.76l1-1.36 1 1.36L15.38 12 17 10.83 14.92 8H20v6z" fill="currentColor" />
             </svg>
             Komplikasi
           </a>
           <a href="/posyandu" className="nav-item">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor"/>
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor" />
             </svg>
             Posyandu
           </a>
           <a href="/rekapitulasi" className="nav-item">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" fill="currentColor"/>
+              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" fill="currentColor" />
             </svg>
             Rekapitulasi
           </a>
@@ -232,7 +240,7 @@ const Persalinan = () => {
           </div>
           <button className="logout-btn" onClick={handleLogout}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z" fill="currentColor"/>
+              <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z" fill="currentColor" />
             </svg>
             Logout
           </button>
@@ -247,7 +255,7 @@ const Persalinan = () => {
           </div>
           <button className="btn-add" onClick={handleAddNew}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor"/>
+              <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor" />
             </svg>
             Tambah Persalinan
           </button>
@@ -263,7 +271,7 @@ const Persalinan = () => {
           <div className="search-bar-container">
             <div className="search-bar">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="currentColor"/>
+                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="currentColor" />
               </svg>
               <input
                 type="text"
