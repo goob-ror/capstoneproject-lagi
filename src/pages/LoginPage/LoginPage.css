@@ -4,9 +4,11 @@
   background-color: #FFFFFF;
   border-radius: 25px;
   width: 500px;
-  height: 450px;
+  min-height: 580px;
   padding: 30px;
   position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 .error-message {
@@ -68,7 +70,7 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  margin: 20px 0 0 0;
+  margin: 15px 0 0 0;
   padding: 0;
   text-align: center;
 }
@@ -83,8 +85,8 @@
   font-family: 'Montserrat', sans-serif;
   font-style: normal;
   font-weight: 700;
-  font-size: 24px;
-  line-height: 36px;
+  font-size: 22px;
+  line-height: 32px;
   color: #515151;
   margin: 0;
   padding: 0;
@@ -100,8 +102,8 @@
   font-family: 'Istok Web', sans-serif;
   font-style: normal;
   font-weight: 400;
-  font-size: 16px;
-  line-height: 24px;
+  font-size: 14px;
+  line-height: 20px;
   color: #515151;
   margin: 0;
   padding: 0;
@@ -112,6 +114,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  margin-top: 15px;
 }
 
 .login-form-wrapper {
@@ -125,8 +128,16 @@
 }
 
 .login-form-group.password-group {
-  margin: 0 0 40px 0;
+  margin: 0 0 0 0;
   position: relative;
+}
+
+.login-form-group.recaptcha-group {
+  margin: 15px 0 15px 0;
+  display: flex;
+  justify-content: center;
+  transform: scale(0.95);
+  transform-origin: center;
 }
 
 .login-form-group label {
@@ -270,7 +281,7 @@
   .login-container {
     width: 90%;
     max-width: 400px;
-    height: auto;
+    min-height: auto;
     padding: 20px;
   }
 
@@ -280,13 +291,13 @@
   }
 
   .login-title h1 {
-    font-size: 20px;
-    line-height: 30px;
+    font-size: 18px;
+    line-height: 26px;
   }
 
   .login-subtitle p {
-    font-size: 14px;
-    line-height: 20px;
+    font-size: 13px;
+    line-height: 18px;
   }
 
   .login-form-group input {
@@ -301,5 +312,9 @@
 
   .register-text {
     font-size: 13px;
+  }
+
+  .login-form-group.recaptcha-group {
+    transform: scale(0.85);
   }
 }

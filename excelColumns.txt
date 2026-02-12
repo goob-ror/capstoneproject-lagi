@@ -1,0 +1,56 @@
+Sheet 1 Data Pasien (Table Header at row 4, data autofill start at row 5)
+No.	Nama Pasien	NIK	Tanggal Lahir	Gol Darah	Nomor HP	Kelurahan	Posyandu	Nama Suami	Suami Perokok	Pendidikan	Pekerjaan	BMI	HPHT	GPA	TP
+
+
+Sheet 2 ANC (autofill placeholder is placed in row 7-10, jumlah bumil header is on B7-10)
+Bumil Memiliki Buku KIA		Bumil Dilayani Sesuai Standar 12 T		Bumil Dengan 4 Terlalu		K1 Murni		K1 Akses		K1 Dokter		K1 USG		K4		K5		K5 Dokter		K5 USG		K6		K8		T1		T2		T3		T4		T5		T 2+		Fe (30 Tablet)		Fe (90 Tablet)		Rujukan Resiko Tinggi			
+																																										Jumlah Maternal	Persen	Jumlah Maternal	Persen
+Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen				
+{simpangpasir_jumlah_milikibukukia}	{simpangpasir_persen_milikibukukia}	{simpangpasir_jumlah_standar12t}	{simpangpasir_persen_standar12t}	{simpangpasir_jumlah_4terlalu}	{simpangpasir_persen_4terlalu}	{simpangpasir_jumlah_k1murni}	{simpangpasir_persen_k1murni}	{simpangpasir_jumlah_k1akses}	{simpangpasir_persen_k1akses}	{simpangpasir_jumlah_k1dokter}	{simpangpasir_persen_k1dokter}	{simpangpasir_jumlah_k1usg}	{simpangpasir_persen_k1usg}	{simpangpasir_jumlah_k4}	{simpangpasir_persen_k4}																														
+{rawamakmur_jumlah_milikibukukia}	{rawamakmur_persen_milikibukukia}	{rawamakmur_jumlah_standar12t}	{rawamakmur_persen_standar12t}	{rawamakmur_jumlah_4terlalu}	{rawamakmur_persen_4terlalu}	{rawamakmur_jumlah_k1murni}	{rawamakmur_persen_k1murni}	{rawamakmur_jumlah_k1akses}	{rawamakmur_persen_k1akses}	{rawamakmur_jumlah_k1dokter}	{rawamakmur_persen_k1dokter}	{rawamakmur_jumlah_k1usg}	{rawamakmur_persen_k1usg}	{rawamakmur_jumlah_k4}	{rawamakmur_persen_k4}																														
+{handilbakti_jumlah_milikibukukia}	{handilbakti_persen_milikibukukia}	{handilbakti_jumlah_standar12t}	{handilbakti_persen_standar12t}	{handilbakti_jumlah_4terlalu}	{handilbakti_persen_4terlalu}	{handilbakti_jumlah_k1murni}	{handilbakti_persen_k1murni}	{handilbakti_jumlah_k1akses}	{handilbakti_persen_k1akses}	{handilbakti_jumlah_k1dokter}	{handilbakti_persen_k1dokter}	{handilbakti_jumlah_k1usg}	{handilbakti_persen_k1usg}	{handilbakti_jumlah_k4}	{handilbakti_persen_k4}																														
+{total_jumlah_milikibukukia}	{total_persen_milikibukukia}	{total_jumlah_standar12t}	{total_persen_standar12t}	{total_jumlah_4terlalu}	{total_persen_4terlalu}	{total_jumlah_k1murni}	{total_persen_k1murni}	{total_jumlah_k1akses}	{total_persen_k1akses}	{total_jumlah_k1dokter}	{total_persen_k1dokter}	{total_jumlah_k1usg}	{total_persen_k1usg}	{total_jumlah_k4}	{total_persen_k4}																														
+
+Sheet 3 ANC Terpadu (autofill placeholder is placed in row 7-10, start autofilling from G column)
+TM1					TM2					TM3					Jumlah Ibu Hamil Anemia		Jumlah Kasus Anemia Berat		Jumlah Kasus Anemia Sedang		Jumlah Kasus Anemia Ringan		Anemia Sedang Berat		Sedang Berat Ditatalaksana		Anemia Ringan Kenaikan Hb		Anemia Berat Rujuk FKRTL		Diperiksa LILA		KEK (LILA < 23.5)		KEK Mendapatkan Gizi		Diperiksa BMI TM1		BMI Kurus		BMI Normal		BMI Gemuk		BMI Obesitas		BMI Kurus Kenaikan		BMI Normal Kenaikan		BMI Normal Penurunan		KEK Ditatalaksana		TM1					TM2					TM3					Diskrining Protein Urine		Positif (+)		Positif (+1)		Positif (+2)		Positif (+3)		Positif (+4)		Diperiksa Gula Darah		Gula Darah < 140 mg/dL		Gula Darah 140-199 mg/dL		Gula Darah > 200 mg/dL		Diperiksa HIV		Hasil Periksa HIV (+)		Ibu Hamil Mendapat ART		Ibu Hamil HIV (+)		Diperiksa Mikroskopis/RDT		Positif Malaria (+)		Ibu Hamil Diberi Kelambu		Diperiksa Kecacingan		Positif Kecacingan (+)		Ibu Hamil Ditatalaksana		Diperiksa IMS		Positif IMS (+)		Ibu Hamil Ditatalaksana		Diperiksa Hepatitis B		Positif Hepatitis B (+)		Ibu Hamil Ditatalaksana		Anemia (Hb < 11g/dL)		KEK		Preeklamsia/Eklamsia		Infeksi		Tuberculosis		Malaria		HIV		Jantung		Diabetes Melitus		Obesitas		Covid-19		Keguguran		Lain-lain		Jumlah Bumil Komplikasi		Jumlah Bumil Dirujuk RS	
+Diperiksa	Anemia Berat	Anemia Sedang	Anemia Ringan	Jumlah Anemia	Diperiksa	Anemia Berat	Anemia Sedang	Anemia Ringan	Jumlah Anemia	Diperiksa	Anemia Berat	Anemia Sedang	Anemia Ringan	Jumlah Anemia																																									LILA Diperiksa	BMI Kurus	BMI Normal	BMI Gemuk	BMI Obesitas	LILA Diperiksa	BMI Kurus	BMI Normal	BMI Gemuk	BMI Obesitas	LILA Diperiksa	BMI Kurus	BMI Normal	BMI Gemuk	BMI Obesitas																											Persalinan Normal	Persalinan Sectio																																																						
+															Jumlah Ibu Hamil Anemia	Persen	Jumlah Ibu Hamil Anemia	Persen	Jumlah Ibu Hamil Anemia	Persen	Jumlah Ibu Hamil Anemia	Persen	Jumlah Ibu Hamil Anemia	Persen	Jumlah Ibu Hamil Anemia	Persen	Jumlah Ibu Hamil Anemia	Persen	Jumlah Ibu Hamil Anemia	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen																Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen			Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen
+																																																																																																																																																							
+																																																																																																																																																							
+																																																																																																																																																							
+																																																																																																																																																							
+Laporan Hemoglobin															Laporan Hemoglobin TM1 - TM3																Laporan Kekurangan Energi Kronik																																							Laporan Protein Urine												Laporan Gula Darah								Laporan Pencegahan Penularan HIV dan Ibu ke Anak (PPIA)								Laporan Pencegahan Malaria						Laporan Kecacingan						Laporan Infeksi Menular Seksual						Laporan Hepatitis B						Total Komplikasi																													
+
+Sheet 4 Persalinan Nifas (autofill placeholder is placed in row 7-10, start autofilling from G column)
+Persalinan Ditolong Nakes		Persalinan Ditolong Non-Nakes		Persalinan di Fasyankes		Persalinan di Non-Fasyankes		KF1		KF2		KF3		KF4 dan Lengkap		Mendapat Vitamin A		Mendapat Tablet Tambah Darah		Anemia (Hb < 11g/dL)		KEK		Preeklamsia/Eklamsia		Infeksi		Tuberculosis		Malaria		HIV		Jantung		Diabetes Melitus		Obesitas		Covid-19		Keguguran		Lain-lain		Jumlah Bumil Komplikasi		Jumlah Bumil Dirujuk RS	
+																																																	
+Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen
+																																																	
+																																																	
+																																																	
+																																																	
+								Pelayanan Nifas												Total Komplikasi																													
+
+Sheet 5 Komplikasi Kebidanan
+Anemia (Hb < 11g/dL)		KEK		Preeklamsia/Eklamsia		Infeksi		Tuberculosis		Malaria		HIV		Jantung		Diabetes Melitus		Obesitas		Covid-19		Keguguran		Lain-lain		Jumlah Bumil Komplikasi		Jumlah Bumil Dirujuk RS	
+																													
+Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen
+																													
+																													
+																													
+																													
+Total Komplikasi																													
+Anemia (Hb < 11g/dL)		KEK		Preeklamsia/Eklamsia		Infeksi		Tuberculosis		Malaria		HIV		Jantung		Diabetes Melitus		Obesitas		Covid-19		Keguguran		Lain-lain		Jumlah Bumil Komplikasi		Jumlah Bumil Dirujuk RS	
+																													
+Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen	Jumlah	Persen
+																													
+																													
+																													
+																													
+Total Komplikasi																													
+
+
+Notes :
+Sheet 3 Total Komplikasi (Waktu Kejadian Saat Hamil)
+Sheet 4 Total Komplikasi (Waktu Kejadian Saat Persalinan & Nifas)
+Sheet 5 Total Komplikasi (Waktu Kejadian in Total)

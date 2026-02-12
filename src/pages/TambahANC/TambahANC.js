@@ -201,14 +201,20 @@ const TambahANC = () => {
       const allVisitTypes = ['K1', 'K2', 'K3', 'K4', 'K5', 'K6', 'K7', 'K8'];
       const nextAvailable = allVisitTypes.find(type => !existingTypes.includes(type));
 
-      if (nextAvailable && formData.jenis_kunjungan !== nextAvailable) {
-        setFormData(prev => ({
-          ...prev,
-          jenis_kunjungan: nextAvailable
-        }));
+      if (nextAvailable) {
+        setFormData(prev => {
+          // Only update if current value is not already set or is in existing types
+          if (!prev.jenis_kunjungan || existingTypes.includes(prev.jenis_kunjungan)) {
+            return {
+              ...prev,
+              jenis_kunjungan: nextAvailable
+            };
+          }
+          return prev;
+        });
       }
     }
-  }, [previousVisits, isEdit, formData.jenis_kunjungan]);
+  }, [previousVisits, isEdit]);
 
   // Check for existing visit when pregnancy and visit type are selected (only in add mode, not edit)
   useEffect(() => {

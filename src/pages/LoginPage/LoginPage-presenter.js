@@ -7,12 +7,12 @@ class LoginPresenter {
     this.model = new LoginPageModel();
   }
 
-  async handleLogin(username, password) {
+  async handleLogin(username, password, recaptchaToken) {
     try {
       this.view.setLoading(true);
       this.view.clearError();
 
-      const data = await this.model.login(username, password);
+      const data = await this.model.login(username, password, recaptchaToken);
 
       // Check if this is an offline login
       if (data.offline) {

@@ -14,9 +14,28 @@ const rekapitulasiRoutes = require('./routes/rekapitulasiRoutes');
 const posyanduRoutes = require('./routes/posyanduRoutes');
 const kelurahanRoutes = require('./routes/kelurahanRoutes');
 const auth = require('./middleware/auth');
+const { validateAllInputs } = require('./middleware/inputValidator');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Security Headers
+app.use((req, res, next) => {
+  // Content Security Policy
+  res.setHeader(
+    'Content-Security-Policy',
+    "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:;"
+  );
+  // Prevent XSS attacks
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  // Prevent clickjacking
+  res.setHeader('X-Frame-Options', 'DENY');
+  // Prevent MIME type sniffing
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  // Referrer Policy
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  next();
+});
 
 // Middleware
 app.use(cors({
@@ -25,8 +44,15 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Apply input validation to all routes (except health check)
+app.use('/api', validateAllInputs({
+  blockMalicious: true,
+  sanitizeAuto: true,
+  logThreats: true
+}));
 
 // Serve static files from React app
 app.use(express.static(path.join(__dirname, '../build')));

@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import ReCAPTCHA from 'react-google-recaptcha';
 import LoginPresenter from './LoginPage-presenter';
 import './LoginPage.css';
 
@@ -11,7 +12,9 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [recaptchaToken, setRecaptchaToken] = useState(null);
   const navigate = useNavigate();
+  const recaptchaRef = useRef(null);
 
   const [presenter] = useState(() => new LoginPresenter({
     setLoading,
@@ -41,9 +44,25 @@ const LoginPage = () => {
     window.history.back();
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    presenter.handleLogin(formData.username, formData.password);
+    
+    if (!recaptchaToken) {
+      setError('Silakan verifikasi bahwa Anda bukan robot.');
+      return;
+    }
+
+    presenter.handleLogin(formData.username, formData.password, recaptchaToken);
+    
+    // Reset reCAPTCHA after submission
+    if (recaptchaRef.current) {
+      recaptchaRef.current.reset();
+      setRecaptchaToken(null);
+    }
+  };
+
+  const onRecaptchaChange = (token) => {
+    setRecaptchaToken(token);
   };
 
   return (
@@ -125,6 +144,13 @@ const LoginPage = () => {
               <button type="button" onClick={(e) => e.preventDefault()} className="forgot-password-link">
                 Lupa password?
               </button>
+            </div>
+            <div className="login-form-group recaptcha-group">
+              <ReCAPTCHA
+                ref={recaptchaRef}
+                sitekey="6Les9mgsAAAAAPDK4yPVWyjHxHl19Eq4IKpmqjB9"
+                onChange={onRecaptchaChange}
+              />
             </div>
             <div className="login-button-wrapper">
               <button type="submit" className="login-button" disabled={loading}>

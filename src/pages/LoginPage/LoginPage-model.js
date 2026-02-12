@@ -5,7 +5,7 @@ class LoginPageModel {
     this.baseURL = '/api/auth';
   }
 
-  async login(username, password) {
+  async login(username, password, recaptchaToken) {
     if (!sessionManager.checkOnlineStatus()) {
       return await this.offlineLogin(username, password);
     }
@@ -16,7 +16,7 @@ class LoginPageModel {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username, password, recaptchaToken }),
       });
 
       const data = await response.json();

@@ -2,12 +2,59 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const axios = require('axios');
 const pool = require('../database/db');
+
+// reCAPTCHA verification function
+async function verifyRecaptcha(token) {
+  try {
+    const secretKey = process.env.RECAPTCHA_SECRET_KEY;
+    
+    if (!secretKey || secretKey === 'your_recaptcha_secret_key_here') {
+      console.warn('⚠️ reCAPTCHA secret key not configured. Skipping verification.');
+      return { success: true, score: 1.0 };
+    }
+
+    const response = await axios.post(
+      `https://www.google.com/recaptcha/api/siteverify`,
+      null,
+      {
+        params: {
+          secret: secretKey,
+          response: token
+        }
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error('reCAPTCHA verification error:', error);
+    return { success: false, error: 'Verification failed' };
+  }
+}
 
 // Register
 router.post('/register', async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { username, password, recaptchaToken } = req.body;
+
+    // Verify reCAPTCHA
+    if (recaptchaToken) {
+      const recaptchaResult = await verifyRecaptcha(recaptchaToken);
+      
+      if (!recaptchaResult.success) {
+        return res.status(400).json({ 
+          message: 'Verifikasi reCAPTCHA gagal. Silakan coba lagi.' 
+        });
+      }
+
+      // For reCAPTCHA v3, check the score (0.0 - 1.0, higher is better)
+      if (recaptchaResult.score && recaptchaResult.score < 0.5) {
+        return res.status(400).json({ 
+          message: 'Verifikasi keamanan gagal. Silakan coba lagi.' 
+        });
+      }
+    }
 
     // Check if username exists
     const [existing] = await pool.query(
@@ -41,7 +88,25 @@ router.post('/register', async (req, res) => {
 // Login
 router.post('/login', async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { username, password, recaptchaToken } = req.body;
+
+    // Verify reCAPTCHA
+    if (recaptchaToken) {
+      const recaptchaResult = await verifyRecaptcha(recaptchaToken);
+      
+      if (!recaptchaResult.success) {
+        return res.status(400).json({ 
+          message: 'Verifikasi reCAPTCHA gagal. Silakan coba lagi.' 
+        });
+      }
+
+      // For reCAPTCHA v3, check the score (0.0 - 1.0, higher is better)
+      if (recaptchaResult.score && recaptchaResult.score < 0.5) {
+        return res.status(400).json({ 
+          message: 'Verifikasi keamanan gagal. Silakan coba lagi.' 
+        });
+      }
+    }
 
     // Find user
     const [users] = await pool.query(
