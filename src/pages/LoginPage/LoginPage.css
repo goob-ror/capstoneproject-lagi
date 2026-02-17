@@ -4,7 +4,6 @@
   background-color: #FFFFFF;
   border-radius: 25px;
   width: 500px;
-  min-height: 580px;
   padding: 30px;
   position: relative;
   display: flex;
@@ -183,8 +182,6 @@
 .password-toggle {
   position: absolute;
   right: 12px;
-  top: 50%;
-  transform: translateY(-40%);
   background: none;
   border: none;
   cursor: pointer;
@@ -196,7 +193,7 @@
 }
 
 .password-toggle:hover {
-  color: #515151;
+  color: #22C55E;
 }
 
 .forgot-password-link {

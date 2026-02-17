@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
+import React from 'react';
 import LoginPage from './pages/LoginPage/LoginPage';
 import RegisterPage from './pages/RegisterPage/RegisterPage';
 import WaitingApprovalPage from './pages/AuthPage/AuthPage';
@@ -19,14 +20,64 @@ import Komplikasi from './pages/Komplikasi/Komplikasi';
 import TambahKomplikasi from './pages/TambahKomplikasi/TambahKomplikasi';
 import Posyandu from './pages/Posyandu/Posyandu';
 import Rekapitulasi from './pages/Rekapitulasi/Rekapitulasi';
+import UserManagement from './pages/UserManagement/UserManagement';
 import OfflineIndicator from './components/OfflineIndicator/OfflineIndicator';
 import AuthModel from './services/AuthModel';
 import './App.css';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
-  const authModel = new AuthModel();
-  return authModel.isAuthenticated() ? children : <Navigate to="/login" />;
+  const [isChecking, setIsChecking] = React.useState(true);
+  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
+  const authModel = React.useMemo(() => new AuthModel(), []);
+
+  React.useEffect(() => {
+    const checkAuth = async () => {
+      // Quick check with localStorage
+      const quickCheck = authModel.isAuthenticated();
+      
+      if (quickCheck) {
+        setIsAuthenticated(true);
+        setIsChecking(false);
+      } else {
+        // Try to restore from IndexedDB
+        const sessionValid = await authModel.checkSessionValidity();
+        setIsAuthenticated(sessionValid);
+        setIsChecking(false);
+      }
+    };
+    
+    checkAuth();
+  }, [authModel]);
+
+  // Show loading while checking authentication
+  if (isChecking) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh',
+        fontFamily: 'Montserrat, sans-serif',
+        backgroundColor: '#EAEAEA'
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{
+            width: '50px',
+            height: '50px',
+            border: '4px solid #E5E7EB',
+            borderTopColor: '#22C55E',
+            borderRadius: '50%',
+            animation: 'spin 0.8s linear infinite',
+            margin: '0 auto 20px'
+          }}></div>
+          <p style={{ color: '#6B7280', fontSize: '14px' }}>Memeriksa sesi...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return isAuthenticated ? children : <Navigate to="/login" replace />;
 };
 
 // Layout wrapper to handle body classes
@@ -38,7 +89,7 @@ function AppLayout() {
     document.body.className = '';
 
     // Add appropriate class based on route
-    const dashboardRoutes = ['/dashboard', '/data-ibu', '/detail-ibu', '/tambah-ibu', '/kunjungan-anc', '/tambah-anc', '/persalinan', '/tambah-persalinan', '/kunjungan-nifas', '/tambah-nifas', '/komplikasi', '/tambah-komplikasi', '/posyandu', '/rekapitulasi'];
+    const dashboardRoutes = ['/dashboard', '/data-ibu', '/detail-ibu', '/tambah-ibu', '/kunjungan-anc', '/tambah-anc', '/persalinan', '/tambah-persalinan', '/kunjungan-nifas', '/tambah-nifas', '/komplikasi', '/tambah-komplikasi', '/posyandu', '/rekapitulasi', '/user-management'];
     if (dashboardRoutes.some(route => location.pathname.startsWith(route))) {
       document.body.classList.add('dashboard-page');
     } else {
@@ -46,7 +97,7 @@ function AppLayout() {
     }
   }, [location]);
 
-  const isDashboard = ['/dashboard', '/data-ibu', '/detail-ibu', '/tambah-ibu', '/kunjungan-anc', '/tambah-anc', '/persalinan', '/tambah-persalinan', '/kunjungan-nifas', '/tambah-nifas', '/komplikasi', '/tambah-komplikasi', '/posyandu', '/rekapitulasi'].some(route => location.pathname.startsWith(route));
+  const isDashboard = ['/dashboard', '/data-ibu', '/detail-ibu', '/tambah-ibu', '/kunjungan-anc', '/tambah-anc', '/persalinan', '/tambah-persalinan', '/kunjungan-nifas', '/tambah-nifas', '/komplikasi', '/tambah-komplikasi', '/posyandu', '/rekapitulasi', '/user-management'].some(route => location.pathname.startsWith(route));
 
   return (
     <div className={isDashboard ? 'App' : 'App centered'}>
@@ -165,6 +216,14 @@ function AppLayout() {
           element={
             <ProtectedRoute>
               <Rekapitulasi />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/user-management"
+          element={
+            <ProtectedRoute>
+              <UserManagement />
             </ProtectedRoute>
           }
         />

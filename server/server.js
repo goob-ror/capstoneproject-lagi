@@ -13,6 +13,7 @@ const komplikasiRoutes = require('./routes/komplikasiRoutes');
 const rekapitulasiRoutes = require('./routes/rekapitulasiRoutes');
 const posyanduRoutes = require('./routes/posyanduRoutes');
 const kelurahanRoutes = require('./routes/kelurahanRoutes');
+const userRoutes = require('./routes/userRoutes');
 const auth = require('./middleware/auth');
 const { validateAllInputs } = require('./middleware/inputValidator');
 
@@ -68,6 +69,7 @@ app.use('/api/komplikasi', komplikasiRoutes);
 app.use('/api/rekapitulasi', rekapitulasiRoutes);
 app.use('/api/posyandu', posyanduRoutes);
 app.use('/api/kelurahan', kelurahanRoutes);
+app.use('/api/users', userRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

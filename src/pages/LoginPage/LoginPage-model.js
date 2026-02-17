@@ -50,8 +50,6 @@ class LoginPageModel {
       if (session.passwordHash && session.passwordHash !== passwordHash) {
         throw new Error('Invalid password.');
       }
-
-      console.log('✓ Offline login successful');
       
       return {
         message: 'Logged in offline with cached session',
@@ -60,7 +58,6 @@ class LoginPageModel {
         offline: true
       };
     } catch (error) {
-      console.error('Offline login failed:', error);
       throw error;
     }
   }

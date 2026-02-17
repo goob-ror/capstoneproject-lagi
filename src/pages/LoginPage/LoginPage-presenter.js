@@ -18,7 +18,7 @@ class LoginPresenter {
       if (data.offline) {
         // Restore from cached session to localStorage only (no IndexedDB write)
         sessionManager.saveToLocalStorage(data.token, data.user);
-        this.view.setError('⚠️ Logged in offline mode. Some features may be limited.');
+        this.view.setError('Logged in offline mode. Some features may be limited.');
         setTimeout(() => this.view.onLoginSuccess(), 1500);
         return;
       }

@@ -10,8 +10,7 @@ async function verifyRecaptcha(token) {
   try {
     const secretKey = process.env.RECAPTCHA_SECRET_KEY;
     
-    if (!secretKey || secretKey === 'your_recaptcha_secret_key_here') {
-      console.warn('⚠️ reCAPTCHA secret key not configured. Skipping verification.');
+    if (!secretKey || secretKey === '6Les9mgsAAAAAPDK4yPVWyjHxHl19Eq4IKpmqjB9') {
       return { success: true, score: 1.0 };
     }
 
@@ -133,6 +132,12 @@ router.post('/login', async (req, res) => {
         status: 'pending'
       });
     }
+
+    // Update last_login
+    await pool.query(
+      'UPDATE bidan SET last_login = NOW() WHERE id = ?',
+      [user.id]
+    );
 
     // Generate token
     const token = jwt.sign(

@@ -14,11 +14,16 @@ class AuthModel {
     return user ? JSON.parse(user) : null;
   }
 
-  async isAuthenticated() {
+  isAuthenticated() {
+    const token = this.getToken();
+    return !!token; // Returns true if token exists, false otherwise
+  }
+
+  async checkSessionValidity() {
+    // Check IndexedDB if localStorage is empty
     const token = this.getToken();
     if (token) return true;
 
-    // Check IndexedDB if localStorage is empty
     try {
       const isValid = await sessionManager.isSessionValid();
       if (isValid) {
