@@ -11,13 +11,14 @@ class KunjunganNifasPresenter {
     return this.authModel.getUser();
   }
 
-  async loadNifasData() {
+  async loadNifasData(year = null) {
     try {
       this.view.setLoading(true);
       this.view.clearError();
 
       const token = this.authModel.getToken();
-      const response = await fetch(`${this.baseURL}/nifas`, {
+      const url = year ? `${this.baseURL}/nifas?year=${year}` : `${this.baseURL}/nifas`;
+      const response = await fetch(url, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

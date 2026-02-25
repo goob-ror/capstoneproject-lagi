@@ -21,7 +21,8 @@ class DashboardPresenter {
         nearingDueDates,
         ancSchedule,
         suamiPerokokKelurahan,
-        imtDistributionKelurahan
+        imtDistributionKelurahan,
+        atRiskMothers
       ] = await Promise.all([
         this.model.getDashboardStats(),
         this.model.getIbuByKelurahan(),
@@ -32,7 +33,8 @@ class DashboardPresenter {
         this.model.getNearingDueDates(),
         this.model.getANCSchedule(),
         this.model.getSuamiPerokokKelurahan(),
-        this.model.getImtDistributionKelurahan()
+        this.model.getImtDistributionKelurahan(),
+        this.model.getAtRiskMothers()
       ]);
 
       this.view.displayStats(stats);
@@ -45,6 +47,7 @@ class DashboardPresenter {
       this.view.displayANCSchedule(ancSchedule);
       this.view.displaySuamiPerokokKelurahan(suamiPerokokKelurahan);
       this.view.displayImtDistributionKelurahan(imtDistributionKelurahan);
+      this.view.displayAtRiskMothers(atRiskMothers);
 
     } catch (error) {
       this.view.setError(error.message || 'Failed to load dashboard data');

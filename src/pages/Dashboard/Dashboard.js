@@ -22,12 +22,15 @@ const Dashboard = () => {
   const [ancSchedule, setANCSchedule] = useState(null);
   const [suamiPerokokKelurahan, setSuamiPerokokKelurahan] = useState(null);
   const [imtDistributionKelurahan, setImtDistributionKelurahan] = useState(null);
+  const [atRiskMothers, setAtRiskMothers] = useState(null);
   const [user, setUser] = useState(null);
   const [dueDatePage, setDueDatePage] = useState(1);
   const [ancSchedulePage, setANCSchedulePage] = useState(1);
+  const [atRiskPage, setAtRiskPage] = useState(1);
   const [hideDueDateOverdue, setHideDueDateOverdue] = useState(false);
   const [hideANCOverdue, setHideANCOverdue] = useState(false);
   const rowsPerPage = 20;
+  const atRiskRowsPerPage = 5;
 
   const [presenter] = useState(() => new DashboardPresenter({
     setLoading,
@@ -43,6 +46,7 @@ const Dashboard = () => {
     displayANCSchedule: (data) => setANCSchedule(data),
     displaySuamiPerokokKelurahan: (data) => setSuamiPerokokKelurahan(data),
     displayImtDistributionKelurahan: (data) => setImtDistributionKelurahan(data),
+    displayAtRiskMothers: (data) => setAtRiskMothers(data),
     onLogout: () => navigate('/login')
   }));
 
@@ -95,10 +99,10 @@ const Dashboard = () => {
   };
 
   // Pagination helpers
-  const getPaginatedData = (data, page) => {
+  const getPaginatedData = (data, page, customRowsPerPage = rowsPerPage) => {
     if (!data) return [];
-    const startIndex = (page - 1) * rowsPerPage;
-    const endIndex = startIndex + rowsPerPage;
+    const startIndex = (page - 1) * customRowsPerPage;
+    const endIndex = startIndex + customRowsPerPage;
     return data.slice(startIndex, endIndex);
   };
 
@@ -526,14 +530,86 @@ const Dashboard = () => {
           </div>
 
           <div className="pie-section">
-            {riskDistributionChart && (
-              <div className="chart-card">
-                <h3 className="chart-title">Distribusi Risiko Kehamilan</h3>
+            <div className="chart-card">
+              <h3 className="chart-title">Distribusi Risiko Kehamilan</h3>
+              {riskDistributionChart && (
                 <div className="chart-container-pie">
                   <Pie data={riskDistributionChart} options={chartOptions} />
                 </div>
-              </div>
-            )}
+              )}
+            </div>
+
+            <div className="chart-card at-risk-card">
+              <h3 className="chart-title">Ibu Berisiko - Perlu Perhatian</h3>
+              <p className="at-risk-subtitle">Anemia dan/atau KEK (LILA &lt; 23.5 cm)</p>
+              {atRiskMothers && atRiskMothers.length > 0 ? (
+                <>
+                  <div className="at-risk-list">
+                    {getPaginatedData(atRiskMothers, atRiskPage, atRiskRowsPerPage).map((mother, index) => (
+                      <div key={mother.id} className="at-risk-item">
+                        <div className="at-risk-header">
+                          <span className="at-risk-number">{((atRiskPage - 1) * atRiskRowsPerPage) + index + 1}</span>
+                          <div className="at-risk-info">
+                            <strong>{mother.nama_lengkap}</strong>
+                            <span className="at-risk-nik">{mother.nik_ibu}</span>
+                          </div>
+                        </div>
+                        <div className="at-risk-details">
+                          <div className="at-risk-badges">
+                            {mother.status_anemia !== 'Normal' && (
+                              <span className={`badge badge-${
+                                mother.status_anemia === 'Anemia Berat' ? 'danger' :
+                                mother.status_anemia === 'Anemia Sedang' ? 'warning' : 'warning-light'
+                              }`}>
+                                {mother.status_anemia} (Hb: {mother.hemoglobin} g/dL)
+                              </span>
+                            )}
+                            {mother.status_kek === 'KEK' && (
+                              <span className="badge badge-orange">
+                                KEK (LILA: {mother.lila} cm)
+                              </span>
+                            )}
+                          </div>
+                          <div className="at-risk-meta">
+                            <span>{mother.nama_kelurahan || 'Tidak Diketahui'}</span>
+                            <span>•</span>
+                            <span>{mother.usia_kehamilan_minggu} minggu</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  {atRiskMothers.length > atRiskRowsPerPage && (
+                    <div className="pagination">
+                      <button 
+                        onClick={() => setAtRiskPage(Math.max(1, atRiskPage - 1))}
+                        disabled={atRiskPage === 1}
+                        className="pagination-btn"
+                      >
+                        ‹ Sebelumnya
+                      </button>
+                      <span className="pagination-info">
+                        Halaman {atRiskPage} dari {Math.ceil(atRiskMothers.length / atRiskRowsPerPage)}
+                      </span>
+                      <button 
+                        onClick={() => setAtRiskPage(Math.min(Math.ceil(atRiskMothers.length / atRiskRowsPerPage), atRiskPage + 1))}
+                        disabled={atRiskPage >= Math.ceil(atRiskMothers.length / atRiskRowsPerPage)}
+                        className="pagination-btn"
+                      >
+                        Selanjutnya ›
+                      </button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="at-risk-empty">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="#22C55E"/>
+                  </svg>
+                  <p>Tidak ada ibu dengan anemia atau KEK</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

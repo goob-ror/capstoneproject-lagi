@@ -113,20 +113,29 @@ router.get('/pregnancy/:pregnancyId/visit/:jenisKunjungan', auth, async (req, re
 // Get all ANC visits with mother names
 router.get('/', auth, async (req, res) => {
   try {
+    const { year } = req.query;
+    const currentYear = new Date().getFullYear();
+    const filterYear = year || currentYear;
+
     const query = `
       SELECT 
         anc.*,
         ibu.nama_lengkap as nama_ibu,
         ibu.nik_ibu,
-        bidan.nama_lengkap as nama_bidan
+        ibu.tinggi_badan,
+        bidan.nama_lengkap as nama_bidan,
+        lab.skrining_hbsag,
+        lab.hasil_lab_hb as hemoglobin
       FROM antenatal_care anc
       JOIN kehamilan k ON anc.forkey_hamil = k.id
       JOIN ibu ON k.forkey_ibu = ibu.id
       JOIN bidan ON anc.forkey_bidan = bidan.id
+      LEFT JOIN lab_screening lab ON anc.forkey_lab_screening = lab.id
+      WHERE YEAR(anc.tanggal_kunjungan) = ?
       ORDER BY anc.tanggal_kunjungan DESC
     `;
     
-    const [rows] = await db.execute(query);
+    const [rows] = await db.execute(query, [filterYear]);
     res.json(rows);
   } catch (error) {
     console.error('Error fetching ANC data:', error);

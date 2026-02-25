@@ -71,6 +71,10 @@ router.get('/pregnancy/:pregnancyId/mother', auth, async (req, res) => {
 // Get all nifas data
 router.get('/', auth, async (req, res) => {
   try {
+    const { year } = req.query;
+    const currentYear = new Date().getFullYear();
+    const filterYear = year || currentYear;
+
     const query = `
       SELECT 
         n.*,
@@ -81,10 +85,11 @@ router.get('/', auth, async (req, res) => {
       JOIN kehamilan k ON n.forkey_hamil = k.id
       JOIN ibu ON k.forkey_ibu = ibu.id
       JOIN bidan ON n.forkey_bidan = bidan.id
+      WHERE YEAR(n.tanggal_kunjungan) = ?
       ORDER BY n.tanggal_kunjungan DESC
     `;
     
-    const [rows] = await db.execute(query);
+    const [rows] = await db.execute(query, [filterYear]);
     res.json(rows);
   } catch (error) {
     console.error('Error fetching nifas data:', error);

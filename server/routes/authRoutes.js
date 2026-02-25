@@ -10,7 +10,7 @@ async function verifyRecaptcha(token) {
   try {
     const secretKey = process.env.RECAPTCHA_SECRET_KEY;
     
-    if (!secretKey || secretKey === '6Les9mgsAAAAAPDK4yPVWyjHxHl19Eq4IKpmqjB9') {
+    if (!secretKey) {
       return { success: true, score: 1.0 };
     }
 

@@ -6,6 +6,10 @@ const authMiddleware = require('../middleware/auth');
 // Get all ibu (mothers) with pregnancy status
 router.get('/', authMiddleware, async (req, res) => {
   try {
+    const { year } = req.query;
+    const currentYear = new Date().getFullYear();
+    const filterYear = year || currentYear;
+
     const [rows] = await pool.query(`
       SELECT 
         i.*, 
@@ -21,9 +25,11 @@ router.get('/', authMiddleware, async (req, res) => {
         WHERE id IN (
           SELECT MAX(id) FROM kehamilan GROUP BY forkey_ibu
         )
+        AND YEAR(created_at) = ?
       ) k ON i.id = k.forkey_ibu
+      WHERE YEAR(i.created_at) = ? OR k.forkey_ibu IS NOT NULL
       ORDER BY i.created_at DESC
-    `);
+    `, [filterYear, filterYear]);
     res.json(rows);
   } catch (error) {
     console.error('Get ibu error:', error);

@@ -6,12 +6,12 @@ class DataIbuPresenter {
     this.model = new DataIbuModel();
   }
 
-  async loadIbuData() {
+  async loadIbuData(year = null) {
     this.view.setLoading(true);
     this.view.clearError();
 
     try {
-      const data = await this.model.getAllIbu();
+      const data = await this.model.getAllIbu(year);
       this.view.displayIbuData(data);
     } catch (error) {
       console.error('Load ibu data error:', error);

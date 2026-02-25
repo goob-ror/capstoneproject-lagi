@@ -82,6 +82,10 @@ router.get('/pregnancy/:pregnancyId/mother', auth, async (req, res) => {
 // Get all persalinan data with baby information
 router.get('/', auth, async (req, res) => {
   try {
+    const { year } = req.query;
+    const currentYear = new Date().getFullYear();
+    const filterYear = year || currentYear;
+
     const query = `
       SELECT 
         p.*,
@@ -99,11 +103,12 @@ router.get('/', auth, async (req, res) => {
       JOIN ibu ON k.forkey_ibu = ibu.id
       JOIN bidan ON p.forkey_bidan = bidan.id
       LEFT JOIN bayi b ON p.id = b.forkey_persalinan
+      WHERE YEAR(p.tanggal_persalinan) = ?
       GROUP BY p.id
       ORDER BY p.tanggal_persalinan DESC
     `;
     
-    const [rows] = await db.execute(query);
+    const [rows] = await db.execute(query, [filterYear]);
     
     // Parse bayi data for each persalinan
     const parsedRows = rows.map(row => {

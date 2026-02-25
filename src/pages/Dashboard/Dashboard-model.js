@@ -191,6 +191,24 @@ class DashboardModel {
     }
   }
 
+  async getAtRiskMothers() {
+    try {
+      const response = await fetch(`${this.baseURL}/dashboard/at-risk-mothers`, {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch at-risk mothers');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching at-risk mothers:', error);
+      throw error;
+    }
+  }
+
   getUser() {
     const user = localStorage.getItem('user');
     return user ? JSON.parse(user) : null;

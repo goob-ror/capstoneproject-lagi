@@ -16,6 +16,7 @@ const Komplikasi = () => {
   const [komplikasiData, setKomplikasiData] = useState([]);
   const [user, setUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
 
   const [presenter] = useState(() => new KomplikasiPresenter({
     setLoading,
@@ -35,8 +36,8 @@ const Komplikasi = () => {
   useEffect(() => {
     const userData = presenter.getUser();
     setUser(userData);
-    presenter.loadKomplikasiData();
-  }, [presenter]);
+    presenter.loadKomplikasiData(selectedYear);
+  }, [presenter, selectedYear]);
 
   useEffect(() => {
     const handleEdit = (id) => {
@@ -158,6 +159,19 @@ const Komplikasi = () => {
     navigate('/tambah-komplikasi');
   };
 
+  const handleYearChange = (e) => {
+    setSelectedYear(e.target.value);
+  };
+
+  const getYearOptions = () => {
+    const currentYear = new Date().getFullYear();
+    const years = [];
+    for (let i = 0; i <= 5; i++) {
+      years.push(currentYear - i);
+    }
+    return years;
+  };
+
   if (loading) {
     return (
       <div className="dashboard-container">
@@ -259,12 +273,27 @@ const Komplikasi = () => {
             <h1>Komplikasi</h1>
             <p>Kelola data komplikasi kehamilan, persalinan, dan nifas</p>
           </div>
-          <button className="btn-add" onClick={handleAddNew}>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+            <div className="filter-section">
+              <label htmlFor="year-filter" className="filter-label">Tahun:</label>
+              <select 
+                id="year-filter"
+                className="filter-select"
+                value={selectedYear}
+                onChange={handleYearChange}
+              >
+                {getYearOptions().map(year => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
+              </select>
+            </div>
+            <button className="btn-add" onClick={handleAddNew}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor" />
             </svg>
             Tambah Komplikasi
           </button>
+          </div>
         </div>
 
         {error && (

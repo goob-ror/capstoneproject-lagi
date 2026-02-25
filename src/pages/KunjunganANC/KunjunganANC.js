@@ -16,6 +16,7 @@ const KunjunganANC = () => {
   const [ancData, setAncData] = useState([]);
   const [user, setUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
 
   const [presenter] = useState(() => new KunjunganANCPresenter({
     setLoading,
@@ -35,8 +36,8 @@ const KunjunganANC = () => {
   useEffect(() => {
     const userData = presenter.getUser();
     setUser(userData);
-    presenter.loadAncData();
-  }, [presenter]);
+    presenter.loadAncData(selectedYear);
+  }, [presenter, selectedYear]);
 
   useEffect(() => {
     const handleEdit = (id) => {
@@ -64,16 +65,76 @@ const KunjunganANC = () => {
           { data: 'nama_ibu' },
           { data: 'jenis_kunjungan' },
           { data: 'jenis_akses' },
-          { data: 'pemeriksa' },
           {
-            data: 'berat_badan',
-            render: (data) => data ? `${data} kg` : '-'
+            data: 'hemoglobin',
+            render: (data) => {
+              if (!data) return '-';
+              let badgeClass = 'badge-success';
+              let status = 'Normal';
+              
+              if (data < 8.0) {
+                badgeClass = 'badge-danger';
+                status = 'Berat';
+              } else if (data < 10.0) {
+                badgeClass = 'badge-warning';
+                status = 'Sedang';
+              } else if (data < 11.0) {
+                badgeClass = 'badge-warning-light';
+                status = 'Ringan';
+              }
+              
+              return `<span class="status-badge ${badgeClass}">${status}</span>`;
+            }
           },
-          { data: 'tekanan_darah' },
+          {
+            data: 'lila',
+            render: (data) => {
+              if (!data) return '-';
+              const badgeClass = data < 23.5 ? 'badge-orange' : 'badge-success';
+              return `<span class="status-badge ${badgeClass}">${data} cm</span>`;
+            }
+          },
+          {
+            data: null,
+            render: (data, type, row) => {
+              if (!row.berat_badan || !row.tinggi_badan) return '-';
+              
+              const tinggiM = row.tinggi_badan / 100;
+              const imt = (row.berat_badan / (tinggiM * tinggiM)).toFixed(1);
+              
+              let category = '';
+              let badgeClass = 'badge-success';
+              
+              if (imt < 18.5) {
+                category = 'Kurus';
+                badgeClass = 'badge-warning';
+              } else if (imt < 25) {
+                category = 'Normal';
+                badgeClass = 'badge-success';
+              } else if (imt < 30) {
+                category = 'Gemuk';
+                badgeClass = 'badge-warning';
+              } else {
+                category = 'Obesitas';
+                badgeClass = 'badge-danger';
+              }
+              
+              return `<span class="status-badge ${badgeClass}">${category}</span>`;
+            }
+          },
           {
             data: 'status_risiko_visit',
             render: (data) => {
-              const badgeClass = data === 'Risiko Tinggi' ? 'badge-danger' : 'badge-success';
+              let badgeClass = 'badge-success';
+              
+              if (data === 'Tinggi') {
+                badgeClass = 'badge-danger';
+              } else if (data === 'Sedang') {
+                badgeClass = 'badge-warning';
+              } else if (data === 'Ringan') {
+                badgeClass = 'badge-warning-light';
+              }
+              
               return `<span class="status-badge ${badgeClass}">${data}</span>`;
             }
           },
@@ -152,6 +213,19 @@ const KunjunganANC = () => {
 
   const handleAddNew = () => {
     navigate('/tambah-anc');
+  };
+
+  const handleYearChange = (e) => {
+    setSelectedYear(e.target.value);
+  };
+
+  const getYearOptions = () => {
+    const currentYear = new Date().getFullYear();
+    const years = [];
+    for (let i = 0; i <= 5; i++) {
+      years.push(currentYear - i);
+    }
+    return years;
   };
 
   if (loading) {
@@ -255,12 +329,27 @@ const KunjunganANC = () => {
             <h1>Kunjungan ANC</h1>
             <p>Kelola data kunjungan antenatal care</p>
           </div>
-          <button className="btn-add" onClick={handleAddNew}>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+            <div className="filter-section">
+              <label htmlFor="year-filter" className="filter-label">Tahun:</label>
+              <select 
+                id="year-filter"
+                className="filter-select"
+                value={selectedYear}
+                onChange={handleYearChange}
+              >
+                {getYearOptions().map(year => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
+              </select>
+            </div>
+            <button className="btn-add" onClick={handleAddNew}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor" />
             </svg>
             Tambah Kunjungan ANC
           </button>
+          </div>
         </div>
 
         {error && (
@@ -293,9 +382,9 @@ const KunjunganANC = () => {
                   <th>Nama Ibu</th>
                   <th>Jenis</th>
                   <th>Akses</th>
-                  <th>Pemeriksa</th>
-                  <th>BB</th>
-                  <th>TD</th>
+                  <th>HBsAg</th>
+                  <th>LILA</th>
+                  <th>IMT</th>
                   <th>Status Risiko</th>
                   <th>Aksi</th>
                 </tr>

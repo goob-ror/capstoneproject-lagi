@@ -652,11 +652,17 @@
   flex-shrink: 0;
 }
 
+.export-dropdown-container {
+  position: relative;
+}
+
 .btn-export {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 16px;
+  padding: 10px 20px;
+  background-color: #22C55E;
+  color: white;
   border: none;
   border-radius: 8px;
   font-size: 14px;
@@ -664,33 +670,62 @@
   cursor: pointer;
   transition: all 0.2s;
   font-family: 'Montserrat', sans-serif;
-  color: white;
-  height: 40px;
-  white-space: nowrap;
 }
 
-.btn-export.excel {
-  background: linear-gradient(135deg, #16A34A, #15803D);
-}
-
-.btn-export.excel:hover {
-  background: linear-gradient(135deg, #15803D, #166534);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
-}
-
-.btn-export.csv {
-  background: linear-gradient(135deg, #3B82F6, #2563EB);
-}
-
-.btn-export.csv:hover {
-  background: linear-gradient(135deg, #2563EB, #1D4ED8);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+.btn-export:hover {
+  background-color: #16A34A;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
 }
 
 .btn-export svg {
   flex-shrink: 0;
+}
+
+.export-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: white;
+  border: 2px solid #E5E7EB;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  min-width: 160px;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.export-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 16px;
+  border: none;
+  background: white;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: 'Montserrat', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  border-bottom: 1px solid #F3F4F6;
+}
+
+.export-dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.export-dropdown-item:hover {
+  background-color: #F9FAFB;
+  color: #22C55E;
+}
+
+.export-dropdown-item svg {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
 }
 
 /* Responsive */

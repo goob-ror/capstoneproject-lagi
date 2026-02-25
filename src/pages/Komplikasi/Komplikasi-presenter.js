@@ -6,12 +6,12 @@ class KomplikasiPresenter {
     this.model = new KomplikasiModel();
   }
 
-  async loadKomplikasiData() {
+  async loadKomplikasiData(year = null) {
     this.view.setLoading(true);
     this.view.clearError();
 
     try {
-      const data = await this.model.getAllKomplikasi();
+      const data = await this.model.getAllKomplikasi(year);
       this.view.displayKomplikasiData(data);
     } catch (error) {
       console.error('Load komplikasi error:', error);

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import * as XLSX from 'xlsx';
 import axios from 'axios';
 import RekapitulasiPresenter from './Rekapitulasi-presenter';
 import LoadingSplash from '../../components/LoadingSplash/LoadingSplash';
@@ -17,6 +16,7 @@ const Rekapitulasi = () => {
   const [selectedYear, setSelectedYear] = useState('');
   const [selectedMonth, setSelectedMonth] = useState('');
   const [excelLoading, setExcelLoading] = useState(false);
+  const [showExportDropdown, setShowExportDropdown] = useState(false);
 
   const [presenter] = useState(() => new RekapitulasiPresenter({
     setLoading,
@@ -37,6 +37,19 @@ const Rekapitulasi = () => {
     presenter.loadSummaryData();
   }, [presenter]);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showExportDropdown && !event.target.closest('.export-dropdown-container')) {
+        setShowExportDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showExportDropdown]);
+
   const handleKelurahanChange = (e) => {
     const kelurahan = e.target.value;
     setSelectedKelurahan(kelurahan);
@@ -55,9 +68,10 @@ const Rekapitulasi = () => {
     presenter.loadSummaryData(selectedKelurahan || null, selectedYear || null, month || null);
   };
 
-  const handleExportExcelTemplate = async () => {
+  const handleExportExcelTemplate = async (type = 'lengkap') => {
     try {
       setExcelLoading(true);
+      setShowExportDropdown(false);
       
       // Get token from localStorage
       const token = localStorage.getItem('token');
@@ -93,7 +107,8 @@ const Rekapitulasi = () => {
       const kelurahanName = selectedKelurahan ? `_${selectedKelurahan}` : '_Semua';
       const yearName = selectedYear ? `_${selectedYear}` : '';
       const monthName = selectedMonth ? `_${getMonthName(selectedMonth)}` : '';
-      const filename = `Laporan_Puskesmas${kelurahanName}${yearName}${monthName}_${new Date().toISOString().split('T')[0]}.xlsx`;
+      const typeLabel = type === 'lengkap' ? '_Lengkap' : '';
+      const filename = `Laporan_Puskesmas${kelurahanName}${yearName}${monthName}${typeLabel}_${new Date().toISOString().split('T')[0]}.xlsx`;
       
       link.setAttribute('download', filename);
       document.body.appendChild(link);
@@ -113,112 +128,6 @@ const Rekapitulasi = () => {
     presenter.handleLogout();
   };
 
-  const handleExportExcel = () => {
-    if (!summaryData) return;
-
-    // Create workbook
-    const wb = XLSX.utils.book_new();
-
-    // Sheet 1: Summary Statistics
-    const summarySheet = [
-      ['REKAPITULASI DATA IBUNDACARE'],
-      ['Tanggal Export:', new Date().toLocaleDateString('id-ID')],
-      ['Kelurahan:', selectedKelurahan || 'Semua Kelurahan'],
-      ['Tahun:', selectedYear || 'Semua Tahun'],
-      ['Bulan:', selectedMonth ? getMonthName(selectedMonth) : 'Semua Bulan'],
-      [],
-      ['STATISTIK UMUM'],
-      ['Total Ibu Terdaftar', summaryData.totalIbu || 0],
-      ['Ibu Hamil Aktif', summaryData.totalHamil || 0],
-      ['Total Kunjungan ANC', summaryData.totalANC || 0],
-      ['Total Kunjungan Nifas', summaryData.totalNifas || 0],
-      [],
-      ['STATISTIK KESEHATAN'],
-      ['Obesitas (BMI ≥30)', summaryData.obesityStatistics?.obese_count || 0, `${summaryData.obesityStatistics?.obese_percentage || 0}%`],
-      ['Preeklamsia', summaryData.preeklamsiaStatistics?.preeklamsia_count || 0],
-      ['Eklamsia', summaryData.preeklamsiaStatistics?.eklamsia_count || 0],
-      ['Hepatitis B Positif', summaryData.hepatitisStatistics?.hepatitis_b_positive || 0, `${summaryData.hepatitisStatistics?.hepatitis_percentage || 0}%`],
-      ['HIV Positif', summaryData.hivStatistics?.hiv_positive || 0, `${summaryData.hivStatistics?.hiv_percentage || 0}%`],
-      [],
-      ['TRIMESTER 1 (0-13 minggu)'],
-      ['Normal (≥ 11)', summaryData.hbStatistics?.trimester1_normal || 0],
-      ['Anemia Ringan (10.0-10.9)', summaryData.hbStatistics?.trimester1_ringan || 0],
-      ['Anemia Sedang (8.0-9.9)', summaryData.hbStatistics?.trimester1_sedang || 0],
-      ['Anemia Berat (<7.9)', summaryData.hbStatistics?.trimester1_berat || 0],
-      [],
-      ['TRIMESTER 2 (14-27 minggu)'],
-      ['Normal (≥ 11)', summaryData.hbStatistics?.trimester2_normal || 0],
-      ['Anemia Ringan (10.0-10.9)', summaryData.hbStatistics?.trimester2_ringan || 0],
-      ['Anemia Sedang (8.0-9.9)', summaryData.hbStatistics?.trimester2_sedang || 0],
-      ['Anemia Berat (<7.9)', summaryData.hbStatistics?.trimester2_berat || 0],
-      [],
-      ['TRIMESTER 3 (28+ minggu)'],
-      ['Normal (≥ 11)', summaryData.hbStatistics?.trimester3_normal || 0],
-      ['Anemia Ringan (10.0-10.9)', summaryData.hbStatistics?.trimester3_ringan || 0],
-      ['Anemia Sedang (8.0-9.9)', summaryData.hbStatistics?.trimester3_sedang || 0],
-      ['Anemia Berat (<7.9)', summaryData.hbStatistics?.trimester3_berat || 0],
-      [],
-      ['Jumlah KEK (LILA < 23.5)', summaryData.kekStatistics?.total_kek_given || 0, `${summaryData.kekStatistics?.percentage_kek || 0}%`],
-    ];
-    const ws1 = XLSX.utils.aoa_to_sheet(summarySheet);
-    XLSX.utils.book_append_sheet(wb, ws1, 'Ringkasan');
-
-    // Sheet 2: ANC by Type
-    if (summaryData.ancByType && summaryData.ancByType.length > 0) {
-      const ancData = [
-        ['KUNJUNGAN ANC BERDASARKAN JENIS'],
-        ['Jenis Kunjungan', 'Jumlah', 'Persentase'],
-        ...summaryData.ancByType.map(item => [
-          item.jenis_kunjungan,
-          item.count,
-          `${item.percentage}%`
-        ])
-      ];
-      const ws2 = XLSX.utils.aoa_to_sheet(ancData);
-      XLSX.utils.book_append_sheet(wb, ws2, 'Kunjungan ANC');
-    }
-
-    // Sheet 3: Nifas by Type
-    if (summaryData.nifasByType && summaryData.nifasByType.length > 0) {
-      const nifasData = [
-        ['KUNJUNGAN NIFAS BERDASARKAN JENIS'],
-        ['Jenis Kunjungan', 'Jumlah', 'Persentase'],
-        ...summaryData.nifasByType.map(item => [
-          item.jenis_kunjungan,
-          item.count,
-          `${item.percentage}%`
-        ])
-      ];
-      const ws3 = XLSX.utils.aoa_to_sheet(nifasData);
-      XLSX.utils.book_append_sheet(wb, ws3, 'Kunjungan Nifas');
-    }
-
-    // Sheet 4: Ibu by Kelurahan
-    if (summaryData.ibuByKelurahan && summaryData.ibuByKelurahan.length > 0) {
-      const kelurahanData = [
-        ['IBU BERDASARKAN KELURAHAN'],
-        ['Kelurahan', 'Total Ibu', 'Ibu Hamil', 'Persentase'],
-        ...summaryData.ibuByKelurahan.map(item => [
-          item.kelurahan,
-          item.total,
-          item.hamil,
-          `${item.percentage}%`
-        ])
-      ];
-      const ws4 = XLSX.utils.aoa_to_sheet(kelurahanData);
-      XLSX.utils.book_append_sheet(wb, ws4, 'Per Kelurahan');
-    }
-
-    // Generate filename
-    const kelurahanName = selectedKelurahan ? `_${selectedKelurahan}` : '_Semua';
-    const yearName = selectedYear ? `_${selectedYear}` : '';
-    const monthName = selectedMonth ? `_${getMonthName(selectedMonth)}` : '';
-    const filename = `Rekapitulasi_IBundaCare${kelurahanName}${yearName}${monthName}_${new Date().toISOString().split('T')[0]}.xlsx`;
-
-    // Save file
-    XLSX.writeFile(wb, filename);
-  };
-
   const getMonthName = (month) => {
     const months = {
       '01': 'Januari', '02': 'Februari', '03': 'Maret', '04': 'April',
@@ -226,86 +135,6 @@ const Rekapitulasi = () => {
       '09': 'September', '10': 'Oktober', '11': 'November', '12': 'Desember'
     };
     return months[month] || month;
-  };
-
-  const handleExportCSV = () => {
-    if (!summaryData) return;
-
-    // Create CSV content
-    let csvContent = 'REKAPITULASI DATA IBUNDACARE\n';
-    csvContent += `Tanggal Export:,${new Date().toLocaleDateString('id-ID')}\n`;
-    csvContent += `Kelurahan:,${selectedKelurahan || 'Semua Kelurahan'}\n`;
-    csvContent += `Tahun:,${selectedYear || 'Semua Tahun'}\n`;
-    csvContent += `Bulan:,${selectedMonth ? getMonthName(selectedMonth) : 'Semua Bulan'}\n\n`;
-    
-    csvContent += 'STATISTIK UMUM\n';
-    csvContent += `Total Ibu Terdaftar,${summaryData.totalIbu || 0}\n`;
-    csvContent += `Ibu Hamil Aktif,${summaryData.totalHamil || 0}\n`;
-    csvContent += `Total Kunjungan ANC,${summaryData.totalANC || 0}\n`;
-    csvContent += `Total Kunjungan Nifas,${summaryData.totalNifas || 0}\n\n`;
-    
-    csvContent += 'STATISTIK KESEHATAN\n';
-    csvContent += `Obesitas (BMI ≥30),${summaryData.obesityStatistics?.obese_count || 0},${summaryData.obesityStatistics?.obese_percentage || 0}%\n`;
-    csvContent += `Preeklamsia,${summaryData.preeklamsiaStatistics?.preeklamsia_count || 0}\n`;
-    csvContent += `Eklamsia,${summaryData.preeklamsiaStatistics?.eklamsia_count || 0}\n`;
-    csvContent += `Hepatitis B Positif,${summaryData.hepatitisStatistics?.hepatitis_b_positive || 0},${summaryData.hepatitisStatistics?.hepatitis_percentage || 0}%\n`;
-    csvContent += `HIV Positif,${summaryData.hivStatistics?.hiv_positive || 0},${summaryData.hivStatistics?.hiv_percentage || 0}%\n\n`;
-    
-    csvContent += 'HEMOGLOBIN TRIMESTER 1 (0-13 minggu)\n';
-    csvContent += `Normal (≥ 11),${summaryData.hbStatistics?.trimester1_normal || 0}\n`;
-    csvContent += `Anemia Ringan (10.0-10.9),${summaryData.hbStatistics?.trimester1_ringan || 0}\n`;
-    csvContent += `Anemia Sedang (8.0-9.9),${summaryData.hbStatistics?.trimester1_sedang || 0}\n`;
-    csvContent += `Anemia Berat (<7.9),${summaryData.hbStatistics?.trimester1_berat || 0}\n\n`;
-    
-    csvContent += 'HEMOGLOBIN TRIMESTER 2 (14-27 minggu)\n';
-    csvContent += `Normal (≥ 11),${summaryData.hbStatistics?.trimester2_normal || 0}\n`;
-    csvContent += `Anemia Ringan (10.0-10.9),${summaryData.hbStatistics?.trimester2_ringan || 0}\n`;
-    csvContent += `Anemia Sedang (8.0-9.9),${summaryData.hbStatistics?.trimester2_sedang || 0}\n`;
-    csvContent += `Anemia Berat (<7.9),${summaryData.hbStatistics?.trimester2_berat || 0}\n\n`;
-    
-    csvContent += 'HEMOGLOBIN TRIMESTER 3 (28+ minggu)\n';
-    csvContent += `Normal (≥ 11),${summaryData.hbStatistics?.trimester3_normal || 0}\n`;
-    csvContent += `Anemia Ringan (10.0-10.9),${summaryData.hbStatistics?.trimester3_ringan || 0}\n`;
-    csvContent += `Anemia Sedang (8.0-9.9),${summaryData.hbStatistics?.trimester3_sedang || 0}\n`;
-    csvContent += `Anemia Berat (<7.9),${summaryData.hbStatistics?.trimester3_berat || 0}\n\n`;
-    
-    csvContent += `Jumlah KEK (LILA < 23.5),${summaryData.kekStatistics?.total_kek_given || 0},${summaryData.kekStatistics?.percentage_kek || 0}%\n\n`;
-
-    // Add ANC data
-    if (summaryData.ancByType && summaryData.ancByType.length > 0) {
-      csvContent += 'KUNJUNGAN ANC BERDASARKAN JENIS\n';
-      csvContent += 'Jenis Kunjungan,Jumlah,Persentase\n';
-      summaryData.ancByType.forEach(item => {
-        csvContent += `${item.jenis_kunjungan},${item.count},${item.percentage}%\n`;
-      });
-      csvContent += '\n';
-    }
-
-    // Add Nifas data
-    if (summaryData.nifasByType && summaryData.nifasByType.length > 0) {
-      csvContent += 'KUNJUNGAN NIFAS BERDASARKAN JENIS\n';
-      csvContent += 'Jenis Kunjungan,Jumlah,Persentase\n';
-      summaryData.nifasByType.forEach(item => {
-        csvContent += `${item.jenis_kunjungan},${item.count},${item.percentage}%\n`;
-      });
-      csvContent += '\n';
-    }
-
-    // Create blob and download
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    const kelurahanName = selectedKelurahan ? `_${selectedKelurahan}` : '_Semua';
-    const yearName = selectedYear ? `_${selectedYear}` : '';
-    const monthName = selectedMonth ? `_${getMonthName(selectedMonth)}` : '';
-    const filename = `Rekapitulasi_IBundaCare${kelurahanName}${yearName}${monthName}_${new Date().toISOString().split('T')[0]}.csv`;
-    
-    link.setAttribute('href', url);
-    link.setAttribute('download', filename);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
   };
 
   const getPreeklamsiaEklamsiaTotal = () => {
@@ -486,19 +315,48 @@ const Rekapitulasi = () => {
               </select>
             </div>
             <div className="export-buttons">
-              <button className="btn-export excel" onClick={handleExportExcelTemplate} title="Export Template Puskesmas">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z" fill="currentColor"/>
-                  <path d="M9.5 13.5l1.5 2 1.5-2 1.5 2 1.5-2" stroke="currentColor" strokeWidth="1.5"/>
-                </svg>
-                Excel
-              </button>
-              <button className="btn-export csv" onClick={handleExportCSV} title="Export ke CSV">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z" fill="currentColor"/>
-                </svg>
-                CSV
-              </button>
+              <div className="export-dropdown-container">
+                <button 
+                  className="btn-export" 
+                  onClick={() => setShowExportDropdown(!showExportDropdown)}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z" fill="currentColor"/>
+                  </svg>
+                  Export Excel
+                  <svg 
+                    width="16" 
+                    height="16" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path d="M7 10l5 5 5-5z" fill="currentColor"/>
+                  </svg>
+                </button>
+                {showExportDropdown && (
+                  <div className="export-dropdown-menu">
+                    <button 
+                      className="export-dropdown-item"
+                      onClick={() => handleExportExcelTemplate('lengkap')}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="currentColor"/>
+                      </svg>
+                      Lengkap
+                    </button>
+                    <button 
+                      className="export-dropdown-item"
+                      onClick={() => handleExportExcelTemplate('normal')}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z" fill="currentColor"/>
+                      </svg>
+                      Normal
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

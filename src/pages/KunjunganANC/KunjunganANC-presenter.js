@@ -6,12 +6,12 @@ class KunjunganANCPresenter {
     this.model = new KunjunganANCModel();
   }
 
-  async loadAncData() {
+  async loadAncData(year = null) {
     this.view.setLoading(true);
     this.view.clearError();
 
     try {
-      const data = await this.model.getAllAnc();
+      const data = await this.model.getAllAnc(year);
       this.view.displayAncData(data);
     } catch (error) {
       console.error('Load ANC data error:', error);

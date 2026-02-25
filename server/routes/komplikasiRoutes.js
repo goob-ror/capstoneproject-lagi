@@ -31,6 +31,10 @@ router.get('/anc/:pregnancyId', auth, async (req, res) => {
 // Get all komplikasi with mother names
 router.get('/', auth, async (req, res) => {
   try {
+    const { year } = req.query;
+    const currentYear = new Date().getFullYear();
+    const filterYear = year || currentYear;
+
     const query = `
       SELECT 
         k.*,
@@ -39,10 +43,11 @@ router.get('/', auth, async (req, res) => {
       FROM komplikasi k
       JOIN kehamilan kh ON k.forkey_hamil = kh.id
       JOIN ibu ON kh.forkey_ibu = ibu.id
+      WHERE YEAR(k.tanggal_diagnosis) = ?
       ORDER BY k.tanggal_diagnosis DESC
     `;
     
-    const [rows] = await db.execute(query);
+    const [rows] = await db.execute(query, [filterYear]);
     res.json(rows);
   } catch (error) {
     console.error('Error fetching komplikasi:', error);

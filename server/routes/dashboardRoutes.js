@@ -38,9 +38,14 @@ router.post('/auto-update-statuses', async (req, res) => {
 // Get dashboard statistics
 router.get('/stats', async (req, res) => {
   try {
+    const currentYear = new Date().getFullYear();
+    
     // Total Ibu Hamil (Active Pregnancies - excluding completed/miscarriage)
     const [totalIbuHamilResult] = await db.query(
-      "SELECT COUNT(*) as count FROM kehamilan WHERE status_kehamilan = 'Hamil'"
+      `SELECT COUNT(*) as count FROM kehamilan 
+       WHERE status_kehamilan = 'Hamil' 
+       AND YEAR(created_at) = ?`,
+      [currentYear]
     );
     const totalIbuHamil = totalIbuHamilResult[0].count;
 
@@ -50,7 +55,9 @@ router.get('/stats', async (req, res) => {
        FROM kehamilan k
        JOIN antenatal_care anc ON k.id = anc.forkey_hamil
        WHERE k.status_kehamilan = 'Hamil' 
-       AND anc.status_risiko_visit IN ('Ringan', 'Sedang', 'Tinggi')`
+       AND YEAR(k.created_at) = ?
+       AND anc.status_risiko_visit IN ('Ringan', 'Sedang', 'Tinggi')`,
+      [currentYear]
     );
     const ibuHamilRisikoTinggi = highRiskResult[0].count;
 
@@ -58,11 +65,13 @@ router.get('/stats', async (req, res) => {
     const [k1CoverageResult] = await db.query(
       `SELECT 
         COUNT(DISTINCT anc.forkey_hamil) as k1_count,
-        (SELECT COUNT(*) FROM kehamilan WHERE status_kehamilan = 'Hamil') as total_hamil
+        (SELECT COUNT(*) FROM kehamilan WHERE status_kehamilan = 'Hamil' AND YEAR(created_at) = ?) as total_hamil
        FROM antenatal_care anc
        JOIN kehamilan k ON anc.forkey_hamil = k.id
        WHERE anc.jenis_kunjungan = 'K1' 
-       AND k.status_kehamilan = 'Hamil'`
+       AND k.status_kehamilan = 'Hamil'
+       AND YEAR(anc.tanggal_kunjungan) = ?`,
+      [currentYear, currentYear]
     );
     const k1Count = k1CoverageResult[0].k1_count;
     const totalHamil = k1CoverageResult[0].total_hamil;
@@ -70,7 +79,10 @@ router.get('/stats', async (req, res) => {
 
     // Komplikasi Dirujuk RS
     const [rujukanResult] = await db.query(
-      "SELECT COUNT(*) as count FROM komplikasi WHERE rujuk_rs = 1"
+      `SELECT COUNT(*) as count FROM komplikasi 
+       WHERE rujuk_rs = 1 
+       AND YEAR(tanggal_diagnosis) = ?`,
+      [currentYear]
     );
     const komplikasiDirujuk = rujukanResult[0].count;
 
@@ -89,6 +101,8 @@ router.get('/stats', async (req, res) => {
 // Get Jumlah Ibu Hamil berdasarkan Kelurahan
 router.get('/ibu-by-kelurahan', async (req, res) => {
   try {
+    const currentYear = new Date().getFullYear();
+    
     const [results] = await db.query(`
       SELECT 
         COALESCE(kel.nama_kelurahan, 'Tidak Diketahui') as kelurahan,
@@ -97,9 +111,10 @@ router.get('/ibu-by-kelurahan', async (req, res) => {
       LEFT JOIN kelurahan kel ON i.kelurahan_id = kel.id
       JOIN kehamilan k ON i.id = k.forkey_ibu
       WHERE k.status_kehamilan = 'Hamil'
+        AND YEAR(k.created_at) = ?
       GROUP BY kel.nama_kelurahan
       ORDER BY count DESC
-    `);
+    `, [currentYear]);
     res.json(results);
   } catch (error) {
     console.error('Error fetching ibu by kelurahan:', error);
@@ -248,6 +263,8 @@ router.get('/immunization-coverage', async (req, res) => {
 // Get Distribusi Risiko Kehamilan (Pie Chart)
 router.get('/risk-distribution', async (req, res) => {
   try {
+    const currentYear = new Date().getFullYear();
+    
     const [results] = await db.query(`
       SELECT 
         CASE 
@@ -258,8 +275,9 @@ router.get('/risk-distribution', async (req, res) => {
       FROM kehamilan k
       LEFT JOIN antenatal_care anc ON k.id = anc.forkey_hamil
       WHERE k.status_kehamilan = 'Hamil'
+        AND YEAR(k.created_at) = ?
       GROUP BY risk_category
-    `);
+    `, [currentYear]);
     res.json(results);
   } catch (error) {
     console.error('Error fetching risk distribution:', error);
@@ -486,6 +504,69 @@ router.get('/imt-distribution-kelurahan', async (req, res) => {
   } catch (error) {
     console.error('Error fetching IMT distribution by kelurahan:', error);
     res.status(500).json({ message: 'Failed to fetch IMT distribution data' });
+  }
+});
+
+// Get At-Risk Mothers (Low Anemia and/or KEK)
+router.get('/at-risk-mothers', async (req, res) => {
+  try {
+    const currentYear = new Date().getFullYear();
+    
+    const [results] = await db.query(`
+      SELECT DISTINCT
+        i.id,
+        i.nama_lengkap,
+        i.nik_ibu,
+        kel.nama_kelurahan,
+        k.id as kehamilan_id,
+        CASE 
+          WHEN latest_anc.hemoglobin < 8.0 THEN 'Anemia Berat'
+          WHEN latest_anc.hemoglobin >= 8.0 AND latest_anc.hemoglobin < 10.0 THEN 'Anemia Sedang'
+          WHEN latest_anc.hemoglobin >= 10.0 AND latest_anc.hemoglobin < 11.0 THEN 'Anemia Ringan'
+          ELSE 'Normal'
+        END as status_anemia,
+        latest_anc.hemoglobin,
+        CASE 
+          WHEN latest_anc.lila < 23.5 THEN 'KEK'
+          ELSE 'Normal'
+        END as status_kek,
+        latest_anc.lila,
+        latest_anc.tanggal_kunjungan as last_visit_date,
+        DATEDIFF(CURDATE(), k.haid_terakhir) DIV 7 as usia_kehamilan_minggu
+      FROM ibu i
+      JOIN kehamilan k ON i.id = k.forkey_ibu
+      LEFT JOIN kelurahan kel ON i.kelurahan_id = kel.id
+      LEFT JOIN (
+        SELECT 
+          anc.forkey_hamil,
+          anc.hemoglobin,
+          anc.lila,
+          anc.tanggal_kunjungan,
+          ROW_NUMBER() OVER (PARTITION BY anc.forkey_hamil ORDER BY anc.tanggal_kunjungan DESC) as rn
+        FROM antenatal_care anc
+        WHERE anc.hemoglobin IS NOT NULL OR anc.lila IS NOT NULL
+      ) latest_anc ON k.id = latest_anc.forkey_hamil AND latest_anc.rn = 1
+      WHERE k.status_kehamilan = 'Hamil'
+        AND YEAR(k.created_at) = ?
+        AND (
+          (latest_anc.hemoglobin IS NOT NULL AND latest_anc.hemoglobin < 11.0) OR
+          (latest_anc.lila IS NOT NULL AND latest_anc.lila < 23.5)
+        )
+      ORDER BY 
+        CASE 
+          WHEN latest_anc.hemoglobin < 8.0 THEN 1
+          WHEN latest_anc.lila < 23.5 AND latest_anc.hemoglobin < 10.0 THEN 2
+          WHEN latest_anc.lila < 23.5 THEN 3
+          WHEN latest_anc.hemoglobin < 10.0 THEN 4
+          ELSE 5
+        END,
+        latest_anc.tanggal_kunjungan DESC
+    `, [currentYear]);
+    
+    res.json(results);
+  } catch (error) {
+    console.error('Error fetching at-risk mothers:', error);
+    res.status(500).json({ message: 'Failed to fetch at-risk mothers data' });
   }
 });
 

@@ -12,9 +12,10 @@ class KunjunganANCModel {
     };
   }
 
-  async getAllAnc() {
+  async getAllAnc(year = null) {
     try {
-      const response = await fetch(this.baseURL, {
+      const url = year ? `${this.baseURL}?year=${year}` : this.baseURL;
+      const response = await fetch(url, {
         method: 'GET',
         headers: this.getAuthHeaders()
       });

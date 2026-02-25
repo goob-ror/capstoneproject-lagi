@@ -13,12 +13,12 @@ class PersalinanPresenter {
     return this.authModel.getUser();
   }
 
-  async loadPersalinanData() {
+  async loadPersalinanData(year = null) {
     try {
       this.callbacks.setLoading(true);
       this.callbacks.clearError();
 
-      const data = await this.model.getAllPersalinan();
+      const data = await this.model.getAllPersalinan(year);
       this.originalData = data;
       this.callbacks.displayPersalinanData(data);
     } catch (error) {
