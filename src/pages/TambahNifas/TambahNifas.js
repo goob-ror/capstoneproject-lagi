@@ -32,7 +32,8 @@ const TambahNifas = () => {
     pemberian_asi: 'ASI Eksklusif',
     keterangan: '',
     forkey_hamil: '',
-    forkey_bidan: ''
+    forkey_bidan: '',
+    mark_as_selesai: false
   });
 
   // Complications form data
@@ -74,7 +75,8 @@ const TambahNifas = () => {
         pemberian_asi: data.pemberian_asi || 'ASI Eksklusif',
         keterangan: data.keterangan || '',
         forkey_hamil: data.forkey_hamil || '',
-        forkey_bidan: data.forkey_bidan || ''
+        forkey_bidan: data.forkey_bidan || '',
+        mark_as_selesai: false
       });
     },
     onSuccess: (message) => {
@@ -141,10 +143,20 @@ const TambahNifas = () => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
+    
+    // Auto-check mark_as_selesai when KF4 is selected
+    if (name === 'jenis_kunjungan' && value === 'KF4') {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value,
+        mark_as_selesai: true
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: type === 'checkbox' ? checked : value
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -561,6 +573,28 @@ const TambahNifas = () => {
                       rows="3"
                       placeholder="Keterangan tambahan tentang kunjungan nifas..."
                     />
+                  </div>
+                </div>
+              </div>
+
+              <div className="form-section">
+                <h3>Status Kehamilan</h3>
+                <div className="form-grid">
+                  <div className="form-group checkbox-group">
+                    <label>
+                      <input
+                        type="checkbox"
+                        name="mark_as_selesai"
+                        checked={formData.mark_as_selesai}
+                        onChange={handleChange}
+                      />
+                      Tandai kehamilan sebagai Selesai
+                    </label>
+                    <small style={{ color: '#6B7280', fontSize: '12px', marginTop: '4px', display: 'block' }}>
+                      {formData.jenis_kunjungan === 'KF4' 
+                        ? 'Otomatis dicentang untuk kunjungan KF4 (masa nifas selesai)'
+                        : 'Centang jika masa nifas sudah selesai dan tidak ada komplikasi'}
+                    </small>
                   </div>
                 </div>
               </div>

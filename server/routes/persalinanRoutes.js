@@ -79,7 +79,7 @@ router.get('/pregnancy/:pregnancyId/mother', auth, async (req, res) => {
   }
 });
 
-// Get all persalinan data
+// Get all persalinan data with baby information
 router.get('/', auth, async (req, res) => {
   try {
     const query = `
@@ -87,28 +87,61 @@ router.get('/', auth, async (req, res) => {
         p.*,
         ibu.nama_lengkap as nama_ibu,
         ibu.nik_ibu,
-        bidan.nama_lengkap as nama_bidan
+        bidan.nama_lengkap as nama_bidan,
+        GROUP_CONCAT(
+          CONCAT_WS('|', 
+            b.id, b.urutan_bayi, b.jenis_kelamin, b.berat_badan_lahir, 
+            b.panjang_badan_lahir, b.kondisi, b.imunisasi_hb0, b.asfiksia
+          ) SEPARATOR ';;'
+        ) as bayi_data
       FROM persalinan p
       JOIN kehamilan k ON p.forkey_hamil = k.id
       JOIN ibu ON k.forkey_ibu = ibu.id
       JOIN bidan ON p.forkey_bidan = bidan.id
+      LEFT JOIN bayi b ON p.id = b.forkey_persalinan
+      GROUP BY p.id
       ORDER BY p.tanggal_persalinan DESC
     `;
     
     const [rows] = await db.execute(query);
-    res.json(rows);
+    
+    // Parse bayi data for each persalinan
+    const parsedRows = rows.map(row => {
+      if (row.bayi_data) {
+        const bayiArray = row.bayi_data.split(';;').map(bayiStr => {
+          const [id, urutan_bayi, jenis_kelamin, berat_badan_lahir, panjang_badan_lahir, kondisi, imunisasi, asfiksia] = bayiStr.split('|');
+          return {
+            id: parseInt(id),
+            urutan_bayi: parseInt(urutan_bayi),
+            jenis_kelamin,
+            berat_badan_lahir: berat_badan_lahir ? parseInt(berat_badan_lahir) : null,
+            panjang_badan_lahir: panjang_badan_lahir ? parseFloat(panjang_badan_lahir) : null,
+            kondisi,
+            imunisasi,
+            asfiksia
+          };
+        });
+        row.bayi = bayiArray;
+      } else {
+        row.bayi = [];
+      }
+      delete row.bayi_data;
+      return row;
+    });
+    
+    res.json(parsedRows);
   } catch (error) {
     console.error('Error fetching persalinan data:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
 
-// Get persalinan by ID
+// Get persalinan by ID with baby information
 router.get('/:id', auth, async (req, res) => {
   try {
     const { id } = req.params;
     
-    const query = `
+    const persalinanQuery = `
       SELECT 
         p.*,
         ibu.nama_lengkap as nama_ibu,
@@ -121,20 +154,31 @@ router.get('/:id', auth, async (req, res) => {
       WHERE p.id = ?
     `;
     
-    const [rows] = await db.execute(query, [id]);
+    const [persalinanRows] = await db.execute(persalinanQuery, [id]);
     
-    if (rows.length === 0) {
+    if (persalinanRows.length === 0) {
       return res.status(404).json({ message: 'Persalinan data not found' });
     }
     
-    res.json(rows[0]);
+    // Get baby data
+    const bayiQuery = `
+      SELECT * FROM bayi WHERE forkey_persalinan = ? ORDER BY urutan_bayi
+    `;
+    const [bayiRows] = await db.execute(bayiQuery, [id]);
+    
+    const result = {
+      ...persalinanRows[0],
+      bayi: bayiRows
+    };
+    
+    res.json(result);
   } catch (error) {
     console.error('Error fetching persalinan data:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
 
-// Create new persalinan
+// Create new persalinan with baby data
 router.post('/', auth, async (req, res) => {
   const connection = await db.getConnection();
   
@@ -144,14 +188,26 @@ router.post('/', auth, async (req, res) => {
     const {
       tanggal_persalinan, tempat_persalinan, penolong, cara_persalinan,
       komplikasi_ibu, perdarahan, robekan_jalan_lahir, jumlah_bayi,
-      jenis_kelamin_bayi, berat_badan_bayi, panjang_badan_bayi,
-      kondisi_bayi, asfiksia, keterangan_bayi, inisiasi_menyusui_dini,
-      vitamin_k1, beri_ttd, salep_mata, keterangan, forkey_hamil, forkey_bidan
+      beri_ttd, keterangan, forkey_hamil, forkey_bidan,
+      bayi // Array of baby data
     } = req.body;
+
+    // Validate baby data
+    if (!bayi || !Array.isArray(bayi) || bayi.length === 0) {
+      await connection.rollback();
+      return res.status(400).json({ message: 'Baby data is required and must be an array' });
+    }
+
+    if (bayi.length !== (jumlah_bayi || 1)) {
+      await connection.rollback();
+      return res.status(400).json({ 
+        message: `Number of babies (${bayi.length}) does not match jumlah_bayi (${jumlah_bayi || 1})` 
+      });
+    }
 
     // Get current pregnancy data to update GPA
     const [pregnancyData] = await connection.execute(
-      'SELECT gravida, partus, abortus, forkey_ibu FROM kehamilan WHERE id = ?',
+      'SELECT partus, forkey_ibu FROM kehamilan WHERE id = ?',
       [forkey_hamil]
     );
 
@@ -160,31 +216,59 @@ router.post('/', auth, async (req, res) => {
       return res.status(404).json({ message: 'Pregnancy data not found' });
     }
 
-    const { gravida, partus, abortus, forkey_ibu } = pregnancyData[0];
+    const { partus, forkey_ibu } = pregnancyData[0];
 
-    // Insert persalinan data
+    // Insert persalinan data (mother's delivery info only)
     const persalinanQuery = `
       INSERT INTO persalinan (
         tanggal_persalinan, tempat_persalinan, penolong, cara_persalinan,
         komplikasi_ibu, perdarahan, robekan_jalan_lahir, jumlah_bayi,
-        jenis_kelamin_bayi, berat_badan_bayi, panjang_badan_bayi,
-        kondisi_bayi, asfiksia, keterangan_bayi, inisiasi_menyusui_dini,
-        vitamin_k1, beri_ttd, salep_mata, keterangan, forkey_hamil, forkey_bidan
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        beri_ttd, keterangan, forkey_hamil, forkey_bidan
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     const [persalinanResult] = await connection.execute(persalinanQuery, [
       tanggal_persalinan, tempat_persalinan, penolong, cara_persalinan,
       komplikasi_ibu || null, perdarahan || 'Tidak', robekan_jalan_lahir || null,
-      jumlah_bayi || 1, jenis_kelamin_bayi || null,
-      berat_badan_bayi || null, panjang_badan_bayi || null,
-      kondisi_bayi || 'Sehat', asfiksia || 'Tidak', keterangan_bayi || null,
-      inisiasi_menyusui_dini ? 1 : 0, vitamin_k1 ? 1 : 0, beri_ttd ? 1 : 0, salep_mata ? 1 : 0,
-      keterangan || null, forkey_hamil, forkey_bidan
+      jumlah_bayi || 1, beri_ttd ? 1 : 0, keterangan || null, forkey_hamil, forkey_bidan
     ]);
 
-    // Update pregnancy status to 'Bersalin' and update GPA
-    // Increment partus (successful delivery) by 1
+    const persalinanId = persalinanResult.insertId;
+
+    // Insert baby data for each baby
+    const bayiQuery = `
+      INSERT INTO bayi (
+        forkey_persalinan, urutan_bayi, jenis_kelamin, berat_badan_lahir,
+        panjang_badan_lahir, apgar_menit1, apgar_menit5, asfiksia, prematur,
+        gangguan_napas, kondisi, imunisasi_hb0, inisiasi_menyusui_dini, vitamin_k1, salep_mata,
+        status_risiko, keterangan
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    for (let i = 0; i < bayi.length; i++) {
+      const baby = bayi[i];
+      await connection.execute(bayiQuery, [
+        persalinanId,
+        i + 1, // urutan_bayi
+        baby.jenis_kelamin,
+        baby.berat_badan_lahir || null,
+        baby.panjang_badan_lahir || null,
+        baby.apgar_menit1 || null,
+        baby.apgar_menit5 || null,
+        baby.asfiksia || 'Tidak',
+        baby.prematur ? 1 : 0,
+        baby.gangguan_napas ? 1 : 0,
+        baby.kondisi || 'Sehat',
+        baby.imunisasi_hb0 ? 1 : 0,
+        baby.inisiasi_menyusui_dini ? 1 : 0,
+        baby.vitamin_k1 ? 1 : 0,
+        baby.salep_mata ? 1 : 0,
+        baby.status_risiko || null,
+        baby.keterangan || null
+      ]);
+    }
+
+    // Update pregnancy status to 'Bersalin' and increment partus
     const newPartus = partus + 1;
     
     await connection.execute(
@@ -192,75 +276,130 @@ router.post('/', auth, async (req, res) => {
       ['Bersalin', newPartus, forkey_hamil]
     );
 
-    // Also update any future pregnancies for this mother to reflect the new GPA
-    // This ensures the next pregnancy will have correct gravida/partus values
+    // Update any future pregnancies for this mother to reflect the new GPA
     await connection.execute(
-      `UPDATE kehamilan SET 
-        gravida = CASE WHEN id = ? THEN gravida ELSE gravida END,
-        partus = ? 
-       WHERE forkey_ibu = ? AND id >= ?`,
-      [forkey_hamil, newPartus, forkey_ibu, forkey_hamil]
+      `UPDATE kehamilan SET partus = ? WHERE forkey_ibu = ? AND id > ?`,
+      [newPartus, forkey_ibu, forkey_hamil]
     );
 
     await connection.commit();
 
     res.status(201).json({
-      message: 'Persalinan data created successfully, pregnancy status updated, and GPA updated',
-      id: persalinanResult.insertId
+      message: 'Persalinan and baby data created successfully',
+      persalinanId: persalinanId,
+      jumlahBayi: bayi.length
     });
   } catch (error) {
     await connection.rollback();
     console.error('Error creating persalinan:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ message: 'Internal server error', error: error.message });
   } finally {
     connection.release();
   }
 });
 
-// Update persalinan
+// Update persalinan and baby data
 router.put('/:id', auth, async (req, res) => {
+  const connection = await db.getConnection();
+  
   try {
+    await connection.beginTransaction();
+
     const { id } = req.params;
     const {
       tanggal_persalinan, tempat_persalinan, penolong, cara_persalinan,
       komplikasi_ibu, perdarahan, robekan_jalan_lahir, jumlah_bayi,
-      jenis_kelamin_bayi, berat_badan_bayi, panjang_badan_bayi,
-      kondisi_bayi, asfiksia, keterangan_bayi, inisiasi_menyusui_dini,
-      vitamin_k1, beri_ttd, salep_mata, keterangan, forkey_hamil, forkey_bidan
+      beri_ttd, keterangan, forkey_hamil, forkey_bidan,
+      bayi // Array of baby data
     } = req.body;
 
-    const query = `
+    // Validate baby data
+    if (!bayi || !Array.isArray(bayi) || bayi.length === 0) {
+      await connection.rollback();
+      return res.status(400).json({ message: 'Baby data is required and must be an array' });
+    }
+
+    if (bayi.length !== (jumlah_bayi || 1)) {
+      await connection.rollback();
+      return res.status(400).json({ 
+        message: `Number of babies (${bayi.length}) does not match jumlah_bayi (${jumlah_bayi || 1})` 
+      });
+    }
+
+    // Update persalinan data
+    const persalinanQuery = `
       UPDATE persalinan SET
         tanggal_persalinan = ?, tempat_persalinan = ?, penolong = ?, cara_persalinan = ?,
         komplikasi_ibu = ?, perdarahan = ?, robekan_jalan_lahir = ?, jumlah_bayi = ?,
-        jenis_kelamin_bayi = ?, berat_badan_bayi = ?, panjang_badan_bayi = ?,
-        kondisi_bayi = ?, asfiksia = ?, keterangan_bayi = ?, inisiasi_menyusui_dini = ?,
-        vitamin_k1 = ?, beri_ttd = ?, salep_mata = ?, keterangan = ?, forkey_hamil = ?, forkey_bidan = ?
+        beri_ttd = ?, keterangan = ?, forkey_hamil = ?, forkey_bidan = ?,
+        updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `;
 
-    const [result] = await db.execute(query, [
+    const [result] = await connection.execute(persalinanQuery, [
       tanggal_persalinan, tempat_persalinan, penolong, cara_persalinan,
       komplikasi_ibu || null, perdarahan || 'Tidak', robekan_jalan_lahir || null,
-      jumlah_bayi || 1, jenis_kelamin_bayi || null,
-      berat_badan_bayi || null, panjang_badan_bayi || null,
-      kondisi_bayi || 'Sehat', asfiksia || 'Tidak', keterangan_bayi || null,
-      inisiasi_menyusui_dini ? 1 : 0, vitamin_k1 ? 1 : 0, beri_ttd ? 1 : 0, salep_mata ? 1 : 0,
-      keterangan || null, forkey_hamil, forkey_bidan, id
+      jumlah_bayi || 1, beri_ttd ? 1 : 0, keterangan || null, 
+      forkey_hamil, forkey_bidan, id
     ]);
 
     if (result.affectedRows === 0) {
+      await connection.rollback();
       return res.status(404).json({ message: 'Persalinan data not found' });
     }
 
-    res.json({ message: 'Persalinan data updated successfully' });
+    // Delete existing baby records
+    await connection.execute('DELETE FROM bayi WHERE forkey_persalinan = ?', [id]);
+
+    // Insert updated baby data
+    const bayiQuery = `
+      INSERT INTO bayi (
+        forkey_persalinan, urutan_bayi, jenis_kelamin, berat_badan_lahir,
+        panjang_badan_lahir, apgar_menit1, apgar_menit5, asfiksia, prematur,
+        gangguan_napas, kondisi, imunisasi_hb0, inisiasi_menyusui_dini, vitamin_k1, 
+        salep_mata, status_risiko, keterangan
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    for (let i = 0; i < bayi.length; i++) {
+      const baby = bayi[i];
+      await connection.execute(bayiQuery, [
+        id,
+        i + 1, // urutan_bayi
+        baby.jenis_kelamin,
+        baby.berat_badan_lahir || null,
+        baby.panjang_badan_lahir || null,
+        baby.apgar_menit1 || null,
+        baby.apgar_menit5 || null,
+        baby.asfiksia || 'Tidak',
+        baby.prematur ? 1 : 0,
+        baby.gangguan_napas ? 1 : 0,
+        baby.kondisi || 'Sehat',
+        baby.imunisasi_hb0 ? 1 : 0,
+        baby.inisiasi_menyusui_dini ? 1 : 0,
+        baby.vitamin_k1 ? 1 : 0,
+        baby.salep_mata ? 1 : 0,
+        baby.status_risiko || null,
+        baby.keterangan || null
+      ]);
+    }
+
+    await connection.commit();
+
+    res.json({ 
+      message: 'Persalinan and baby data updated successfully',
+      jumlahBayi: bayi.length
+    });
   } catch (error) {
+    await connection.rollback();
     console.error('Error updating persalinan:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ message: 'Internal server error', error: error.message });
+  } finally {
+    connection.release();
   }
 });
 
-// Delete persalinan
+// Delete persalinan and associated baby data
 router.delete('/:id', auth, async (req, res) => {
   const connection = await db.getConnection();
   
@@ -271,7 +410,7 @@ router.delete('/:id', auth, async (req, res) => {
     
     // Get the pregnancy ID and current GPA before deleting
     const [persalinanData] = await connection.execute(
-      `SELECT p.forkey_hamil, k.gravida, k.partus, k.abortus, k.forkey_ibu 
+      `SELECT p.forkey_hamil, k.partus, k.forkey_ibu 
        FROM persalinan p 
        JOIN kehamilan k ON p.forkey_hamil = k.id 
        WHERE p.id = ?`,
@@ -283,7 +422,10 @@ router.delete('/:id', auth, async (req, res) => {
       return res.status(404).json({ message: 'Persalinan data not found' });
     }
 
-    const { forkey_hamil, gravida, partus, abortus, forkey_ibu } = persalinanData[0];
+    const { forkey_hamil, partus, forkey_ibu } = persalinanData[0];
+
+    // Delete baby data first (due to foreign key constraint)
+    await connection.execute('DELETE FROM bayi WHERE forkey_persalinan = ?', [id]);
 
     // Delete persalinan data
     await connection.execute('DELETE FROM persalinan WHERE id = ?', [id]);
@@ -298,19 +440,19 @@ router.delete('/:id', auth, async (req, res) => {
 
     // Update any future pregnancies for this mother to reflect the corrected GPA
     await connection.execute(
-      `UPDATE kehamilan SET 
-        partus = ? 
-       WHERE forkey_ibu = ? AND id >= ?`,
+      `UPDATE kehamilan SET partus = ? WHERE forkey_ibu = ? AND id > ?`,
       [newPartus, forkey_ibu, forkey_hamil]
     );
 
     await connection.commit();
     
-    res.json({ message: 'Persalinan data deleted successfully, pregnancy status reverted, and GPA corrected' });
+    res.json({ 
+      message: 'Persalinan and baby data deleted successfully, pregnancy status reverted, and GPA corrected' 
+    });
   } catch (error) {
     await connection.rollback();
     console.error('Error deleting persalinan:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ message: 'Internal server error', error: error.message });
   } finally {
     connection.release();
   }

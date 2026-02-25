@@ -3,14 +3,25 @@ const router = express.Router();
 const pool = require('../database/db');
 const authMiddleware = require('../middleware/auth');
 
-// Get all ibu (mothers)
+// Get all ibu (mothers) with pregnancy status
 router.get('/', authMiddleware, async (req, res) => {
   try {
     const [rows] = await pool.query(`
-      SELECT i.*, kel.nama_kelurahan as kelurahan_nama, p.nama_posyandu
+      SELECT 
+        i.*, 
+        kel.nama_kelurahan as kelurahan_nama, 
+        p.nama_posyandu,
+        k.status_kehamilan as current_status
       FROM ibu i
       LEFT JOIN kelurahan kel ON i.kelurahan_id = kel.id
       LEFT JOIN wilker_posyandu p ON i.posyandu_id = p.id
+      LEFT JOIN (
+        SELECT forkey_ibu, status_kehamilan
+        FROM kehamilan
+        WHERE id IN (
+          SELECT MAX(id) FROM kehamilan GROUP BY forkey_ibu
+        )
+      ) k ON i.id = k.forkey_ibu
       ORDER BY i.created_at DESC
     `);
     res.json(rows);

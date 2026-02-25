@@ -3,6 +3,13 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import Select from 'react-select';
 import TambahANCPresenter from './TambahANC-presenter';
 import { calculateBMI, getBMICategory, getBMICategoryColor } from '../../utils/bmiCalculator';
+import { 
+  calculateRiskScore, 
+  getRiskLevel, 
+  getAutomaticRiskStatus,
+  formatRiskScore,
+  getRiskPercentage
+} from '../../utils/maternalRiskScoring';
 import './TambahANC.css';
 
 const TambahANC = () => {
@@ -21,6 +28,8 @@ const TambahANC = () => {
   const [existingVisitWarning, setExistingVisitWarning] = useState('');
   const [existingVisitTypes, setExistingVisitTypes] = useState([]);
   const [activeTab, setActiveTab] = useState('anc');
+  const [riskScore, setRiskScore] = useState(null);
+  const [showRiskNotification, setShowRiskNotification] = useState(false);
 
   const [formData, setFormData] = useState({
     tanggal_kunjungan: '',
@@ -222,6 +231,50 @@ const TambahANC = () => {
       presenter.checkExistingVisit(formData.forkey_hamil, formData.jenis_kunjungan);
     }
   }, [formData.forkey_hamil, formData.jenis_kunjungan, isEdit, presenter]);
+
+  // Calculate maternal risk score automatically
+  useEffect(() => {
+    if (motherData) {
+      const calculatedScore = calculateRiskScore({
+        motherData,
+        formData,
+        labScreeningData
+      });
+      
+      setRiskScore(calculatedScore);
+      
+      // Get automatic risk status
+      const autoStatus = getAutomaticRiskStatus(calculatedScore.score, calculatedScore.criticalFactors);
+      
+      // Auto-update status_risiko_visit if it changed
+      if (formData.status_risiko_visit !== autoStatus) {
+        setFormData(prev => ({
+          ...prev,
+          status_risiko_visit: autoStatus
+        }));
+        
+        // Show notification if changed to any risk level (not Normal)
+        if (autoStatus !== 'Normal') {
+          setShowRiskNotification(true);
+          setTimeout(() => setShowRiskNotification(false), 5000);
+        }
+      }
+    }
+  }, [
+    motherData,
+    formData.tekanan_darah,
+    formData.lila,
+    formData.denyut_jantung_janin,
+    formData.selisih_beratbadan,
+    labScreeningData.hasil_lab_hb,
+    labScreeningData.lab_protein_urine,
+    labScreeningData.skrining_hiv,
+    labScreeningData.skrining_sifilis,
+    labScreeningData.skrining_hbsag,
+    labScreeningData.skrining_tb,
+    labScreeningData.skrining_gonorea,
+    labScreeningData.skrining_klamidia
+  ]);
 
   // Function to reset form to initial state (keeping pregnancy and bidan)
   const resetFormFields = () => {
@@ -596,12 +649,46 @@ const TambahANC = () => {
           </div>
         )}
 
+        {showRiskNotification && (
+          <div className="warning-banner" style={{ backgroundColor: '#FEE2E2', borderColor: '#FCA5A5', color: '#991B1B' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" fill="currentColor" />
+            </svg>
+            Status risiko otomatis diubah ke "{formData.status_risiko_visit}"
+          </div>
+        )}
+
         {existingVisitWarning && (
           <div className="warning-banner">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" fill="currentColor" />
             </svg>
             {existingVisitWarning}
+          </div>
+        )}
+
+        {riskScore && motherData && (
+          <div className={`risk-card risk-${getRiskLevel(riskScore.score).level}`}>
+            <div className="risk-header">
+              <span className="risk-title">Skor Risiko: {formatRiskScore(riskScore)}</span>
+              <span className={`risk-label risk-${getRiskLevel(riskScore.score).level}`}>
+                {getRiskLevel(riskScore.score).label}
+              </span>
+            </div>
+            <div className="risk-bar">
+              <div className={`risk-fill risk-${getRiskLevel(riskScore.score).level}`} 
+                   style={{width: `${getRiskPercentage(riskScore.score)}%`}}></div>
+            </div>
+            {riskScore.factors.length > 0 && (
+              <details className="risk-details">
+                <summary>Lihat {riskScore.factors.length} faktor risiko</summary>
+                <ul>
+                  {riskScore.factors.map((factor, idx) => (
+                    <li key={idx}>{factor}</li>
+                  ))}
+                </ul>
+              </details>
+            )}
           </div>
         )}
 
@@ -757,7 +844,9 @@ const TambahANC = () => {
                       required
                     >
                       <option value="Normal">Normal</option>
-                      <option value="Risiko Tinggi">Risiko Tinggi</option>
+                      <option value="Ringan">Ringan</option>
+                      <option value="Sedang">Sedang</option>
+                      <option value="Tinggi">Tinggi</option>
                     </select>
                   </div>
                 </div>

@@ -14,6 +14,7 @@ const rekapitulasiRoutes = require('./routes/rekapitulasiRoutes');
 const posyanduRoutes = require('./routes/posyanduRoutes');
 const kelurahanRoutes = require('./routes/kelurahanRoutes');
 const userRoutes = require('./routes/userRoutes');
+const excelExportRoutes = require('./routes/excel');
 const auth = require('./middleware/auth');
 const { validateAllInputs } = require('./middleware/inputValidator');
 
@@ -70,6 +71,7 @@ app.use('/api/rekapitulasi', rekapitulasiRoutes);
 app.use('/api/posyandu', posyanduRoutes);
 app.use('/api/kelurahan', kelurahanRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/excel-export', excelExportRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

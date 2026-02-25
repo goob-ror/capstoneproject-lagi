@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Feb 18, 2026 at 04:35 AM
+-- Generation Time: Feb 18, 2026 at 04:29 AM
 -- Server version: 8.0.30
 -- PHP Version: 8.1.10
 
@@ -164,42 +164,12 @@ CREATE TABLE `bayi` (
   `prematur` tinyint(1) DEFAULT '0',
   `gangguan_napas` tinyint(1) DEFAULT NULL,
   `kondisi` enum('Sehat','Sakit','Meninggal') DEFAULT 'Sehat',
-  `imunisasi_hb0` tinyint(1) DEFAULT '0',
   `inisiasi_menyusui_dini` tinyint(1) DEFAULT '0',
   `vitamin_k1` tinyint(1) DEFAULT '0',
   `salep_mata` tinyint(1) DEFAULT '0',
-  `status_risiko` enum('Normal', 'Ringan','Sedang','Berat','') DEFAULT NULL,
-  `keterangan` text,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  `status_risiko` enum('Ringan','Sedang','Berat','') DEFAULT NULL,
+  `keterangan` text
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Dumping data for table `bayi`
---
-
-INSERT INTO `bayi` (`id`, `forkey_persalinan`, `urutan_bayi`, `jenis_kelamin`, `berat_badan_lahir`, `panjang_badan_lahir`, `apgar_menit1`, `apgar_menit5`, `asfiksia`, `prematur`, `gangguan_napas`, `kondisi`, `inisiasi_menyusui_dini`, `vitamin_k1`, `salep_mata`, `status_risiko`, `keterangan`, `created_at`, `updated_at`) VALUES
-(1, 1, 1, 'Laki-laki', NULL, 49.0, NULL, NULL, 'Tidak', 0, NULL, 'Sehat', 1, 1, 1, NULL, 'Bayi menangis kuat', '2026-02-18 04:33:31', '2026-02-18 04:33:31'),
-(2, 2, 1, 'Perempuan', NULL, 48.0, NULL, NULL, 'Tidak', 0, NULL, 'Sehat', 1, 1, 1, NULL, 'Bayi bugar', '2026-02-18 04:33:31', '2026-02-18 04:33:31'),
-(3, 3, 1, 'Laki-laki', NULL, 50.0, NULL, NULL, 'Tidak', 0, NULL, 'Sehat', 1, 1, 1, NULL, 'Bayi besar, sehat', '2026-02-18 04:33:31', '2026-02-18 04:33:31'),
-(4, 4, 1, 'Perempuan', NULL, 49.0, NULL, NULL, 'Ringan', 0, NULL, 'Sehat', 0, 1, 1, NULL, 'Ketuban pecah dini', '2026-02-18 04:33:31', '2026-02-18 04:33:31'),
-(5, 5, 1, 'Perempuan', NULL, 47.0, NULL, NULL, 'Tidak', 0, NULL, 'Sehat', 1, 1, 1, NULL, 'Normal', '2026-02-18 04:33:31', '2026-02-18 04:33:31'),
-(6, 6, 1, 'Laki-laki', NULL, 50.0, NULL, NULL, 'Tidak', 0, NULL, 'Sehat', 1, 1, 1, NULL, 'Normal', '2026-02-18 04:33:31', '2026-02-18 04:33:31'),
-(7, 7, 1, 'Laki-laki', NULL, 51.0, NULL, NULL, 'Ringan', 0, NULL, 'Sehat', 0, 1, 1, NULL, 'Sempat asfiksia ringan', '2026-02-18 04:33:31', '2026-02-18 04:33:31'),
-(8, 8, 1, 'Perempuan', NULL, 48.5, NULL, NULL, 'Tidak', 0, NULL, 'Sehat', 1, 1, 1, NULL, 'Normal', '2026-02-18 04:33:31', '2026-02-18 04:33:31'),
-(9, 9, 1, 'Perempuan', NULL, 48.0, NULL, NULL, 'Tidak', 0, NULL, 'Sehat', 1, 1, 1, NULL, 'Normal', '2026-02-18 04:33:31', '2026-02-18 04:33:31'),
-(10, 10, 1, 'Laki-laki', NULL, 50.0, NULL, NULL, 'Tidak', 0, NULL, 'Sehat', 1, 1, 1, NULL, 'Normal', '2026-02-18 04:33:31', '2026-02-18 04:33:31'),
-(11, 11, 1, 'Perempuan', NULL, 49.0, NULL, NULL, 'Tidak', 0, NULL, 'Sehat', 0, 1, 1, NULL, 'Posisi Sungsang', '2026-02-18 04:33:31', '2026-02-18 04:33:31'),
-(12, 12, 1, 'Laki-laki', NULL, 49.5, NULL, NULL, 'Tidak', 0, NULL, 'Sehat', 1, 1, 1, NULL, 'Normal', '2026-02-18 04:33:31', '2026-02-18 04:33:31'),
-(13, 13, 1, 'Perempuan', NULL, 48.0, NULL, NULL, 'Tidak', 0, NULL, 'Sehat', 1, 1, 1, NULL, 'Normal', '2026-02-18 04:33:31', '2026-02-18 04:33:31'),
-(14, 14, 1, 'Laki-laki', NULL, 50.0, NULL, NULL, 'Tidak', 0, NULL, 'Sehat', 1, 1, 1, NULL, 'Normal', '2026-02-18 04:33:31', '2026-02-18 04:33:31'),
-(15, 15, 1, 'Perempuan', NULL, 49.0, NULL, NULL, 'Ringan', 0, NULL, 'Sehat', 0, 1, 1, NULL, 'Observasi ketat', '2026-02-18 04:33:31', '2026-02-18 04:33:31'),
-(16, 16, 1, 'Laki-laki', NULL, 49.0, NULL, NULL, 'Tidak', 0, NULL, 'Sehat', 1, 1, 1, NULL, 'Normal', '2026-02-18 04:33:31', '2026-02-18 04:33:31'),
-(17, 17, 1, 'Perempuan', NULL, 48.5, NULL, NULL, 'Tidak', 0, NULL, 'Sehat', 1, 1, 1, NULL, 'Normal', '2026-02-18 04:33:31', '2026-02-18 04:33:31'),
-(18, 18, 1, 'Laki-laki', NULL, 49.0, NULL, NULL, 'Tidak', 0, NULL, 'Sehat', 1, 1, 1, NULL, 'Normal', '2026-02-18 04:33:31', '2026-02-18 04:33:31'),
-(19, 19, 1, 'Laki-laki', NULL, 51.0, NULL, NULL, 'Tidak', 0, NULL, 'Sehat', 1, 1, 1, NULL, 'Normal', '2026-02-18 04:33:31', '2026-02-18 04:33:31'),
-(20, 20, 1, 'Perempuan', NULL, 48.0, NULL, NULL, 'Tidak', 0, NULL, 'Sehat', 1, 1, 1, NULL, 'Normal', '2026-02-18 04:33:31', '2026-02-18 04:33:31'),
-(21, 21, 1, 'Laki-laki', NULL, 48.0, NULL, NULL, 'Tidak', 0, NULL, 'Sehat', 0, 1, 1, NULL, NULL, '2026-02-18 04:33:31', '2026-02-18 04:33:31');
 
 -- --------------------------------------------------------
 
@@ -725,41 +695,53 @@ CREATE TABLE `persalinan` (
   `perdarahan` enum('Tidak','Ringan','Sedang','Berat') DEFAULT 'Tidak',
   `robekan_jalan_lahir` enum('Tidak','Perineum','Serviks','Vagina') DEFAULT NULL,
   `jumlah_bayi` int DEFAULT '1',
+  `jenis_kelamin_bayi` enum('Laki-laki','Perempuan','Kembar Campur') DEFAULT NULL,
+  `berat_badan_bayi` int DEFAULT NULL,
+  `bblr` tinyint(1) DEFAULT NULL,
+  `panjang_badan_bayi` decimal(4,2) DEFAULT NULL,
+  `kondisi_bayi` enum('Sehat','Sakit','Meninggal') DEFAULT NULL,
+  `asfiksia` enum('Tidak','Ringan','Berat') DEFAULT NULL,
+  `prematur_bayi` tinyint(1) NOT NULL DEFAULT '0',
+  `keterangan_bayi` text,
+  `apgar_menit1` int DEFAULT NULL,
+  `apgar_menit5` int DEFAULT NULL,
+  `inisiasi_menyusui_dini` tinyint(1) DEFAULT '0',
+  `vitamin_k1` tinyint(1) DEFAULT '0',
   `beri_ttd` tinyint(1) DEFAULT '0',
+  `salep_mata` tinyint(1) DEFAULT '0',
   `keterangan` text,
   `forkey_hamil` int NOT NULL,
   `forkey_bidan` int NOT NULL,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `persalinan`
 --
 
-INSERT INTO `persalinan` (`id`, `tanggal_persalinan`, `tempat_persalinan`, `penolong`, `cara_persalinan`, `komplikasi_ibu`, `perdarahan`, `robekan_jalan_lahir`, `jumlah_bayi`, `beri_ttd`, `keterangan`, `forkey_hamil`, `forkey_bidan`, `created_at`, `updated_at`) VALUES
-(1, '2026-01-19 13:29:00', 'Puskesmas', 'Bidan', 'Spontan', NULL, 'Tidak', 'Perineum', 1, 1, 'Persalinan lancar', 26, 2, '2025-11-23 14:29:05', '2026-02-18 04:33:31'),
-(2, '2025-08-22 15:30:00', 'Klinik', 'Bidan', 'Spontan', NULL, 'Ringan', 'Tidak', 1, 0, 'Lancar', 27, 4, '2025-11-23 14:29:05', '2026-02-18 04:33:31'),
-(3, '2025-10-17 20:00:00', 'Rumah', 'Bidan', 'Spontan', NULL, 'Tidak', 'Vagina', 1, 0, 'Lahir di PMB', 28, 2, '2025-11-23 14:29:05', '2026-02-18 04:33:31'),
-(4, '2025-09-27 10:00:00', 'RS', 'Dokter', 'Sectio', 'KPD', 'Sedang', 'Tidak', 1, 0, 'Rujuk RS karena KPD', 29, 5, '2025-11-23 14:29:05', '2026-02-18 04:33:31'),
-(5, '2025-10-12 18:45:00', 'Puskesmas', 'Bidan', 'Spontan', NULL, 'Tidak', 'Perineum', 1, 0, 'Anak kedua', 30, 3, '2025-11-23 14:29:05', '2026-02-18 04:33:31'),
-(6, '2025-08-08 23:15:00', 'Klinik', 'Bidan', 'Spontan', NULL, 'Tidak', 'Tidak', 1, 0, 'Tanpa jahitan', 31, 4, '2025-11-23 14:29:05', '2026-02-18 04:33:31'),
-(7, '2025-09-17 14:00:00', 'RS', 'Dokter', 'Vakum', 'Partus Lama', 'Sedang', 'Perineum', 1, 0, 'Kala II memanjang', 32, 1, '2025-11-23 14:29:05', '2026-02-18 04:33:31'),
-(8, '2025-11-01 21:00:00', 'Puskesmas', 'Bidan', 'Spontan', NULL, 'Tidak', 'Serviks', 1, 0, 'Luka jahit serviks', 33, 5, '2025-11-23 14:29:05', '2026-02-18 04:33:31'),
-(9, '2025-09-01 16:30:00', 'Rumah', 'Bidan', 'Spontan', NULL, 'Tidak', 'Vagina', 1, 0, 'Lahir di PMB', 34, 2, '2025-11-23 14:29:05', '2026-02-18 04:33:31'),
-(10, '2025-09-22 19:20:00', 'Puskesmas', 'Bidan', 'Spontan', NULL, 'Tidak', 'Tidak', 1, 0, 'Utuh', 35, 3, '2025-11-23 14:29:05', '2026-02-18 04:33:31'),
-(11, '2025-10-22 08:00:00', 'RS', 'Dokter', 'Sectio', 'Sungsang', 'Tidak', 'Tidak', 1, 0, 'SC Elektif', 36, 1, '2025-11-23 14:29:05', '2026-02-18 04:33:31'),
-(12, '2025-08-17 22:50:00', 'Puskesmas', 'Bidan', 'Spontan', NULL, 'Tidak', 'Perineum', 1, 0, 'Jahitan jelujur', 37, 5, '2025-11-23 14:29:05', '2026-02-18 04:33:31'),
-(13, '2025-09-12 12:00:00', 'Klinik', 'Bidan', 'Spontan', NULL, 'Tidak', 'Tidak', 1, 0, 'Anak pertama', 38, 2, '2025-11-23 14:29:05', '2026-02-18 04:33:31'),
-(14, '2025-11-08 17:40:00', 'Puskesmas', 'Bidan', 'Spontan', NULL, 'Tidak', 'Perineum', 1, 0, 'Lancar', 39, 4, '2025-11-23 14:29:05', '2026-02-18 04:33:31'),
-(15, '2025-08-27 05:00:00', 'RS', 'Dokter', 'Sectio', 'Pre-eklampsia Berat', 'Sedang', 'Tidak', 1, 0, 'Cito SC karena PEB', 40, 1, '2025-11-23 14:29:05', '2026-02-18 04:33:31'),
-(16, '2025-10-01 14:15:00', 'Puskesmas', 'Bidan', 'Spontan', NULL, 'Tidak', 'Vagina', 1, 0, 'Lahir normal', 41, 5, '2025-11-23 14:29:05', '2026-02-18 04:33:31'),
-(17, '2025-10-08 06:30:00', 'Rumah', 'Bidan', 'Spontan', NULL, 'Tidak', 'Perineum', 1, 0, 'Partus presipitatus', 42, 2, '2025-11-23 14:29:05', '2026-02-18 04:33:31'),
-(18, '2025-08-12 11:20:00', 'Klinik', 'Bidan', 'Spontan', NULL, 'Tidak', 'Tidak', 1, 0, 'Utuh', 43, 3, '2025-11-23 14:29:05', '2026-02-18 04:33:31'),
-(19, '2025-10-06 19:50:00', 'Puskesmas', 'Bidan', 'Spontan', NULL, 'Tidak', 'Serviks', 1, 0, 'Bayi cukup besar', 44, 4, '2025-11-23 14:29:05', '2026-02-18 04:33:31'),
-(20, '2025-10-27 23:45:00', 'Puskesmas', 'Bidan', 'Spontan', NULL, 'Tidak', 'Perineum', 1, 0, 'Lancar', 45, 5, '2025-11-23 14:29:05', '2026-02-18 04:33:31'),
-(21, '2026-02-01 08:17:00', 'Puskesmas', 'Bidan', 'Spontan', NULL, 'Tidak', NULL, 1, 1, NULL, 22, 6, '2026-02-01 00:18:38', '2026-02-18 04:33:31'),
-(22, '2026-02-02 10:19:00', 'Puskesmas', 'Bidan', 'Spontan', NULL, 'Tidak', NULL, 1, 1, NULL, 56, 6, '2026-02-02 02:19:25', '2026-02-18 04:33:31');
+INSERT INTO `persalinan` (`id`, `tanggal_persalinan`, `tempat_persalinan`, `penolong`, `cara_persalinan`, `komplikasi_ibu`, `perdarahan`, `robekan_jalan_lahir`, `jumlah_bayi`, `jenis_kelamin_bayi`, `berat_badan_bayi`, `bblr`, `panjang_badan_bayi`, `kondisi_bayi`, `asfiksia`, `prematur_bayi`, `keterangan_bayi`, `apgar_menit1`, `apgar_menit5`, `inisiasi_menyusui_dini`, `vitamin_k1`, `beri_ttd`, `salep_mata`, `keterangan`, `forkey_hamil`, `forkey_bidan`, `created_at`) VALUES
+(1, '2026-01-19 13:29:00', 'Puskesmas', 'Bidan', 'Spontan', NULL, 'Tidak', 'Perineum', 1, 'Laki-laki', NULL, 3, 49.00, 'Sehat', 'Tidak', 0, 'Bayi menangis kuat', NULL, NULL, 1, 1, 1, 1, 'Persalinan lancar', 26, 2, '2025-11-23 14:29:05'),
+(2, '2025-08-22 15:30:00', 'Klinik', 'Bidan', 'Spontan', NULL, 'Ringan', 'Tidak', 1, 'Perempuan', NULL, 3, 48.00, 'Sehat', 'Tidak', 0, 'Bayi bugar', NULL, NULL, 1, 1, 0, 1, 'Lancar', 27, 4, '2025-11-23 14:29:05'),
+(3, '2025-10-17 20:00:00', 'Rumah', 'Bidan', 'Spontan', NULL, 'Tidak', 'Vagina', 1, 'Laki-laki', NULL, 4, 50.00, 'Sehat', 'Tidak', 0, 'Bayi besar, sehat', NULL, NULL, 1, 1, 0, 1, 'Lahir di PMB', 28, 2, '2025-11-23 14:29:05'),
+(4, '2025-09-27 10:00:00', 'RS', 'Dokter', 'Sectio', 'KPD', 'Sedang', 'Tidak', 1, 'Perempuan', NULL, 3, 49.00, 'Sehat', 'Ringan', 0, 'Ketuban pecah dini', NULL, NULL, 0, 1, 0, 1, 'Rujuk RS karena KPD', 29, 5, '2025-11-23 14:29:05'),
+(5, '2025-10-12 18:45:00', 'Puskesmas', 'Bidan', 'Spontan', NULL, 'Tidak', 'Perineum', 1, 'Perempuan', NULL, 3, 47.00, 'Sehat', 'Tidak', 0, 'Normal', NULL, NULL, 1, 1, 0, 1, 'Anak kedua', 30, 3, '2025-11-23 14:29:05'),
+(6, '2025-08-08 23:15:00', 'Klinik', 'Bidan', 'Spontan', NULL, 'Tidak', 'Tidak', 1, 'Laki-laki', NULL, 3, 50.00, 'Sehat', 'Tidak', 0, 'Normal', NULL, NULL, 1, 1, 0, 1, 'Tanpa jahitan', 31, 4, '2025-11-23 14:29:05'),
+(7, '2025-09-17 14:00:00', 'RS', 'Dokter', 'Vakum', 'Partus Lama', 'Sedang', 'Perineum', 1, 'Laki-laki', NULL, 4, 51.00, 'Sehat', 'Ringan', 0, 'Sempat asfiksia ringan', NULL, NULL, 0, 1, 0, 1, 'Kala II memanjang', 32, 1, '2025-11-23 14:29:05'),
+(8, '2025-11-01 21:00:00', 'Puskesmas', 'Bidan', 'Spontan', NULL, 'Tidak', 'Serviks', 1, 'Perempuan', NULL, 3, 48.50, 'Sehat', 'Tidak', 0, 'Normal', NULL, NULL, 1, 1, 0, 1, 'Luka jahit serviks', 33, 5, '2025-11-23 14:29:05'),
+(9, '2025-09-01 16:30:00', 'Rumah', 'Bidan', 'Spontan', NULL, 'Tidak', 'Vagina', 1, 'Perempuan', NULL, 3, 48.00, 'Sehat', 'Tidak', 0, 'Normal', NULL, NULL, 1, 1, 0, 1, 'Lahir di PMB', 34, 2, '2025-11-23 14:29:05'),
+(10, '2025-09-22 19:20:00', 'Puskesmas', 'Bidan', 'Spontan', NULL, 'Tidak', 'Tidak', 1, 'Laki-laki', NULL, 3, 50.00, 'Sehat', 'Tidak', 0, 'Normal', NULL, NULL, 1, 1, 0, 1, 'Utuh', 35, 3, '2025-11-23 14:29:05'),
+(11, '2025-10-22 08:00:00', 'RS', 'Dokter', 'Sectio', 'Sungsang', 'Tidak', 'Tidak', 1, 'Perempuan', NULL, 3, 49.00, 'Sehat', 'Tidak', 0, 'Posisi Sungsang', NULL, NULL, 0, 1, 0, 1, 'SC Elektif', 36, 1, '2025-11-23 14:29:05'),
+(12, '2025-08-17 22:50:00', 'Puskesmas', 'Bidan', 'Spontan', NULL, 'Tidak', 'Perineum', 1, 'Laki-laki', NULL, 3, 49.50, 'Sehat', 'Tidak', 0, 'Normal', NULL, NULL, 1, 1, 0, 1, 'Jahitan jelujur', 37, 5, '2025-11-23 14:29:05'),
+(13, '2025-09-12 12:00:00', 'Klinik', 'Bidan', 'Spontan', NULL, 'Tidak', 'Tidak', 1, 'Perempuan', NULL, 3, 48.00, 'Sehat', 'Tidak', 0, 'Normal', NULL, NULL, 1, 1, 0, 1, 'Anak pertama', 38, 2, '2025-11-23 14:29:05'),
+(14, '2025-11-08 17:40:00', 'Puskesmas', 'Bidan', 'Spontan', NULL, 'Tidak', 'Perineum', 1, 'Laki-laki', NULL, 3, 50.00, 'Sehat', 'Tidak', 0, 'Normal', NULL, NULL, 1, 1, 0, 1, 'Lancar', 39, 4, '2025-11-23 14:29:05'),
+(15, '2025-08-27 05:00:00', 'RS', 'Dokter', 'Sectio', 'Pre-eklampsia Berat', 'Sedang', 'Tidak', 1, 'Perempuan', NULL, 4, 49.00, 'Sehat', 'Ringan', 0, 'Observasi ketat', NULL, NULL, 0, 1, 0, 1, 'Cito SC karena PEB', 40, 1, '2025-11-23 14:29:05'),
+(16, '2025-10-01 14:15:00', 'Puskesmas', 'Bidan', 'Spontan', NULL, 'Tidak', 'Vagina', 1, 'Laki-laki', NULL, 3, 49.00, 'Sehat', 'Tidak', 0, 'Normal', NULL, NULL, 1, 1, 0, 1, 'Lahir normal', 41, 5, '2025-11-23 14:29:05'),
+(17, '2025-10-08 06:30:00', 'Rumah', 'Bidan', 'Spontan', NULL, 'Tidak', 'Perineum', 1, 'Perempuan', NULL, 3, 48.50, 'Sehat', 'Tidak', 0, 'Normal', NULL, NULL, 1, 1, 0, 1, 'Partus presipitatus', 42, 2, '2025-11-23 14:29:05'),
+(18, '2025-08-12 11:20:00', 'Klinik', 'Bidan', 'Spontan', NULL, 'Tidak', 'Tidak', 1, 'Laki-laki', NULL, 3, 49.00, 'Sehat', 'Tidak', 0, 'Normal', NULL, NULL, 1, 1, 0, 1, 'Utuh', 43, 3, '2025-11-23 14:29:05'),
+(19, '2025-10-06 19:50:00', 'Puskesmas', 'Bidan', 'Spontan', NULL, 'Tidak', 'Serviks', 1, 'Laki-laki', NULL, 3, 51.00, 'Sehat', 'Tidak', 0, 'Normal', NULL, NULL, 1, 1, 0, 1, 'Bayi cukup besar', 44, 4, '2025-11-23 14:29:05'),
+(20, '2025-10-27 23:45:00', 'Puskesmas', 'Bidan', 'Spontan', NULL, 'Tidak', 'Perineum', 1, 'Perempuan', NULL, 3, 48.00, 'Sehat', 'Tidak', 0, 'Normal', NULL, NULL, 1, 1, 0, 1, 'Lancar', 45, 5, '2025-11-23 14:29:05'),
+(21, '2026-02-01 08:17:00', 'Puskesmas', 'Bidan', 'Spontan', NULL, 'Tidak', NULL, 1, 'Laki-laki', NULL, 4, 47.99, 'Sehat', 'Tidak', 0, NULL, NULL, NULL, 0, 1, 1, 1, NULL, 22, 6, '2026-02-01 00:18:38'),
+(22, '2026-02-02 10:19:00', 'Puskesmas', 'Bidan', 'Spontan', NULL, 'Tidak', NULL, 1, NULL, NULL, NULL, NULL, 'Sehat', 'Tidak', 0, NULL, NULL, NULL, 0, 0, 1, 0, NULL, 56, 6, '2026-02-02 02:19:25');
 
 -- --------------------------------------------------------
 
@@ -1062,7 +1044,7 @@ ALTER TABLE `antenatal_care`
 -- AUTO_INCREMENT for table `bayi`
 --
 ALTER TABLE `bayi`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `bidan`

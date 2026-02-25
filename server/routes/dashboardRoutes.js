@@ -2,6 +2,39 @@ const express = require('express');
 const router = express.Router();
 const db = require('../database/db');
 
+// Auto-update pregnancy statuses (called on dashboard load)
+router.post('/auto-update-statuses', async (req, res) => {
+  const connection = await db.getConnection();
+  
+  try {
+    await connection.beginTransaction();
+
+    // Auto-update Nifas to Selesai after 42 days from delivery
+    const updateQuery = `
+      UPDATE kehamilan k
+      JOIN persalinan p ON k.id = p.forkey_hamil
+      SET k.status_kehamilan = 'Selesai', k.updated_at = CURRENT_TIMESTAMP
+      WHERE k.status_kehamilan = 'Nifas'
+        AND DATEDIFF(CURDATE(), p.tanggal_persalinan) > 42
+    `;
+
+    const [result] = await connection.execute(updateQuery);
+
+    await connection.commit();
+
+    res.json({
+      success: true,
+      updated_count: result.affectedRows
+    });
+  } catch (error) {
+    await connection.rollback();
+    console.error('Error auto-updating statuses:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  } finally {
+    connection.release();
+  }
+});
+
 // Get dashboard statistics
 router.get('/stats', async (req, res) => {
   try {
@@ -17,7 +50,7 @@ router.get('/stats', async (req, res) => {
        FROM kehamilan k
        JOIN antenatal_care anc ON k.id = anc.forkey_hamil
        WHERE k.status_kehamilan = 'Hamil' 
-       AND anc.status_risiko_visit = 'Risiko Tinggi'`
+       AND anc.status_risiko_visit IN ('Ringan', 'Sedang', 'Tinggi')`
     );
     const ibuHamilRisikoTinggi = highRiskResult[0].count;
 
@@ -218,7 +251,7 @@ router.get('/risk-distribution', async (req, res) => {
     const [results] = await db.query(`
       SELECT 
         CASE 
-          WHEN anc.status_risiko_visit = 'Risiko Tinggi' THEN 'Risiko Tinggi'
+          WHEN anc.status_risiko_visit IN ('Ringan', 'Sedang', 'Tinggi') THEN 'Risiko Tinggi'
           ELSE 'Normal'
         END as risk_category,
         COUNT(DISTINCT k.id) as count
@@ -248,7 +281,7 @@ router.get('/nearing-due-dates', async (req, res) => {
           WHEN EXISTS (
             SELECT 1 FROM antenatal_care anc 
             WHERE anc.forkey_hamil = k.id 
-            AND anc.status_risiko_visit = 'Risiko Tinggi'
+            AND anc.status_risiko_visit IN ('Ringan', 'Sedang', 'Tinggi')
           ) THEN 'Risiko Tinggi'
           ELSE 'Normal'
         END as status_risiko
@@ -338,7 +371,7 @@ router.get('/anc-schedule', async (req, res) => {
           WHEN EXISTS (
             SELECT 1 FROM antenatal_care anc 
             WHERE anc.forkey_hamil = k.id 
-            AND anc.status_risiko_visit = 'Risiko Tinggi'
+            AND anc.status_risiko_visit IN ('Ringan', 'Sedang', 'Tinggi')
           ) THEN 'Risiko Tinggi'
           ELSE 'Normal'
         END as status_risiko

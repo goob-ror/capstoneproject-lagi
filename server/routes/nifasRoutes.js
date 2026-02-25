@@ -125,12 +125,16 @@ router.get('/:id', auth, async (req, res) => {
 
 // Create new nifas visit
 router.post('/', auth, async (req, res) => {
+  const connection = await db.getConnection();
+  
   try {
+    await connection.beginTransaction();
+
     const {
       tanggal_kunjungan, jenis_kunjungan, pemeriksa, tekanan_darah,
       suhu_badan, involusio_uteri, lochea, payudara, konseling_asi,
       berat_badan_bayi, suhu_bayi, pemberian_asi, keterangan,
-      forkey_hamil, forkey_bidan
+      forkey_hamil, forkey_bidan, mark_as_selesai
     } = req.body;
 
     // Convert and validate numeric/boolean fields
@@ -161,7 +165,7 @@ router.post('/', auth, async (req, res) => {
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
-    const [result] = await db.execute(query, [
+    const [result] = await connection.execute(query, [
       processedData.tanggal_kunjungan,
       processedData.jenis_kunjungan,
       processedData.pemeriksa,
@@ -179,25 +183,52 @@ router.post('/', auth, async (req, res) => {
       processedData.forkey_bidan
     ]);
 
+    // Update pregnancy status to Nifas if currently Bersalin
+    await connection.execute(
+      `UPDATE kehamilan 
+       SET status_kehamilan = 'Nifas', updated_at = CURRENT_TIMESTAMP 
+       WHERE id = ? AND status_kehamilan = 'Bersalin'`,
+      [processedData.forkey_hamil]
+    );
+
+    // If mark_as_selesai is true, update status to Selesai
+    if (mark_as_selesai) {
+      await connection.execute(
+        `UPDATE kehamilan 
+         SET status_kehamilan = 'Selesai', updated_at = CURRENT_TIMESTAMP 
+         WHERE id = ?`,
+        [processedData.forkey_hamil]
+      );
+    }
+
+    await connection.commit();
+
     res.status(201).json({
       message: 'Data kunjungan nifas berhasil disimpan',
       id: result.insertId
     });
   } catch (error) {
+    await connection.rollback();
     console.error('Error creating nifas visit:', error);
     res.status(500).json({ message: 'Internal server error' });
+  } finally {
+    connection.release();
   }
 });
 
 // Update nifas visit
 router.put('/:id', auth, async (req, res) => {
+  const connection = await db.getConnection();
+  
   try {
+    await connection.beginTransaction();
+
     const { id } = req.params;
     const {
       tanggal_kunjungan, jenis_kunjungan, pemeriksa, tekanan_darah,
       suhu_badan, involusio_uteri, lochea, payudara, konseling_asi,
       berat_badan_bayi, suhu_bayi, pemberian_asi, keterangan,
-      forkey_hamil, forkey_bidan
+      forkey_hamil, forkey_bidan, mark_as_selesai
     } = req.body;
 
     // Convert and validate numeric/boolean fields
@@ -228,7 +259,7 @@ router.put('/:id', auth, async (req, res) => {
       WHERE id = ?
     `;
 
-    const [result] = await db.execute(query, [
+    const [result] = await connection.execute(query, [
       processedData.tanggal_kunjungan,
       processedData.jenis_kunjungan,
       processedData.pemeriksa,
@@ -248,13 +279,29 @@ router.put('/:id', auth, async (req, res) => {
     ]);
 
     if (result.affectedRows === 0) {
+      await connection.rollback();
       return res.status(404).json({ message: 'Nifas data not found' });
     }
 
+    // If mark_as_selesai is true, update status to Selesai
+    if (mark_as_selesai) {
+      await connection.execute(
+        `UPDATE kehamilan 
+         SET status_kehamilan = 'Selesai', updated_at = CURRENT_TIMESTAMP 
+         WHERE id = ?`,
+        [processedData.forkey_hamil]
+      );
+    }
+
+    await connection.commit();
+
     res.json({ message: 'Data kunjungan nifas berhasil diupdate' });
   } catch (error) {
+    await connection.rollback();
     console.error('Error updating nifas visit:', error);
     res.status(500).json({ message: 'Internal server error' });
+  } finally {
+    connection.release();
   }
 });
 
@@ -273,6 +320,39 @@ router.delete('/:id', auth, async (req, res) => {
   } catch (error) {
     console.error('Error deleting nifas visit:', error);
     res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Auto-update pregnancies to Selesai after 42 days from delivery
+router.post('/auto-update-status', auth, async (req, res) => {
+  const connection = await db.getConnection();
+  
+  try {
+    await connection.beginTransaction();
+
+    // Find pregnancies in Nifas status where delivery was more than 42 days ago
+    const query = `
+      UPDATE kehamilan k
+      JOIN persalinan p ON k.id = p.forkey_hamil
+      SET k.status_kehamilan = 'Selesai', k.updated_at = CURRENT_TIMESTAMP
+      WHERE k.status_kehamilan = 'Nifas'
+        AND DATEDIFF(CURDATE(), p.tanggal_persalinan) > 42
+    `;
+
+    const [result] = await connection.execute(query);
+
+    await connection.commit();
+
+    res.json({
+      message: 'Status kehamilan berhasil diupdate otomatis',
+      updated_count: result.affectedRows
+    });
+  } catch (error) {
+    await connection.rollback();
+    console.error('Error auto-updating pregnancy status:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  } finally {
+    connection.release();
   }
 });
 

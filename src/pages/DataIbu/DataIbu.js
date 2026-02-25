@@ -77,6 +77,25 @@ const DataIbu = () => {
             data: 'nama_posyandu',
             render: (data) => data || '-'
           },
+          { 
+            data: 'current_status',
+            render: (data) => {
+              if (!data) {
+                return '<span class="status-badge status-none">Belum Ada Data</span>';
+              }
+              
+              const statusMap = {
+                'Hamil': { class: 'status-hamil', text: 'Hamil' },
+                'Bersalin': { class: 'status-bersalin', text: 'Bersalin' },
+                'Nifas': { class: 'status-nifas', text: 'Nifas' },
+                'Selesai': { class: 'status-selesai', text: 'Selesai' },
+                'Keguguran': { class: 'status-keguguran', text: 'Keguguran' }
+              };
+              
+              const status = statusMap[data] || { class: 'status-none', text: data };
+              return `<span class="status-badge ${status.class}">${status.text}</span>`;
+            }
+          },
           { data: 'gol_darah' },
           { data: 'pekerjaan' },
           {
@@ -313,6 +332,7 @@ const DataIbu = () => {
                   <th>No. HP</th>
                   <th>Kelurahan</th>
                   <th>Posyandu</th>
+                  <th>Status</th>
                   <th>Gol. Darah</th>
                   <th>Pekerjaan</th>
                   <th>Aksi</th>

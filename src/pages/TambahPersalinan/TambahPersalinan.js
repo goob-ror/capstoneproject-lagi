@@ -2,6 +2,13 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Select from 'react-select';
 import TambahPersalinanPresenter from './TambahPersalinan-presenter';
+import {
+  calculateNeonatalRiskScore,
+  getNeonatalRiskLevel,
+  getAutomaticNeonatalRiskStatus,
+  formatNeonatalRiskScore,
+  getNeonatalRiskPercentage
+} from '../../utils/neonatalRiskScoring';
 import './TambahPersalinan.css';
 
 const TambahPersalinan = () => {
@@ -16,6 +23,8 @@ const TambahPersalinan = () => {
   const [user, setUser] = useState(null);
   const [motherData, setMotherData] = useState(null);
   const [activeTab, setActiveTab] = useState('persalinan');
+  const [neonatalRiskScores, setNeonatalRiskScores] = useState([]);
+  const [showRiskNotifications, setShowRiskNotifications] = useState([]);
 
   const [formData, setFormData] = useState({
     tanggal_persalinan: '',
@@ -26,20 +35,30 @@ const TambahPersalinan = () => {
     perdarahan: 'Tidak',
     robekan_jalan_lahir: '',
     jumlah_bayi: 1,
-    jenis_kelamin_bayi: '',
-    berat_badan_bayi: '',
-    panjang_badan_bayi: '',
-    kondisi_bayi: 'Sehat',
-    asfiksia: 'Tidak',
-    keterangan_bayi: '',
-    inisiasi_menyusui_dini: false,
-    vitamin_k1: false,
     beri_ttd: false,
-    salep_mata: false,
     keterangan: '',
     forkey_hamil: '',
     forkey_bidan: ''
   });
+
+  // Baby data array
+  const [bayiData, setBayiData] = useState([{
+    jenis_kelamin: '',
+    berat_badan_lahir: '',
+    panjang_badan_lahir: '',
+    apgar_menit1: '',
+    apgar_menit5: '',
+    asfiksia: 'Tidak',
+    prematur: false,
+    gangguan_napas: false,
+    kondisi: 'Sehat',
+    imunisasi_hb0: false,
+    inisiasi_menyusui_dini: false,
+    vitamin_k1: false,
+    salep_mata: false,
+    status_risiko: '',
+    keterangan: ''
+  }]);
 
   // Complications form data
   const [complications, setComplications] = useState([{
@@ -120,6 +139,57 @@ const TambahPersalinan = () => {
     }
   }, [formData.forkey_hamil, presenter]);
 
+  // Calculate neonatal risk scores for all babies
+  useEffect(() => {
+    const scores = bayiData.map((bayi, index) => {
+      const score = calculateNeonatalRiskScore({
+        babyData: bayi,
+        deliveryData: formData
+      });
+      
+      // Get automatic risk status
+      const autoStatus = getAutomaticNeonatalRiskStatus(score.score, score.criticalFactors);
+      
+      // Auto-update status_risiko if it changed
+      if (bayi.status_risiko !== autoStatus) {
+        const updated = [...bayiData];
+        updated[index] = { ...updated[index], status_risiko: autoStatus };
+        setBayiData(updated);
+        
+        // Show notification if changed to high risk
+        if (autoStatus === 'Berat' || autoStatus === 'Sedang') {
+          setShowRiskNotifications(prev => {
+            const newNotifications = [...prev];
+            newNotifications[index] = true;
+            setTimeout(() => {
+              setShowRiskNotifications(p => {
+                const updated = [...p];
+                updated[index] = false;
+                return updated;
+              });
+            }, 5000);
+            return newNotifications;
+          });
+        }
+      }
+      
+      return score;
+    });
+    
+    setNeonatalRiskScores(scores);
+  }, [
+    bayiData.map(b => b.berat_badan_lahir).join(','),
+    bayiData.map(b => b.apgar_menit1).join(','),
+    bayiData.map(b => b.apgar_menit5).join(','),
+    bayiData.map(b => b.asfiksia).join(','),
+    bayiData.map(b => b.prematur).join(','),
+    bayiData.map(b => b.gangguan_napas).join(','),
+    bayiData.map(b => b.kondisi).join(','),
+    bayiData.map(b => b.keterangan).join(','),
+    formData.cara_persalinan,
+    formData.komplikasi_ibu
+  ]);
+
   // Complications handling functions
   const addComplication = () => {
     setComplications([...complications, {
@@ -153,10 +223,52 @@ const TambahPersalinan = () => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+    
+    // Handle jumlah_bayi change
+    if (name === 'jumlah_bayi') {
+      const newCount = parseInt(value) || 1;
+      const currentCount = bayiData.length;
+      
+      if (newCount > currentCount) {
+        // Add more baby forms
+        const newBayiData = [...bayiData];
+        for (let i = currentCount; i < newCount; i++) {
+          newBayiData.push({
+            jenis_kelamin: '',
+            berat_badan_lahir: '',
+            panjang_badan_lahir: '',
+            apgar_menit1: '',
+            apgar_menit5: '',
+            asfiksia: 'Tidak',
+            prematur: false,
+            gangguan_napas: false,
+            kondisi: 'Sehat',
+            imunisasi_hb0: false,
+            inisiasi_menyusui_dini: false,
+            vitamin_k1: false,
+            salep_mata: false,
+            status_risiko: '',
+            keterangan: ''
+          });
+        }
+        setBayiData(newBayiData);
+      } else if (newCount < currentCount) {
+        // Remove excess baby forms
+        setBayiData(bayiData.slice(0, newCount));
+      }
+    }
+    
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
+  };
+
+  // Baby data handling functions
+  const updateBayi = (index, field, value) => {
+    const updated = [...bayiData];
+    updated[index] = { ...updated[index], [field]: value };
+    setBayiData(updated);
   };
 
   const handleSubmit = async (e) => {
@@ -169,7 +281,13 @@ const TambahPersalinan = () => {
 
     const validComplications = hasComplications ? complications.filter(comp => comp.nama_komplikasi.trim() !== '') : [];
     
-    await presenter.handleSubmit(formData, validComplications, isEdit, editId);
+    // Prepare submission data with bayi array
+    const submissionData = {
+      ...formData,
+      bayi: bayiData
+    };
+    
+    await presenter.handleSubmit(submissionData, validComplications, isEdit, editId);
   };
 
   const handleLogout = () => {
@@ -317,6 +435,15 @@ const TambahPersalinan = () => {
           </div>
         )}
 
+        {showRiskNotifications.some(show => show) && (
+          <div className="warning-banner" style={{ backgroundColor: '#FEE2E2', borderColor: '#FCA5A5', color: '#991B1B' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" fill="currentColor" />
+            </svg>
+            Status risiko neonatal otomatis diubah
+          </div>
+        )}
+
         <div className="form-tabs-container" style={{ position: 'sticky', top: 0, zIndex: 100 }}>
           <button
             type="button"
@@ -346,34 +473,31 @@ const TambahPersalinan = () => {
               <div className="form-section">
                 <h3>Informasi Dasar</h3>
                 <div className="form-grid">
-                  <div className="form-group-with-info">
-                    <div className="form-group">
-                      <label htmlFor="forkey_hamil">Pilih Ibu yang Akan Melahirkan *</label>
-                      <Select
-                        id="forkey_hamil"
-                        name="forkey_hamil"
-                        value={pregnancyOptions.find(opt => opt.value === formData.forkey_hamil) || null}
-                        onChange={(selectedOption) => setFormData(prev => ({ ...prev, forkey_hamil: selectedOption ? selectedOption.value : '' }))}
-                        options={pregnancyOptions}
-                        placeholder="-- Cari Ibu Hamil --"
-                        isClearable
-                        isSearchable
-                        isDisabled={isEdit}
-                        styles={customSelectStyles}
-                        noOptionsMessage={() => "Tidak ada ibu hamil yang siap melahirkan"}
-                      />
-                      <small style={{ color: '#6B7280', fontSize: '12px', marginTop: '4px', display: 'block' }}>
-                        Hanya menampilkan ibu hamil yang mendekati HPL atau sudah melewati 37 minggu kehamilan
-                      </small>
-                    </div>
+                  <div className="form-group full-width">
+                    <label htmlFor="forkey_hamil">Pilih Ibu yang Akan Melahirkan *</label>
+                    <Select
+                      id="forkey_hamil"
+                      name="forkey_hamil"
+                      value={pregnancyOptions.find(opt => opt.value === formData.forkey_hamil) || null}
+                      onChange={(selectedOption) => setFormData(prev => ({ ...prev, forkey_hamil: selectedOption ? selectedOption.value : '' }))}
+                      options={pregnancyOptions}
+                      placeholder="-- Cari Ibu Hamil --"
+                      isClearable
+                      isSearchable
+                      isDisabled={isEdit}
+                      styles={customSelectStyles}
+                      noOptionsMessage={() => "Tidak ada ibu hamil yang siap melahirkan"}
+                    />
+                    <small style={{ color: '#6B7280', fontSize: '12px', marginTop: '4px', display: 'block' }}>
+                      Hanya menampilkan ibu hamil yang mendekati HPL atau sudah melewati 37 minggu kehamilan
+                    </small>
+                  </div>
 
-                    {motherData && (
+                  {motherData && (
+                    <div className="form-group full-width">
                       <div className="mother-info-card">
                         <div className="mother-info-header">
                           <h4>Informasi Ibu</h4>
-                          <div className="pregnancy-status-badge">
-                            Siap Melahirkan
-                          </div>
                         </div>
                         <div className="mother-info-grid">
                           <div className="mother-info-item">
@@ -402,8 +526,8 @@ const TambahPersalinan = () => {
                           </div>
                         </div>
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
 
                   <div className="form-group">
                     <label htmlFor="tanggal_persalinan">Tanggal & Waktu Persalinan *</label>
@@ -527,7 +651,7 @@ const TambahPersalinan = () => {
               </div>
 
               <div className="form-section">
-                <h3>Data Bayi</h3>
+                <h3>Jumlah Bayi</h3>
                 <div className="form-grid">
                   <div className="form-group">
                     <label htmlFor="jumlah_bayi">Jumlah Bayi *</label>
@@ -541,133 +665,235 @@ const TambahPersalinan = () => {
                       max="5"
                       required
                     />
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="jenis_kelamin_bayi">Jenis Kelamin Bayi</label>
-                    <select
-                      id="jenis_kelamin_bayi"
-                      name="jenis_kelamin_bayi"
-                      value={formData.jenis_kelamin_bayi}
-                      onChange={handleChange}
-                    >
-                      <option value="">-- Pilih --</option>
-                      <option value="Laki-laki">Laki-laki</option>
-                      <option value="Perempuan">Perempuan</option>
-                      <option value="Kembar Campur">Kembar Campur</option>
-                    </select>
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="berat_badan_bayi">Berat Badan Bayi (kg)</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      id="berat_badan_bayi"
-                      name="berat_badan_bayi"
-                      value={formData.berat_badan_bayi}
-                      onChange={handleChange}
-                      placeholder="Contoh: 3.2"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="panjang_badan_bayi">Panjang Badan Bayi (cm)</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      id="panjang_badan_bayi"
-                      name="panjang_badan_bayi"
-                      value={formData.panjang_badan_bayi}
-                      onChange={handleChange}
-                      placeholder="Contoh: 49"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="kondisi_bayi">Kondisi Bayi *</label>
-                    <select
-                      id="kondisi_bayi"
-                      name="kondisi_bayi"
-                      value={formData.kondisi_bayi}
-                      onChange={handleChange}
-                      required
-                    >
-                      <option value="Sehat">Sehat</option>
-                      <option value="Sakit">Sakit</option>
-                      <option value="Meninggal">Meninggal</option>
-                    </select>
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="asfiksia">Asfiksia</label>
-                    <select
-                      id="asfiksia"
-                      name="asfiksia"
-                      value={formData.asfiksia}
-                      onChange={handleChange}
-                    >
-                      <option value="Tidak">Tidak</option>
-                      <option value="Ringan">Ringan</option>
-                      <option value="Berat">Berat</option>
-                    </select>
-                  </div>
-
-                  <div className="form-group full-width">
-                    <label htmlFor="keterangan_bayi">Keterangan Bayi</label>
-                    <textarea
-                      id="keterangan_bayi"
-                      name="keterangan_bayi"
-                      value={formData.keterangan_bayi}
-                      onChange={handleChange}
-                      rows="3"
-                      placeholder="Keterangan kondisi bayi..."
-                    />
+                    <small style={{ color: '#6B7280', fontSize: '12px', marginTop: '4px', display: 'block' }}>
+                      Form data bayi akan menyesuaikan dengan jumlah yang diinput
+                    </small>
                   </div>
                 </div>
               </div>
 
+              <div className="anc-complications-section">
+                <div className="form-section">
+                  <div className="anc-section-header">
+                    <h3>Data Bayi</h3>
+                  </div>
+
+                  {bayiData.map((bayi, index) => (
+                    <div key={index} className="anc-complication-card">
+                      <div className="anc-complication-header">
+                        <h4>Bayi {index + 1}</h4>
+                      </div>
+
+                      <div className="form-grid">
+                        <div className="form-group">
+                          <label>Jenis Kelamin *</label>
+                          <select
+                            value={bayi.jenis_kelamin}
+                            onChange={(e) => updateBayi(index, 'jenis_kelamin', e.target.value)}
+                            required
+                          >
+                            <option value="">-- Pilih --</option>
+                            <option value="Laki-laki">Laki-laki</option>
+                            <option value="Perempuan">Perempuan</option>
+                          </select>
+                        </div>
+
+                        <div className="form-group">
+                          <label>Berat Badan Lahir (gram)</label>
+                          <input
+                            type="number"
+                            value={bayi.berat_badan_lahir}
+                            onChange={(e) => updateBayi(index, 'berat_badan_lahir', e.target.value)}
+                            placeholder="Contoh: 3200"
+                          />
+                        </div>
+
+                        <div className="form-group">
+                          <label>Panjang Badan Lahir (cm)</label>
+                          <input
+                            type="number"
+                            step="0.1"
+                            value={bayi.panjang_badan_lahir}
+                            onChange={(e) => updateBayi(index, 'panjang_badan_lahir', e.target.value)}
+                            placeholder="Contoh: 49.5"
+                          />
+                        </div>
+
+                        <div className="form-group">
+                          <label>APGAR Menit 1</label>
+                          <input
+                            type="number"
+                            min="0"
+                            max="10"
+                            value={bayi.apgar_menit1}
+                            onChange={(e) => updateBayi(index, 'apgar_menit1', e.target.value)}
+                            placeholder="0-10"
+                          />
+                        </div>
+
+                        <div className="form-group">
+                          <label>APGAR Menit 5</label>
+                          <input
+                            type="number"
+                            min="0"
+                            max="10"
+                            value={bayi.apgar_menit5}
+                            onChange={(e) => updateBayi(index, 'apgar_menit5', e.target.value)}
+                            placeholder="0-10"
+                          />
+                        </div>
+
+                        <div className="form-group">
+                          <label>Asfiksia</label>
+                          <select
+                            value={bayi.asfiksia}
+                            onChange={(e) => updateBayi(index, 'asfiksia', e.target.value)}
+                          >
+                            <option value="Tidak">Tidak</option>
+                            <option value="Ringan">Ringan</option>
+                            <option value="Berat">Berat</option>
+                          </select>
+                        </div>
+
+                        <div className="form-group">
+                          <label>Kondisi *</label>
+                          <select
+                            value={bayi.kondisi}
+                            onChange={(e) => updateBayi(index, 'kondisi', e.target.value)}
+                            required
+                          >
+                            <option value="Sehat">Sehat</option>
+                            <option value="Sakit">Sakit</option>
+                            <option value="Meninggal">Meninggal</option>
+                          </select>
+                        </div>
+
+                        <div className="form-group">
+                          <label>Status Risiko</label>
+                          <select
+                            value={bayi.status_risiko}
+                            onChange={(e) => updateBayi(index, 'status_risiko', e.target.value)}
+                          >
+                            <option value="">-- Pilih --</option>
+                            <option value="Normal">Normal</option>
+                            <option value="Ringan">Ringan</option>
+                            <option value="Sedang">Sedang</option>
+                            <option value="Berat">Berat</option>
+                          </select>
+                        </div>
+
+                        <div className="form-group checkbox-group">
+                          <label>
+                            <input
+                              type="checkbox"
+                              checked={bayi.prematur}
+                              onChange={(e) => updateBayi(index, 'prematur', e.target.checked)}
+                            />
+                            Prematur
+                          </label>
+                        </div>
+
+                        <div className="form-group checkbox-group">
+                          <label>
+                            <input
+                              type="checkbox"
+                              checked={bayi.gangguan_napas}
+                              onChange={(e) => updateBayi(index, 'gangguan_napas', e.target.checked)}
+                            />
+                            Gangguan Napas
+                          </label>
+                        </div>
+
+                        <div className="form-group checkbox-group">
+                          <label>
+                            <input
+                              type="checkbox"
+                              checked={bayi.imunisasi_hb0}
+                              onChange={(e) => updateBayi(index, 'imunisasi_hb0', e.target.checked)}
+                            />
+                            Imunisasi HB0
+                          </label>
+                        </div>
+
+                        <div className="form-group checkbox-group">
+                          <label>
+                            <input
+                              type="checkbox"
+                              checked={bayi.inisiasi_menyusui_dini}
+                              onChange={(e) => updateBayi(index, 'inisiasi_menyusui_dini', e.target.checked)}
+                            />
+                            Inisiasi Menyusui Dini (IMD)
+                          </label>
+                        </div>
+
+                        <div className="form-group checkbox-group">
+                          <label>
+                            <input
+                              type="checkbox"
+                              checked={bayi.vitamin_k1}
+                              onChange={(e) => updateBayi(index, 'vitamin_k1', e.target.checked)}
+                            />
+                            Vitamin K1
+                          </label>
+                        </div>
+
+                        <div className="form-group checkbox-group">
+                          <label>
+                            <input
+                              type="checkbox"
+                              checked={bayi.salep_mata}
+                              onChange={(e) => updateBayi(index, 'salep_mata', e.target.checked)}
+                            />
+                            Salep Mata
+                          </label>
+                        </div>
+
+                        <div className="form-group full-width">
+                          <label>Keterangan</label>
+                          <textarea
+                            value={bayi.keterangan}
+                            onChange={(e) => updateBayi(index, 'keterangan', e.target.value)}
+                            rows="2"
+                            placeholder="Keterangan kondisi bayi..."
+                          />
+                        </div>
+                      </div>
+
+                      {/* Neonatal Risk Score */}
+                      {neonatalRiskScores[index] && (
+                        <div className={`risk-card risk-${getNeonatalRiskLevel(neonatalRiskScores[index].score).level}`} style={{ marginTop: '12px' }}>
+                          <div className="risk-header">
+                            <span className="risk-title">Skor Risiko: {formatNeonatalRiskScore(neonatalRiskScores[index])}</span>
+                            <span className={`risk-label risk-${getNeonatalRiskLevel(neonatalRiskScores[index].score).level}`}>
+                              {getNeonatalRiskLevel(neonatalRiskScores[index].score).label}
+                            </span>
+                          </div>
+                          <div className="risk-bar">
+                            <div className={`risk-fill risk-${getNeonatalRiskLevel(neonatalRiskScores[index].score).level}`} 
+                                 style={{width: `${getNeonatalRiskPercentage(neonatalRiskScores[index].score)}%`}}></div>
+                          </div>
+                          {neonatalRiskScores[index].factors.length > 0 && (
+                            <details className="risk-details">
+                              <summary>Lihat {neonatalRiskScores[index].factors.length} faktor risiko</summary>
+                              <ul>
+                                {neonatalRiskScores[index].factors.map((factor, idx) => (
+                                  <li key={idx}>{factor}</li>
+                                ))}
+                              </ul>
+                            </details>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               <div className="form-section">
-                <h3>Perawatan Bayi</h3>
+                <h3>Keterangan Tambahan</h3>
                 <div className="form-grid">
-                  <div className="form-group checkbox-group">
-                    <label>
-                      <input
-                        type="checkbox"
-                        name="inisiasi_menyusui_dini"
-                        checked={formData.inisiasi_menyusui_dini}
-                        onChange={handleChange}
-                      />
-                      Inisiasi Menyusui Dini (IMD)
-                    </label>
-                  </div>
-
-                  <div className="form-group checkbox-group">
-                    <label>
-                      <input
-                        type="checkbox"
-                        name="vitamin_k1"
-                        checked={formData.vitamin_k1}
-                        onChange={handleChange}
-                      />
-                      Vitamin K1
-                    </label>
-                  </div>
-
-                  <div className="form-group checkbox-group">
-                    <label>
-                      <input
-                        type="checkbox"
-                        name="salep_mata"
-                        checked={formData.salep_mata}
-                        onChange={handleChange}
-                      />
-                      Salep Mata
-                    </label>
-                  </div>
-
                   <div className="form-group full-width">
-                    <label htmlFor="keterangan">Keterangan Tambahan</label>
+                    <label htmlFor="keterangan">Keterangan Persalinan</label>
                     <textarea
                       id="keterangan"
                       name="keterangan"

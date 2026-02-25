@@ -49,6 +49,24 @@ const Dashboard = () => {
   useEffect(() => {
     const userData = presenter.model.getUser();
     setUser(userData);
+    
+    // Auto-update pregnancy statuses on dashboard load
+    const autoUpdateStatuses = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        await fetch('/api/dashboard/auto-update-statuses', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+      } catch (error) {
+        console.error('Error auto-updating statuses:', error);
+      }
+    };
+    
+    autoUpdateStatuses();
     presenter.loadDashboardData();
   }, [presenter]);
 

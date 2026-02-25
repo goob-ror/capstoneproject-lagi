@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
+import axios from 'axios';
 import RekapitulasiPresenter from './Rekapitulasi-presenter';
+import LoadingSplash from '../../components/LoadingSplash/LoadingSplash';
 import './Rekapitulasi.css';
 
 const Rekapitulasi = () => {
@@ -14,6 +16,7 @@ const Rekapitulasi = () => {
   const [selectedKelurahan, setSelectedKelurahan] = useState('');
   const [selectedYear, setSelectedYear] = useState('');
   const [selectedMonth, setSelectedMonth] = useState('');
+  const [excelLoading, setExcelLoading] = useState(false);
 
   const [presenter] = useState(() => new RekapitulasiPresenter({
     setLoading,
@@ -50,6 +53,60 @@ const Rekapitulasi = () => {
     const month = e.target.value;
     setSelectedMonth(month);
     presenter.loadSummaryData(selectedKelurahan || null, selectedYear || null, month || null);
+  };
+
+  const handleExportExcelTemplate = async () => {
+    try {
+      setExcelLoading(true);
+      
+      // Get token from localStorage
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError('Anda harus login terlebih dahulu');
+        setExcelLoading(false);
+        return;
+      }
+
+      // Build query parameters
+      const params = new URLSearchParams();
+      if (selectedKelurahan) params.append('kelurahan', selectedKelurahan);
+      if (selectedYear) params.append('year', selectedYear);
+      if (selectedMonth) params.append('month', selectedMonth);
+
+      // Make request to server
+      const response = await axios.get(`/api/excel-export/generate?${params.toString()}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        responseType: 'blob' // Important for file download
+      });
+
+      // Create blob and download
+      const blob = new Blob([response.data], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+      });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // Generate filename
+      const kelurahanName = selectedKelurahan ? `_${selectedKelurahan}` : '_Semua';
+      const yearName = selectedYear ? `_${selectedYear}` : '';
+      const monthName = selectedMonth ? `_${getMonthName(selectedMonth)}` : '';
+      const filename = `Laporan_Puskesmas${kelurahanName}${yearName}${monthName}_${new Date().toISOString().split('T')[0]}.xlsx`;
+      
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      setExcelLoading(false);
+    } catch (error) {
+      console.error('Error exporting Excel:', error);
+      setError('Gagal mengekspor file Excel: ' + (error.response?.data?.message || error.message));
+      setExcelLoading(false);
+    }
   };
 
   const handleLogout = () => {
@@ -270,6 +327,8 @@ const Rekapitulasi = () => {
 
   return (
     <div className="dashboard-container">
+      {excelLoading && <LoadingSplash message="Menghasilkan file Excel..." />}
+      
       <aside className="sidebar">
         <div className="sidebar-header">
           <img src="/images/logo-withText.png" alt="iBundaCare Logo" className="sidebar-logo" />
@@ -427,7 +486,7 @@ const Rekapitulasi = () => {
               </select>
             </div>
             <div className="export-buttons">
-              <button className="btn-export excel" onClick={handleExportExcel} title="Export ke Excel">
+              <button className="btn-export excel" onClick={handleExportExcelTemplate} title="Export Template Puskesmas">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z" fill="currentColor"/>
                   <path d="M9.5 13.5l1.5 2 1.5-2 1.5 2 1.5-2" stroke="currentColor" strokeWidth="1.5"/>
