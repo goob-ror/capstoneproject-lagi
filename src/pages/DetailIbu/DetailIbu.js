@@ -14,6 +14,8 @@ const DetailIbu = () => {
   const [activeTab, setActiveTab] = useState('info');
   const [selectedPregnancy, setSelectedPregnancy] = useState(null);
   const [showANCModal, setShowANCModal] = useState(false);
+  const [expandedVisits, setExpandedVisits] = useState({});
+  const [expandedPregnancies, setExpandedPregnancies] = useState({});
 
   const [presenter] = useState(() => new DetailIbuPresenter({
     setLoading,
@@ -31,6 +33,14 @@ const DetailIbu = () => {
       presenter.loadIbuDetail(id);
     }
   }, [presenter, id]);
+
+  // Auto-expand the first (most recent) pregnancy when data loads
+  useEffect(() => {
+    if (ibuData?.pregnancyHistory && ibuData.pregnancyHistory.length > 0) {
+      const firstPregnancyId = ibuData.pregnancyHistory[0].id;
+      setExpandedPregnancies({ [firstPregnancyId]: true });
+    }
+  }, [ibuData]);
 
   const handleLogout = () => {
     presenter.handleLogout();
@@ -495,59 +505,281 @@ const DetailIbu = () => {
               {activeTab === 'pregnancy-history' && (
                 <div className="pregnancy-history-list">
                   {ibuData.pregnancyHistory && ibuData.pregnancyHistory.length > 0 ? (
-                    ibuData.pregnancyHistory.map((pregnancy, index) => (
-                      <div 
-                        key={pregnancy.id} 
-                        className="pregnancy-history-card clickable"
-                        onClick={() => handlePregnancyClick(pregnancy)}
-                      >
-                        <div className="pregnancy-history-header">
-                          <div>
-                            <h4>Kehamilan ke-{pregnancy.gravida}</h4>
-                            <p className="pregnancy-date">
-                              HPHT: {formatDate(pregnancy.haid_terakhir)} - 
-                              Taksiran: {formatDate(pregnancy.taksiran_persalinan)}
-                            </p>
-                          </div>
-                          <div className="badges">
-                            <span className={`status-badge ${
-                              pregnancy.status_kehamilan === 'Hamil' ? 'badge-success' : 
-                              pregnancy.status_kehamilan === 'Bersalin' ? 'badge-info' :
-                              pregnancy.status_kehamilan === 'Selesai' ? 'badge-success' :
-                              pregnancy.status_kehamilan === 'Keguguran' ? 'badge-danger' : 
-                              'badge-secondary'
-                            }`}>
-                              {pregnancy.status_kehamilan}
-                            </span>
-                            <span className="anc-count-badge">
-                              {pregnancy.ancVisits?.length || 0} ANC
-                            </span>
-                            {pregnancy.persalinan && (
-                              <span className="visit-badge">
-                                {pregnancy.persalinan.jenis_kunjungan || 'Persalinan'}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <div className="pregnancy-summary">
-                          <div className="summary-item">
-                            <span className="summary-label">G{pregnancy.gravida}P{pregnancy.partus}A{pregnancy.abortus}</span>
-                          </div>
-                          {pregnancy.persalinan ? (
-                            <div className="summary-item">
-                              <span className="summary-label">
-                                Persalinan: {formatDate(pregnancy.persalinan.tanggal_persalinan)} - 
-                                {pregnancy.persalinan.cara_persalinan} di {pregnancy.persalinan.tempat_persalinan}
-                              </span>
+                    ibuData.pregnancyHistory.map((pregnancy, index) => {
+                      // Calculate trimester anemia statistics
+                      const getAnemiaByTrimester = (visits) => {
+                        const trimesters = { 1: [], 2: [], 3: [] };
+                        
+                        visits?.forEach(visit => {
+                          if (!visit.hasil_lab_hb || !pregnancy.haid_terakhir) return;
+                          
+                          const hpht = new Date(pregnancy.haid_terakhir);
+                          const visitDate = new Date(visit.tanggal_kunjungan);
+                          const weeksDiff = Math.floor((visitDate - hpht) / (7 * 24 * 60 * 60 * 1000));
+                          
+                          let trimester = 0;
+                          if (weeksDiff >= 0 && weeksDiff <= 13) trimester = 1;
+                          else if (weeksDiff >= 14 && weeksDiff <= 27) trimester = 2;
+                          else if (weeksDiff >= 28) trimester = 3;
+                          
+                          if (trimester > 0) {
+                            trimesters[trimester].push({
+                              hb: parseFloat(visit.hasil_lab_hb),
+                              category: visit.hasil_lab_hb >= 11 ? 'Normal' : 
+                                       visit.hasil_lab_hb >= 10 ? 'Ringan' : 
+                                       visit.hasil_lab_hb >= 7 ? 'Sedang' : 'Berat'
+                            });
+                          }
+                        });
+                        
+                        return trimesters;
+                      };
+
+                      // Calculate total Fe tablets given
+                      const getTotalFeTablets = (visits) => {
+                        let total = 0;
+                        visits?.forEach(visit => {
+                          if (visit.beri_tablet_fe) total += 30;
+                        });
+                        return total;
+                      };
+
+                      const anemiaByTrimester = getAnemiaByTrimester(pregnancy.ancVisits);
+                      const totalFeTablets = getTotalFeTablets(pregnancy.ancVisits);
+
+                      return (
+                        <div key={pregnancy.id} className="pregnancy-detail-card">
+                          <div 
+                            className="pregnancy-detail-header clickable"
+                            onClick={() => {
+                              const newExpanded = { ...expandedPregnancies };
+                              newExpanded[pregnancy.id] = !newExpanded[pregnancy.id];
+                              setExpandedPregnancies(newExpanded);
+                            }}
+                          >
+                            <div>
+                              <h4>Kehamilan ke-{pregnancy.gravida}</h4>
+                              <p className="pregnancy-date">
+                                HPHT: {formatDate(pregnancy.haid_terakhir)} | 
+                                Taksiran: {formatDate(pregnancy.taksiran_persalinan)} | 
+                                G{pregnancy.gravida}P{pregnancy.partus}A{pregnancy.abortus}
+                              </p>
+                              {!expandedPregnancies[pregnancy.id] && (
+                                <div className="pregnancy-quick-info">
+                                  <span className="quick-info-badge">
+                                    {pregnancy.ancVisits?.length || 0} Kunjungan
+                                  </span>
+                                  <span className="quick-info-badge">
+                                    Fe: {totalFeTablets} tablet
+                                  </span>
+                                </div>
+                              )}
                             </div>
-                          ) : (
-                            <div className="summary-item">
-                              <span className="summary-label">Klik untuk melihat detail ANC</span>
+                            <div className="pregnancy-header-actions">
+                              <span className={`status-badge ${
+                                pregnancy.status_kehamilan === 'Hamil' ? 'badge-success' : 
+                                pregnancy.status_kehamilan === 'Bersalin' ? 'badge-info' :
+                                pregnancy.status_kehamilan === 'Selesai' ? 'badge-success' :
+                                pregnancy.status_kehamilan === 'Keguguran' ? 'badge-danger' : 
+                                'badge-secondary'
+                              }`}>
+                                {pregnancy.status_kehamilan}
+                              </span>
+                              <button className="pregnancy-expand-btn">
+                                {expandedPregnancies[pregnancy.id] ? '−' : '+'}
+                              </button>
+                            </div>
+                          </div>
+
+                          {expandedPregnancies[pregnancy.id] && (
+                            <div className="pregnancy-detail-content">
+                              {/* Anemia & Fe Tablets Summary */}
+                              <div className="pregnancy-summary-grid">
+                                {/* Trimester Anemia Cards */}
+                                <div className="trimester-anemia-cards">
+                                  {[1, 2, 3].map(tri => {
+                                    const triData = anemiaByTrimester[tri];
+                                    const hasData = triData && triData.length > 0;
+                                    const latestHb = hasData ? triData[triData.length - 1] : null;
+                                    
+                                    return (
+                                      <div key={tri} className="mini-trimester-card">
+                                        <div className="mini-trimester-title">Trimester {tri}</div>
+                                        {hasData ? (
+                                          <>
+                                            <div className="mini-trimester-value">{latestHb.hb} g/dL</div>
+                                            <span className={`status-badge ${
+                                              latestHb.category === 'Normal' ? 'badge-success' :
+                                              latestHb.category === 'Ringan' ? 'badge-warning-light' :
+                                              latestHb.category === 'Sedang' ? 'badge-warning' :
+                                              'badge-danger'
+                                            }`}>
+                                              {latestHb.category}
+                                            </span>
+                                          </>
+                                        ) : (
+                                          <div className="mini-trimester-empty">Tidak ada data</div>
+                                        )}
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+
+                                {/* Fe Tablets Progress */}
+                                <div className="fe-tablets-card">
+                                  <div className="fe-tablets-title">Tablet Fe</div>
+                                  <div className="fe-tablets-checkmarks">
+                                    <div className={`fe-checkpoint ${totalFeTablets >= 30 ? 'completed' : ''}`}>
+                                      <div className="fe-check-icon">
+                                        {totalFeTablets >= 30 ? '✓' : '○'}
+                                      </div>
+                                      <span>30</span>
+                                    </div>
+                                    <div className="fe-connector"></div>
+                                    <div className={`fe-checkpoint ${totalFeTablets >= 60 ? 'completed' : ''}`}>
+                                      <div className="fe-check-icon">
+                                        {totalFeTablets >= 60 ? '✓' : '○'}
+                                      </div>
+                                      <span>60</span>
+                                    </div>
+                                    <div className="fe-connector"></div>
+                                    <div className={`fe-checkpoint ${totalFeTablets >= 90 ? 'completed' : ''}`}>
+                                      <div className="fe-check-icon">
+                                        {totalFeTablets >= 90 ? '✓' : '○'}
+                                      </div>
+                                      <span>90</span>
+                                    </div>
+                                  </div>
+                                  <div className="fe-tablets-total">Total: {totalFeTablets} tablet</div>
+                                </div>
+                              </div>
+
+                              {/* Kunjungan List */}
+                              <div className="kunjungan-list">
+                                <h5>Riwayat Kunjungan ({pregnancy.ancVisits?.length || 0})</h5>
+                                {pregnancy.ancVisits && pregnancy.ancVisits.length > 0 ? (
+                                  pregnancy.ancVisits.map((visit, visitIndex) => {
+                                    const prevVisit = visitIndex > 0 ? pregnancy.ancVisits[visitIndex - 1] : null;
+                                    const weightDiff = prevVisit && visit.berat_badan && prevVisit.berat_badan 
+                                      ? (visit.berat_badan - prevVisit.berat_badan).toFixed(1) : null;
+                                    const currentBMI = visit.berat_badan && ibuData?.ibu?.tinggi_badan 
+                                      ? calculateBMI(visit.berat_badan, ibuData.ibu.tinggi_badan) : null;
+                                    const isKEK = visit.lila && visit.lila < 23.5;
+
+                                    return (
+                                      <div key={visit.id} className="kunjungan-card">
+                                        <div 
+                                          className="kunjungan-header"
+                                          onClick={() => {
+                                            const key = `${pregnancy.id}-${visit.id}`;
+                                            const newExpanded = { ...expandedVisits };
+                                            newExpanded[key] = !newExpanded[key];
+                                            setExpandedVisits(newExpanded);
+                                          }}
+                                        >
+                                          <div className="kunjungan-title">
+                                            <span className="kunjungan-type">{visit.jenis_kunjungan}</span>
+                                            <span className="kunjungan-date">{formatDate(visit.tanggal_kunjungan)}</span>
+                                          </div>
+                                          <div className="kunjungan-quick-stats">
+                                            {visit.berat_badan && (
+                                              <span className="quick-stat">
+                                                {visit.berat_badan} kg
+                                                {weightDiff && (
+                                                  <span className={`stat-diff ${parseFloat(weightDiff) >= 0 ? 'positive' : 'negative'}`}>
+                                                    {parseFloat(weightDiff) >= 0 ? '+' : ''}{weightDiff}
+                                                  </span>
+                                                )}
+                                              </span>
+                                            )}
+                                            {isKEK && <span className="kek-indicator">KEK</span>}
+                                            <button className="expand-btn">
+                                              {expandedVisits[`${pregnancy.id}-${visit.id}`] ? '−' : '+'}
+                                            </button>
+                                          </div>
+                                        </div>
+
+                                        {expandedVisits[`${pregnancy.id}-${visit.id}`] && (
+                                          <div className="kunjungan-details">
+                                            <div className="detail-grid">
+                                              <div className="detail-item">
+                                                <span className="detail-label">Tanggal:</span>
+                                                <span className="detail-value">{formatDate(visit.tanggal_kunjungan)}</span>
+                                              </div>
+                                              <div className="detail-item">
+                                                <span className="detail-label">Berat Badan:</span>
+                                                <span className="detail-value">
+                                                  {visit.berat_badan ? `${visit.berat_badan} kg` : '-'}
+                                                  {weightDiff && (
+                                                    <span className={`weight-change ${parseFloat(weightDiff) >= 0 ? 'increase' : 'decrease'}`}>
+                                                      {parseFloat(weightDiff) >= 0 ? '+' : ''}{weightDiff} kg
+                                                    </span>
+                                                  )}
+                                                </span>
+                                              </div>
+                                              <div className="detail-item">
+                                                <span className="detail-label">LILA:</span>
+                                                <span className="detail-value">
+                                                  {visit.lila ? `${visit.lila} cm` : '-'}
+                                                  {isKEK && <span className="kek-badge">KEK</span>}
+                                                </span>
+                                              </div>
+                                              <div className="detail-item">
+                                                <span className="detail-label">IMT:</span>
+                                                <span className="detail-value">
+                                                  {currentBMI ? `${currentBMI} (${getBMICategory(currentBMI)})` : '-'}
+                                                </span>
+                                              </div>
+                                              <div className="detail-item">
+                                                <span className="detail-label">Hemoglobin:</span>
+                                                <span className={`detail-value ${
+                                                  visit.hasil_lab_hb ? (visit.hasil_lab_hb >= 11 ? 'normal' : 'anemia') : ''
+                                                }`}>
+                                                  {visit.hasil_lab_hb ? `${visit.hasil_lab_hb} g/dL (${getAnemiaCategory(visit.hasil_lab_hb)})` : '-'}
+                                                </span>
+                                              </div>
+                                              <div className="detail-item">
+                                                <span className="detail-label">Tekanan Darah:</span>
+                                                <span className="detail-value">{visit.tekanan_darah || '-'}</span>
+                                              </div>
+                                              <div className="detail-item">
+                                                <span className="detail-label">Tinggi Fundus:</span>
+                                                <span className="detail-value">{visit.tinggi_fundus ? `${visit.tinggi_fundus} cm` : '-'}</span>
+                                              </div>
+                                              <div className="detail-item">
+                                                <span className="detail-label">Tablet Fe:</span>
+                                                <span className="detail-value">{visit.beri_tablet_fe ? 'Ya (+30)' : 'Tidak'}</span>
+                                              </div>
+                                              <div className="detail-item">
+                                                <span className="detail-label">Imunisasi TT:</span>
+                                                <span className="detail-value">{visit.status_imunisasi_tt || '-'}</span>
+                                              </div>
+                                              <div className="detail-item">
+                                                <span className="detail-label">Pemeriksa:</span>
+                                                <span className="detail-value">{visit.pemeriksa || '-'}</span>
+                                              </div>
+                                            </div>
+                                            {visit.keterangan_anc && (
+                                              <div className="kunjungan-notes">
+                                                <strong>Keterangan:</strong> {visit.keterangan_anc}
+                                              </div>
+                                            )}
+                                          </div>
+                                        )}
+                                      </div>
+                                    );
+                                  })
+                                ) : (
+                                  <div className="empty-state-small">
+                                    <p>Belum ada kunjungan ANC</p>
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           )}
                         </div>
-                      </div>
-                    ))
+                      );
+                    })
                   ) : (
                     <div className="empty-state">
                       <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

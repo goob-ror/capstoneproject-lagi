@@ -17,6 +17,8 @@ const KunjunganNifas = () => {
   const [user, setUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
+  const [showBabyModal, setShowBabyModal] = useState(false);
+  const [selectedBabies, setSelectedBabies] = useState([]);
 
   const [presenter] = useState(() => new KunjunganNifasPresenter({
     setLoading,
@@ -50,6 +52,11 @@ const KunjunganNifas = () => {
       }
     };
 
+    const handleShowBabies = (babies) => {
+      setSelectedBabies(babies);
+      setShowBabyModal(true);
+    };
+
     if (nifasData.length > 0 && tableRef.current && !dataTableRef.current) {
       dataTableRef.current = $(tableRef.current).DataTable({
         data: nifasData,
@@ -79,15 +86,32 @@ const KunjunganNifas = () => {
             }) : '-'
           },
           { data: 'nama_ibu' },
-          { data: 'nik_ibu' },
-          { data: 'pemeriksa' },
-          { data: 'tekanan_darah' },
           {
-            data: 'suhu_badan',
-            render: (data) => data ? `${data}°C` : '-'
+            data: 'berat_badan',
+            render: (data) => data ? `${data} kg` : '-'
           },
-          { data: 'involusio_uteri' },
-          { data: 'lochea' },
+          {
+            data: 'babies',
+            render: (data, type, row) => {
+              if (!data || data.length === 0) return '-';
+              if (data.length === 1) {
+                const baby = data[0];
+                return baby.berat_badan ? `${baby.berat_badan} kg` : '-';
+              }
+              return `<button class="btn-show-babies" data-row-id="${row.id}" style="color: #22C55E; text-decoration: underline; cursor: pointer; border: none; background: none; font-size: 14px;">${data.length} bayi</button>`;
+            }
+          },
+          {
+            data: 'babies',
+            render: (data, type, row) => {
+              if (!data || data.length === 0) return '-';
+              if (data.length === 1) {
+                const baby = data[0];
+                return baby.panjang_badan ? `${baby.panjang_badan} cm` : '-';
+              }
+              return `<button class="btn-show-babies" data-row-id="${row.id}" style="color: #22C55E; text-decoration: underline; cursor: pointer; border: none; background: none; font-size: 14px;">${data.length} bayi</button>`;
+            }
+          },
           {
             data: null,
             render: (data, type, row) => {
@@ -138,6 +162,14 @@ const KunjunganNifas = () => {
       $(tableRef.current).on('click', '.btn-delete', function () {
         const id = $(this).data('id');
         handleDelete(id);
+      });
+
+      $(tableRef.current).on('click', '.btn-show-babies', function () {
+        const rowId = $(this).data('row-id');
+        const rowData = nifasData.find(item => item.id === rowId);
+        if (rowData && rowData.babies) {
+          handleShowBabies(rowData.babies);
+        }
       });
     }
 
@@ -329,12 +361,9 @@ const KunjunganNifas = () => {
                   <th>Jenis</th>
                   <th>Tanggal</th>
                   <th>Nama Ibu</th>
-                  <th>NIK</th>
-                  <th>Pemeriksa</th>
-                  <th>TD</th>
-                  <th>Suhu</th>
-                  <th>Involusio</th>
-                  <th>Lochea</th>
+                  <th>BB Ibu</th>
+                  <th>BB Bayi</th>
+                  <th>Panjang Bayi</th>
                   <th>Aksi</th>
                 </tr>
               </thead>
@@ -343,6 +372,55 @@ const KunjunganNifas = () => {
             </table>
           </div>
         </div>
+
+        {/* Baby Modal */}
+        {showBabyModal && (
+          <div className="modal-overlay" onClick={() => setShowBabyModal(false)}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h3>Data Bayi</h3>
+                <button className="modal-close" onClick={() => setShowBabyModal(false)}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="currentColor"/>
+                  </svg>
+                </button>
+              </div>
+              <div className="modal-body">
+                {selectedBabies.map((baby, index) => (
+                  <div key={index} className="baby-info-card">
+                    <h4>Bayi {baby.urutan_bayi}</h4>
+                    <div className="baby-info-grid">
+                      <div className="baby-info-item">
+                        <span className="baby-info-label">Berat Badan:</span>
+                        <span className="baby-info-value">{baby.berat_badan ? `${baby.berat_badan} kg` : '-'}</span>
+                      </div>
+                      <div className="baby-info-item">
+                        <span className="baby-info-label">Panjang Badan:</span>
+                        <span className="baby-info-value">{baby.panjang_badan ? `${baby.panjang_badan} cm` : '-'}</span>
+                      </div>
+                      <div className="baby-info-item">
+                        <span className="baby-info-label">Pemberian ASI:</span>
+                        <span className="baby-info-value">{baby.pemberian_asi || '-'}</span>
+                      </div>
+                      <div className="baby-info-item">
+                        <span className="baby-info-label">Kondisi:</span>
+                        <span className={`baby-info-value badge ${baby.kondisi_bayi === 'Sehat' ? 'badge-success' : baby.kondisi_bayi === 'Sakit' ? 'badge-warning' : 'badge-danger'}`}>
+                          {baby.kondisi_bayi || '-'}
+                        </span>
+                      </div>
+                      {baby.keterangan && (
+                        <div className="baby-info-item full-width">
+                          <span className="baby-info-label">Keterangan:</span>
+                          <span className="baby-info-value">{baby.keterangan}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );

@@ -474,9 +474,12 @@ router.get('/:id/detail', authMiddleware, async (req, res) => {
     const pregnancyHistory = [];
     for (const pregnancy of pregnancyHistoryRows) {
       const [ancRows] = await pool.query(
-        `SELECT * FROM antenatal_care 
-         WHERE forkey_hamil = ? 
-         ORDER BY tanggal_kunjungan ASC`,
+        `SELECT ac.*, ls.hasil_lab_hb, ls.lab_protein_urine, ls.lab_gula_darah,
+                ls.skrining_hiv, ls.skrining_sifilis, ls.skrining_hbsag
+         FROM antenatal_care ac
+         LEFT JOIN lab_screening ls ON ac.forkey_lab_screening = ls.id
+         WHERE ac.forkey_hamil = ? 
+         ORDER BY ac.tanggal_kunjungan ASC`,
         [pregnancy.id]
       );
       
@@ -501,9 +504,12 @@ router.get('/:id/detail', authMiddleware, async (req, res) => {
     let ancVisits = [];
     if (kehamilan) {
       const [ancRows] = await pool.query(
-        `SELECT * FROM antenatal_care 
-         WHERE forkey_hamil = ? 
-         ORDER BY tanggal_kunjungan DESC`,
+        `SELECT ac.*, ls.hasil_lab_hb, ls.lab_protein_urine, ls.lab_gula_darah,
+                ls.skrining_hiv, ls.skrining_sifilis, ls.skrining_hbsag
+         FROM antenatal_care ac
+         LEFT JOIN lab_screening ls ON ac.forkey_lab_screening = ls.id
+         WHERE ac.forkey_hamil = ? 
+         ORDER BY ac.tanggal_kunjungan DESC`,
         [kehamilan.id]
       );
       ancVisits = ancRows;

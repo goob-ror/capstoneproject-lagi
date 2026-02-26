@@ -22,19 +22,27 @@ const TambahNifas = () => {
     jenis_kunjungan: 'KF1',
     pemeriksa: 'Bidan',
     tekanan_darah: '',
+    berat_badan: '',
     suhu_badan: '',
     involusio_uteri: 'Baik',
     lochea: 'Rubra',
     payudara: 'Normal',
     konseling_asi: false,
-    berat_badan_bayi: '',
-    suhu_bayi: '',
-    pemberian_asi: 'ASI Eksklusif',
-    keterangan: '',
+    jumlah_bayi: 1,
     forkey_hamil: '',
     forkey_bidan: '',
     mark_as_selesai: false
   });
+
+  // Baby data array
+  const [bayiData, setBayiData] = useState([{
+    urutan_bayi: 1,
+    berat_badan: '',
+    panjang_badan: '',
+    pemberian_asi: 'ASI Eksklusif',
+    kondisi_bayi: 'Sehat',
+    keterangan: ''
+  }]);
 
   // Complications form data
   const [complications, setComplications] = useState([{
@@ -65,19 +73,29 @@ const TambahNifas = () => {
         jenis_kunjungan: data.jenis_kunjungan || 'KF1',
         pemeriksa: data.pemeriksa || 'Bidan',
         tekanan_darah: data.tekanan_darah || '',
+        berat_badan: data.berat_badan || '',
         suhu_badan: data.suhu_badan || '',
         involusio_uteri: data.involusio_uteri || 'Baik',
         lochea: data.lochea || 'Rubra',
         payudara: data.payudara || 'Normal',
         konseling_asi: data.konseling_asi || false,
-        berat_badan_bayi: data.berat_badan_bayi || '',
-        suhu_bayi: data.suhu_bayi || '',
-        pemberian_asi: data.pemberian_asi || 'ASI Eksklusif',
-        keterangan: data.keterangan || '',
+        jumlah_bayi: data.babies?.length || 1,
         forkey_hamil: data.forkey_hamil || '',
         forkey_bidan: data.forkey_bidan || '',
         mark_as_selesai: false
       });
+
+      // Populate babies data if exists
+      if (data.babies && data.babies.length > 0) {
+        setBayiData(data.babies.map((baby, index) => ({
+          urutan_bayi: baby.urutan_bayi || index + 1,
+          berat_badan: baby.berat_badan || '',
+          panjang_badan: baby.panjang_badan || '',
+          pemberian_asi: baby.pemberian_asi || 'ASI Eksklusif',
+          kondisi_bayi: baby.kondisi_bayi || 'Sehat',
+          keterangan: baby.keterangan || ''
+        })));
+      }
     },
     onSuccess: (message) => {
       alert(message);
@@ -144,6 +162,31 @@ const TambahNifas = () => {
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     
+    // Handle jumlah_bayi change
+    if (name === 'jumlah_bayi') {
+      const newCount = parseInt(value) || 1;
+      const currentCount = bayiData.length;
+      
+      if (newCount > currentCount) {
+        // Add more baby forms
+        const newBayiData = [...bayiData];
+        for (let i = currentCount; i < newCount; i++) {
+          newBayiData.push({
+            urutan_bayi: i + 1,
+            berat_badan: '',
+            panjang_badan: '',
+            pemberian_asi: 'ASI Eksklusif',
+            kondisi_bayi: 'Sehat',
+            keterangan: ''
+          });
+        }
+        setBayiData(newBayiData);
+      } else if (newCount < currentCount) {
+        // Remove excess baby forms
+        setBayiData(bayiData.slice(0, newCount));
+      }
+    }
+    
     // Auto-check mark_as_selesai when KF4 is selected
     if (name === 'jenis_kunjungan' && value === 'KF4') {
       setFormData(prev => ({
@@ -159,6 +202,13 @@ const TambahNifas = () => {
     }
   };
 
+  // Baby data handling functions
+  const updateBayi = (index, field, value) => {
+    const updated = [...bayiData];
+    updated[index] = { ...updated[index], [field]: value };
+    setBayiData(updated);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     // Check if we have complications to submit
@@ -168,7 +218,16 @@ const TambahNifas = () => {
 
     const validComplications = hasComplications ? complications.filter(comp => comp.nama_komplikasi.trim() !== '') : [];
     
-    await presenter.handleSubmit(formData, validComplications, isEdit, editId);
+    // Prepare nifas data with babies
+    const nifasDataWithBabies = {
+      ...formData,
+      babies: bayiData.map((bayi, index) => ({
+        ...bayi,
+        urutan_bayi: index + 1
+      }))
+    };
+    
+    await presenter.handleSubmit(nifasDataWithBabies, validComplications, isEdit, editId);
   };
 
   const handleLogout = () => {
@@ -449,6 +508,19 @@ const TambahNifas = () => {
                   </div>
 
                   <div className="form-group">
+                    <label htmlFor="berat_badan">Berat Badan Ibu (kg)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      id="berat_badan"
+                      name="berat_badan"
+                      value={formData.berat_badan}
+                      onChange={handleChange}
+                      placeholder="Contoh: 55.5"
+                    />
+                  </div>
+
+                  <div className="form-group">
                     <label htmlFor="suhu_badan">Suhu Badan (°C)</label>
                     <input
                       type="number"
@@ -524,57 +596,85 @@ const TambahNifas = () => {
                 <h3>Data Bayi</h3>
                 <div className="form-grid">
                   <div className="form-group">
-                    <label htmlFor="berat_badan_bayi">Berat Badan Bayi (kg)</label>
+                    <label htmlFor="jumlah_bayi">Jumlah Bayi *</label>
                     <input
                       type="number"
-                      step="0.01"
-                      id="berat_badan_bayi"
-                      name="berat_badan_bayi"
-                      value={formData.berat_badan_bayi}
+                      id="jumlah_bayi"
+                      name="jumlah_bayi"
+                      value={formData.jumlah_bayi}
                       onChange={handleChange}
-                      placeholder="Contoh: 3.2"
+                      min="1"
+                      max="3"
+                      required
                     />
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="suhu_bayi">Suhu Bayi (°C)</label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      id="suhu_bayi"
-                      name="suhu_bayi"
-                      value={formData.suhu_bayi}
-                      onChange={handleChange}
-                      placeholder="Contoh: 36.5"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="pemberian_asi">Pemberian ASI</label>
-                    <select
-                      id="pemberian_asi"
-                      name="pemberian_asi"
-                      value={formData.pemberian_asi}
-                      onChange={handleChange}
-                    >
-                      <option value="ASI Eksklusif">ASI Eksklusif</option>
-                      <option value="ASI + Formula">ASI + Formula</option>
-                      <option value="Formula">Formula</option>
-                    </select>
-                  </div>
-
-                  <div className="form-group full-width">
-                    <label htmlFor="keterangan">Keterangan</label>
-                    <textarea
-                      id="keterangan"
-                      name="keterangan"
-                      value={formData.keterangan}
-                      onChange={handleChange}
-                      rows="3"
-                      placeholder="Keterangan tambahan tentang kunjungan nifas..."
-                    />
+                    <small style={{ color: '#6B7280', fontSize: '12px', marginTop: '4px', display: 'block' }}>
+                      Ubah jumlah bayi untuk kembar
+                    </small>
                   </div>
                 </div>
+
+                {bayiData.map((bayi, index) => (
+                  <div key={index} className="baby-card">
+                    <h4>Bayi {index + 1}</h4>
+                    <div className="form-grid">
+                      <div className="form-group">
+                        <label>Berat Badan (kg)</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={bayi.berat_badan}
+                          onChange={(e) => updateBayi(index, 'berat_badan', e.target.value)}
+                          placeholder="Contoh: 3.2"
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label>Panjang Badan (cm)</label>
+                        <input
+                          type="number"
+                          step="0.1"
+                          value={bayi.panjang_badan}
+                          onChange={(e) => updateBayi(index, 'panjang_badan', e.target.value)}
+                          placeholder="Contoh: 48.5"
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label>Pemberian ASI</label>
+                        <select
+                          value={bayi.pemberian_asi}
+                          onChange={(e) => updateBayi(index, 'pemberian_asi', e.target.value)}
+                        >
+                          <option value="ASI Eksklusif">ASI Eksklusif</option>
+                          <option value="ASI + Formula">ASI + Formula</option>
+                          <option value="Formula">Formula</option>
+                        </select>
+                      </div>
+
+                      <div className="form-group">
+                        <label>Kondisi Bayi</label>
+                        <select
+                          value={bayi.kondisi_bayi}
+                          onChange={(e) => updateBayi(index, 'kondisi_bayi', e.target.value)}
+                        >
+                          <option value="Sehat">Sehat</option>
+                          <option value="Sakit">Sakit</option>
+                          <option value="Rujuk">Rujuk</option>
+                        </select>
+                      </div>
+
+                      <div className="form-group full-width">
+                        <label>Keterangan Bayi</label>
+                        <textarea
+                          value={bayi.keterangan}
+                          onChange={(e) => updateBayi(index, 'keterangan', e.target.value)}
+                          rows="2"
+                          placeholder="Keterangan tambahan tentang bayi..."
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
 
               <div className="form-section">

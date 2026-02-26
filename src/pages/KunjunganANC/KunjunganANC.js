@@ -382,7 +382,7 @@ const KunjunganANC = () => {
                   <th>Nama Ibu</th>
                   <th>Jenis</th>
                   <th>Akses</th>
-                  <th>HBsAg</th>
+                  <th>Anemia</th>
                   <th>LILA</th>
                   <th>IMT</th>
                   <th>Status Risiko</th>

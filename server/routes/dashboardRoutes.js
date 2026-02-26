@@ -520,12 +520,12 @@ router.get('/at-risk-mothers', async (req, res) => {
         kel.nama_kelurahan,
         k.id as kehamilan_id,
         CASE 
-          WHEN latest_anc.hemoglobin < 8.0 THEN 'Anemia Berat'
-          WHEN latest_anc.hemoglobin >= 8.0 AND latest_anc.hemoglobin < 10.0 THEN 'Anemia Sedang'
-          WHEN latest_anc.hemoglobin >= 10.0 AND latest_anc.hemoglobin < 11.0 THEN 'Anemia Ringan'
+          WHEN latest_lab.hasil_lab_hb < 8.0 THEN 'Anemia Berat'
+          WHEN latest_lab.hasil_lab_hb >= 8.0 AND latest_lab.hasil_lab_hb < 10.0 THEN 'Anemia Sedang'
+          WHEN latest_lab.hasil_lab_hb >= 10.0 AND latest_lab.hasil_lab_hb < 11.0 THEN 'Anemia Ringan'
           ELSE 'Normal'
         END as status_anemia,
-        latest_anc.hemoglobin,
+        latest_lab.hasil_lab_hb as hemoglobin,
         CASE 
           WHEN latest_anc.lila < 23.5 THEN 'KEK'
           ELSE 'Normal'
@@ -539,25 +539,26 @@ router.get('/at-risk-mothers', async (req, res) => {
       LEFT JOIN (
         SELECT 
           anc.forkey_hamil,
-          anc.hemoglobin,
           anc.lila,
           anc.tanggal_kunjungan,
+          anc.forkey_lab_screening,
           ROW_NUMBER() OVER (PARTITION BY anc.forkey_hamil ORDER BY anc.tanggal_kunjungan DESC) as rn
         FROM antenatal_care anc
-        WHERE anc.hemoglobin IS NOT NULL OR anc.lila IS NOT NULL
+        WHERE anc.lila IS NOT NULL OR anc.forkey_lab_screening IS NOT NULL
       ) latest_anc ON k.id = latest_anc.forkey_hamil AND latest_anc.rn = 1
+      LEFT JOIN lab_screening latest_lab ON latest_anc.forkey_lab_screening = latest_lab.id
       WHERE k.status_kehamilan = 'Hamil'
         AND YEAR(k.created_at) = ?
         AND (
-          (latest_anc.hemoglobin IS NOT NULL AND latest_anc.hemoglobin < 11.0) OR
+          (latest_lab.hasil_lab_hb IS NOT NULL AND latest_lab.hasil_lab_hb < 11.0) OR
           (latest_anc.lila IS NOT NULL AND latest_anc.lila < 23.5)
         )
       ORDER BY 
         CASE 
-          WHEN latest_anc.hemoglobin < 8.0 THEN 1
-          WHEN latest_anc.lila < 23.5 AND latest_anc.hemoglobin < 10.0 THEN 2
+          WHEN latest_lab.hasil_lab_hb < 8.0 THEN 1
+          WHEN latest_anc.lila < 23.5 AND latest_lab.hasil_lab_hb < 10.0 THEN 2
           WHEN latest_anc.lila < 23.5 THEN 3
-          WHEN latest_anc.hemoglobin < 10.0 THEN 4
+          WHEN latest_lab.hasil_lab_hb < 10.0 THEN 4
           ELSE 5
         END,
         latest_anc.tanggal_kunjungan DESC

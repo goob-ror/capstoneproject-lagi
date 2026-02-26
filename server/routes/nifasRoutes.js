@@ -80,17 +80,55 @@ router.get('/', auth, async (req, res) => {
         n.*,
         ibu.nama_lengkap as nama_ibu,
         ibu.nik_ibu,
-        bidan.nama_lengkap as nama_bidan
+        bidan.nama_lengkap as nama_bidan,
+        GROUP_CONCAT(
+          CONCAT_WS('|', 
+            nb.id,
+            nb.urutan_bayi, 
+            nb.berat_badan, 
+            nb.panjang_badan, 
+            nb.pemberian_asi,
+            nb.kondisi_bayi,
+            COALESCE(nb.keterangan, '')
+          ) 
+          ORDER BY nb.urutan_bayi 
+          SEPARATOR ';;'
+        ) as babies_data
       FROM kunjungan_nifas n
       JOIN kehamilan k ON n.forkey_hamil = k.id
       JOIN ibu ON k.forkey_ibu = ibu.id
       JOIN bidan ON n.forkey_bidan = bidan.id
+      LEFT JOIN kunjungan_nifas_bayi nb ON n.id = nb.forkey_kunjungan_nifas
       WHERE YEAR(n.tanggal_kunjungan) = ?
+      GROUP BY n.id
       ORDER BY n.tanggal_kunjungan DESC
     `;
     
     const [rows] = await db.execute(query, [filterYear]);
-    res.json(rows);
+    
+    // Parse babies data for each row
+    const parsedRows = rows.map(row => {
+      const babies = [];
+      if (row.babies_data) {
+        const babiesArray = row.babies_data.split(';;');
+        babiesArray.forEach(babyStr => {
+          const [id, urutan_bayi, berat_badan, panjang_badan, pemberian_asi, kondisi_bayi, keterangan] = babyStr.split('|');
+          babies.push({
+            id: parseInt(id),
+            urutan_bayi: parseInt(urutan_bayi),
+            berat_badan: berat_badan ? parseFloat(berat_badan) : null,
+            panjang_badan: panjang_badan ? parseFloat(panjang_badan) : null,
+            pemberian_asi,
+            kondisi_bayi,
+            keterangan: keterangan || null
+          });
+        });
+      }
+      delete row.babies_data;
+      return { ...row, babies };
+    });
+    
+    res.json(parsedRows);
   } catch (error) {
     console.error('Error fetching nifas data:', error);
     res.status(500).json({ message: 'Internal server error' });
@@ -121,7 +159,13 @@ router.get('/:id', auth, async (req, res) => {
       return res.status(404).json({ message: 'Nifas data not found' });
     }
     
-    res.json(rows[0]);
+    // Get babies data
+    const [babies] = await db.execute(
+      `SELECT * FROM kunjungan_nifas_bayi WHERE forkey_kunjungan_nifas = ? ORDER BY urutan_bayi`,
+      [id]
+    );
+    
+    res.json({ ...rows[0], babies });
   } catch (error) {
     console.error('Error fetching nifas data:', error);
     res.status(500).json({ message: 'Internal server error' });
@@ -137,9 +181,8 @@ router.post('/', auth, async (req, res) => {
 
     const {
       tanggal_kunjungan, jenis_kunjungan, pemeriksa, tekanan_darah,
-      suhu_badan, involusio_uteri, lochea, payudara, konseling_asi,
-      berat_badan_bayi, suhu_bayi, pemberian_asi, keterangan,
-      forkey_hamil, forkey_bidan, mark_as_selesai
+      berat_badan, suhu_badan, involusio_uteri, lochea, payudara, konseling_asi,
+      forkey_hamil, forkey_bidan, mark_as_selesai, babies
     } = req.body;
 
     // Convert and validate numeric/boolean fields
@@ -148,15 +191,12 @@ router.post('/', auth, async (req, res) => {
       jenis_kunjungan: jenis_kunjungan || null,
       pemeriksa: pemeriksa || 'Bidan',
       tekanan_darah: tekanan_darah || null,
+      berat_badan: berat_badan ? parseFloat(berat_badan) : null,
       suhu_badan: suhu_badan ? parseFloat(suhu_badan) : null,
       involusio_uteri: involusio_uteri || 'Baik',
       lochea: lochea || 'Rubra',
       payudara: payudara || 'Normal',
       konseling_asi: konseling_asi ? 1 : 0,
-      berat_badan_bayi: berat_badan_bayi ? parseFloat(berat_badan_bayi) : null,
-      suhu_bayi: suhu_bayi ? parseFloat(suhu_bayi) : null,
-      pemberian_asi: pemberian_asi || 'ASI Eksklusif',
-      keterangan: keterangan || null,
       forkey_hamil,
       forkey_bidan
     };
@@ -164,10 +204,9 @@ router.post('/', auth, async (req, res) => {
     const query = `
       INSERT INTO kunjungan_nifas (
         tanggal_kunjungan, jenis_kunjungan, pemeriksa, tekanan_darah,
-        suhu_badan, involusio_uteri, lochea, payudara, konseling_asi,
-        berat_badan_bayi, suhu_bayi, pemberian_asi, keterangan,
+        berat_badan, suhu_badan, involusio_uteri, lochea, payudara, konseling_asi,
         forkey_hamil, forkey_bidan
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     const [result] = await connection.execute(query, [
@@ -175,18 +214,39 @@ router.post('/', auth, async (req, res) => {
       processedData.jenis_kunjungan,
       processedData.pemeriksa,
       processedData.tekanan_darah,
+      processedData.berat_badan,
       processedData.suhu_badan,
       processedData.involusio_uteri,
       processedData.lochea,
       processedData.payudara,
       processedData.konseling_asi,
-      processedData.berat_badan_bayi,
-      processedData.suhu_bayi,
-      processedData.pemberian_asi,
-      processedData.keterangan,
       processedData.forkey_hamil,
       processedData.forkey_bidan
     ]);
+
+    const nifasId = result.insertId;
+
+    // Insert baby data
+    if (babies && babies.length > 0) {
+      for (const baby of babies) {
+        const babyQuery = `
+          INSERT INTO kunjungan_nifas_bayi (
+            forkey_kunjungan_nifas, urutan_bayi, berat_badan, panjang_badan,
+            pemberian_asi, kondisi_bayi, keterangan
+          ) VALUES (?, ?, ?, ?, ?, ?, ?)
+        `;
+        
+        await connection.execute(babyQuery, [
+          nifasId,
+          baby.urutan_bayi || 1,
+          baby.berat_badan ? parseFloat(baby.berat_badan) : null,
+          baby.panjang_badan ? parseFloat(baby.panjang_badan) : null,
+          baby.pemberian_asi || 'ASI Eksklusif',
+          baby.kondisi_bayi || 'Sehat',
+          baby.keterangan || null
+        ]);
+      }
+    }
 
     // Update pregnancy status to Nifas if currently Bersalin
     await connection.execute(
@@ -210,7 +270,7 @@ router.post('/', auth, async (req, res) => {
 
     res.status(201).json({
       message: 'Data kunjungan nifas berhasil disimpan',
-      id: result.insertId
+      id: nifasId
     });
   } catch (error) {
     await connection.rollback();
@@ -231,9 +291,8 @@ router.put('/:id', auth, async (req, res) => {
     const { id } = req.params;
     const {
       tanggal_kunjungan, jenis_kunjungan, pemeriksa, tekanan_darah,
-      suhu_badan, involusio_uteri, lochea, payudara, konseling_asi,
-      berat_badan_bayi, suhu_bayi, pemberian_asi, keterangan,
-      forkey_hamil, forkey_bidan, mark_as_selesai
+      berat_badan, suhu_badan, involusio_uteri, lochea, payudara, konseling_asi,
+      forkey_hamil, forkey_bidan, mark_as_selesai, babies
     } = req.body;
 
     // Convert and validate numeric/boolean fields
@@ -242,15 +301,12 @@ router.put('/:id', auth, async (req, res) => {
       jenis_kunjungan: jenis_kunjungan || null,
       pemeriksa: pemeriksa || 'Bidan',
       tekanan_darah: tekanan_darah || null,
+      berat_badan: (berat_badan && berat_badan !== '' && berat_badan !== 'false') ? parseFloat(berat_badan) : null,
       suhu_badan: (suhu_badan && suhu_badan !== '' && suhu_badan !== 'false') ? parseFloat(suhu_badan) : null,
       involusio_uteri: involusio_uteri || 'Baik',
       lochea: lochea || 'Rubra',
       payudara: payudara || 'Normal',
       konseling_asi: (konseling_asi === true || konseling_asi === 'true' || konseling_asi === 1) ? 1 : 0,
-      berat_badan_bayi: (berat_badan_bayi && berat_badan_bayi !== '' && berat_badan_bayi !== 'false') ? parseFloat(berat_badan_bayi) : null,
-      suhu_bayi: (suhu_bayi && suhu_bayi !== '' && suhu_bayi !== 'false') ? parseFloat(suhu_bayi) : null,
-      pemberian_asi: pemberian_asi || 'ASI Eksklusif',
-      keterangan: keterangan || null,
       forkey_hamil,
       forkey_bidan
     };
@@ -258,8 +314,7 @@ router.put('/:id', auth, async (req, res) => {
     const query = `
       UPDATE kunjungan_nifas SET
         tanggal_kunjungan = ?, jenis_kunjungan = ?, pemeriksa = ?, tekanan_darah = ?,
-        suhu_badan = ?, involusio_uteri = ?, lochea = ?, payudara = ?, konseling_asi = ?,
-        berat_badan_bayi = ?, suhu_bayi = ?, pemberian_asi = ?, keterangan = ?,
+        berat_badan = ?, suhu_badan = ?, involusio_uteri = ?, lochea = ?, payudara = ?, konseling_asi = ?,
         forkey_hamil = ?, forkey_bidan = ?
       WHERE id = ?
     `;
@@ -269,15 +324,12 @@ router.put('/:id', auth, async (req, res) => {
       processedData.jenis_kunjungan,
       processedData.pemeriksa,
       processedData.tekanan_darah,
+      processedData.berat_badan,
       processedData.suhu_badan,
       processedData.involusio_uteri,
       processedData.lochea,
       processedData.payudara,
       processedData.konseling_asi,
-      processedData.berat_badan_bayi,
-      processedData.suhu_bayi,
-      processedData.pemberian_asi,
-      processedData.keterangan,
       processedData.forkey_hamil,
       processedData.forkey_bidan,
       id
@@ -286,6 +338,30 @@ router.put('/:id', auth, async (req, res) => {
     if (result.affectedRows === 0) {
       await connection.rollback();
       return res.status(404).json({ message: 'Nifas data not found' });
+    }
+
+    // Update baby data - delete existing and insert new
+    await connection.execute('DELETE FROM kunjungan_nifas_bayi WHERE forkey_kunjungan_nifas = ?', [id]);
+    
+    if (babies && babies.length > 0) {
+      for (const baby of babies) {
+        const babyQuery = `
+          INSERT INTO kunjungan_nifas_bayi (
+            forkey_kunjungan_nifas, urutan_bayi, berat_badan, panjang_badan,
+            pemberian_asi, kondisi_bayi, keterangan
+          ) VALUES (?, ?, ?, ?, ?, ?, ?)
+        `;
+        
+        await connection.execute(babyQuery, [
+          id,
+          baby.urutan_bayi || 1,
+          baby.berat_badan ? parseFloat(baby.berat_badan) : null,
+          baby.panjang_badan ? parseFloat(baby.panjang_badan) : null,
+          baby.pemberian_asi || 'ASI Eksklusif',
+          baby.kondisi_bayi || 'Sehat',
+          baby.keterangan || null
+        ]);
+      }
     }
 
     // If mark_as_selesai is true, update status to Selesai
@@ -312,19 +388,33 @@ router.put('/:id', auth, async (req, res) => {
 
 // Delete nifas visit
 router.delete('/:id', auth, async (req, res) => {
+  const connection = await db.getConnection();
+  
   try {
+    await connection.beginTransaction();
+    
     const { id } = req.params;
     
-    const [result] = await db.execute('DELETE FROM kunjungan_nifas WHERE id = ?', [id]);
+    // Delete baby records first (foreign key constraint)
+    await connection.execute('DELETE FROM kunjungan_nifas_bayi WHERE forkey_kunjungan_nifas = ?', [id]);
+    
+    // Delete nifas record
+    const [result] = await connection.execute('DELETE FROM kunjungan_nifas WHERE id = ?', [id]);
     
     if (result.affectedRows === 0) {
+      await connection.rollback();
       return res.status(404).json({ message: 'Nifas data not found' });
     }
     
+    await connection.commit();
+    
     res.json({ message: 'Data kunjungan nifas berhasil dihapus' });
   } catch (error) {
+    await connection.rollback();
     console.error('Error deleting nifas visit:', error);
     res.status(500).json({ message: 'Internal server error' });
+  } finally {
+    connection.release();
   }
 });
 
@@ -381,9 +471,8 @@ router.post('/with-complications', auth, async (req, res) => {
     if (nifasData) {
       const {
         tanggal_kunjungan, jenis_kunjungan, pemeriksa, tekanan_darah,
-        suhu_badan, involusio_uteri, lochea, payudara, konseling_asi,
-        berat_badan_bayi, suhu_bayi, pemberian_asi, keterangan,
-        forkey_hamil, forkey_bidan
+        berat_badan, suhu_badan, involusio_uteri, lochea, payudara, konseling_asi,
+        forkey_hamil, forkey_bidan, babies
       } = nifasData;
 
       // Convert and validate numeric/boolean fields
@@ -392,15 +481,12 @@ router.post('/with-complications', auth, async (req, res) => {
         jenis_kunjungan: jenis_kunjungan || null,
         pemeriksa: pemeriksa || 'Bidan',
         tekanan_darah: tekanan_darah || null,
+        berat_badan: (berat_badan && berat_badan !== '' && berat_badan !== 'false') ? parseFloat(berat_badan) : null,
         suhu_badan: (suhu_badan && suhu_badan !== '' && suhu_badan !== 'false') ? parseFloat(suhu_badan) : null,
         involusio_uteri: involusio_uteri || 'Baik',
         lochea: lochea || 'Rubra',
         payudara: payudara || 'Normal',
         konseling_asi: (konseling_asi === true || konseling_asi === 'true' || konseling_asi === 1) ? 1 : 0,
-        berat_badan_bayi: (berat_badan_bayi && berat_badan_bayi !== '' && berat_badan_bayi !== 'false') ? parseFloat(berat_badan_bayi) : null,
-        suhu_bayi: (suhu_bayi && suhu_bayi !== '' && suhu_bayi !== 'false') ? parseFloat(suhu_bayi) : null,
-        pemberian_asi: pemberian_asi || 'ASI Eksklusif',
-        keterangan: keterangan || null,
         forkey_hamil,
         forkey_bidan
       };
@@ -408,10 +494,9 @@ router.post('/with-complications', auth, async (req, res) => {
       const nifasQuery = `
         INSERT INTO kunjungan_nifas (
           tanggal_kunjungan, jenis_kunjungan, pemeriksa, tekanan_darah,
-          suhu_badan, involusio_uteri, lochea, payudara, konseling_asi,
-          berat_badan_bayi, suhu_bayi, pemberian_asi, keterangan,
+          berat_badan, suhu_badan, involusio_uteri, lochea, payudara, konseling_asi,
           forkey_hamil, forkey_bidan
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
 
       const [nifasResult] = await connection.execute(nifasQuery, [
@@ -419,20 +504,39 @@ router.post('/with-complications', auth, async (req, res) => {
         processedData.jenis_kunjungan,
         processedData.pemeriksa,
         processedData.tekanan_darah,
+        processedData.berat_badan,
         processedData.suhu_badan,
         processedData.involusio_uteri,
         processedData.lochea,
         processedData.payudara,
         processedData.konseling_asi,
-        processedData.berat_badan_bayi,
-        processedData.suhu_bayi,
-        processedData.pemberian_asi,
-        processedData.keterangan,
         processedData.forkey_hamil,
         processedData.forkey_bidan
       ]);
 
       nifasId = nifasResult.insertId;
+
+      // Insert baby data
+      if (babies && babies.length > 0) {
+        for (const baby of babies) {
+          const babyQuery = `
+            INSERT INTO kunjungan_nifas_bayi (
+              forkey_kunjungan_nifas, urutan_bayi, berat_badan, panjang_badan,
+              pemberian_asi, kondisi_bayi, keterangan
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+          `;
+          
+          await connection.execute(babyQuery, [
+            nifasId,
+            baby.urutan_bayi || 1,
+            baby.berat_badan ? parseFloat(baby.berat_badan) : null,
+            baby.panjang_badan ? parseFloat(baby.panjang_badan) : null,
+            baby.pemberian_asi || 'ASI Eksklusif',
+            baby.kondisi_bayi || 'Sehat',
+            baby.keterangan || null
+          ]);
+        }
+      }
     }
 
     // Create complications if provided

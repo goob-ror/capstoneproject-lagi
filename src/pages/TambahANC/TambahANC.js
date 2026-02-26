@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Select from 'react-select';
 import TambahANCPresenter from './TambahANC-presenter';
@@ -30,6 +30,29 @@ const TambahANC = () => {
   const [activeTab, setActiveTab] = useState('anc');
   const [riskScore, setRiskScore] = useState(null);
   const [showRiskNotification, setShowRiskNotification] = useState(false);
+  const [selectedPregnancy, setSelectedPregnancy] = useState(null);
+  const autoUpdateJenisKunjungan = useRef(true); // Track if we should auto-update
+
+  // Calculate gestational age in weeks
+  const calculateGestationalAge = (lmpDate, currentDate = new Date()) => {
+    const lmp = new Date(lmpDate);
+    const current = new Date(currentDate);
+    const diffTime = Math.abs(current - lmp);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return Math.floor(diffDays / 7);
+  };
+
+  // Determine jenis_kunjungan based on gestational age
+  const getJenisKunjunganByAge = (weeks) => {
+    if (weeks <= 12) return 'K1';
+    if (weeks <= 16) return 'K2';
+    if (weeks <= 20) return 'K3';
+    if (weeks <= 24) return 'K4';
+    if (weeks <= 28) return 'K5';
+    if (weeks <= 32) return 'K6';
+    if (weeks <= 36) return 'K7';
+    return 'K8';
+  };
 
   const [formData, setFormData] = useState({
     tanggal_kunjungan: '',
@@ -199,31 +222,38 @@ const TambahANC = () => {
     }
   }, [formData.forkey_hamil, presenter]);
 
-  // Extract existing visit types and auto-select next available
+  // Auto-select jenis_kunjungan based on gestational age
   useEffect(() => {
-    if (previousVisits && previousVisits.length > 0 && !isEdit) {
-      // Get unique visit types only
-      const existingTypes = [...new Set(previousVisits.map(visit => visit.jenis_kunjungan))];
-      setExistingVisitTypes(existingTypes);
-
-      // Auto-select next available visit type
-      const allVisitTypes = ['K1', 'K2', 'K3', 'K4', 'K5', 'K6', 'K7', 'K8'];
-      const nextAvailable = allVisitTypes.find(type => !existingTypes.includes(type));
-
-      if (nextAvailable) {
-        setFormData(prev => {
-          // Only update if current value is not already set or is in existing types
-          if (!prev.jenis_kunjungan || existingTypes.includes(prev.jenis_kunjungan)) {
-            return {
-              ...prev,
-              jenis_kunjungan: nextAvailable
-            };
-          }
-          return prev;
-        });
+    if (selectedPregnancy && selectedPregnancy.haid_terakhir && !isEdit && formData.tanggal_kunjungan && autoUpdateJenisKunjungan.current) {
+      const weeks = calculateGestationalAge(selectedPregnancy.haid_terakhir, formData.tanggal_kunjungan);
+      const jenisKunjungan = getJenisKunjunganByAge(weeks);
+      
+      console.log('Auto-selecting jenis_kunjungan:', {
+        haid_terakhir: selectedPregnancy.haid_terakhir,
+        tanggal_kunjungan: formData.tanggal_kunjungan,
+        weeks,
+        jenisKunjungan,
+        currentValue: formData.jenis_kunjungan,
+        autoUpdateEnabled: autoUpdateJenisKunjungan.current
+      });
+      
+      // Only update if the calculated value is different from current value
+      if (jenisKunjungan !== formData.jenis_kunjungan) {
+        setFormData(prev => ({
+          ...prev,
+          jenis_kunjungan: jenisKunjungan
+        }));
       }
     }
-  }, [previousVisits, isEdit]);
+  }, [selectedPregnancy, formData.tanggal_kunjungan, isEdit, formData.jenis_kunjungan]);
+
+  // Extract existing visit types for display
+  useEffect(() => {
+    if (previousVisits && previousVisits.length > 0) {
+      const existingTypes = [...new Set(previousVisits.map(visit => visit.jenis_kunjungan))];
+      setExistingVisitTypes(existingTypes);
+    }
+  }, [previousVisits]);
 
   // Check for existing visit when pregnancy and visit type are selected (only in add mode, not edit)
   useEffect(() => {
@@ -360,11 +390,16 @@ const TambahANC = () => {
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
 
-    // If changing jenis_kunjungan, reset form fields
+    // If manually changing jenis_kunjungan, disable auto-update
     if (name === 'jenis_kunjungan') {
-      resetFormFields();
-      setExistingVisitId(null);
-      setExistingVisitWarning('');
+      autoUpdateJenisKunjungan.current = false;
+      // Don't reset form fields - just disable auto-update
+      // User might want to manually override the auto-selection
+    }
+
+    // If changing tanggal_kunjungan, re-enable auto-update
+    if (name === 'tanggal_kunjungan') {
+      autoUpdateJenisKunjungan.current = true;
     }
 
     setFormData(prev => ({
@@ -747,7 +782,18 @@ const TambahANC = () => {
                       id="forkey_hamil"
                       name="forkey_hamil"
                       value={pregnancyOptions.find(opt => opt.value === formData.forkey_hamil) || null}
-                      onChange={(selectedOption) => setFormData(prev => ({ ...prev, forkey_hamil: selectedOption ? selectedOption.value : '' }))}
+                      onChange={(selectedOption) => {
+                        setFormData(prev => ({ ...prev, forkey_hamil: selectedOption ? selectedOption.value : '' }));
+                        // Store the full pregnancy data for gestational age calculation
+                        if (selectedOption) {
+                          const pregnancy = pregnancies.find(p => p.id === selectedOption.value);
+                          console.log('Selected pregnancy:', pregnancy);
+                          setSelectedPregnancy(pregnancy);
+                          autoUpdateJenisKunjungan.current = true; // Re-enable auto-update when pregnancy changes
+                        } else {
+                          setSelectedPregnancy(null);
+                        }
+                      }}
                       options={pregnancyOptions}
                       placeholder="-- Cari Ibu Hamil --"
                       isClearable
@@ -786,13 +832,17 @@ const TambahANC = () => {
                           </option>
                         ))}
                       </select>
+                      {selectedPregnancy && selectedPregnancy.haid_terakhir && formData.tanggal_kunjungan && (
+                        <small style={{ display: 'block', marginTop: '4px', color: '#6B7280' }}>
+                          Usia kehamilan: {calculateGestationalAge(selectedPregnancy.haid_terakhir, formData.tanggal_kunjungan)} minggu
+                        </small>
+                      )}
                       {existingVisitTypes.length > 0 && (
                         <div className="existing-visits-info">
                           <small>Kunjungan yang sudah ada:</small>
                           <div className="existing-visits-badges">
                             {existingVisitTypes
                               .sort((a, b) => {
-                                // Sort K1, K2, K3, etc. in order
                                 const numA = parseInt(a.replace('K', ''));
                                 const numB = parseInt(b.replace('K', ''));
                                 return numA - numB;
