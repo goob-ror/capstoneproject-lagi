@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Select from 'react-select';
 import TambahNifasPresenter from './TambahNifas-presenter';
@@ -16,6 +16,15 @@ const TambahNifas = () => {
   const [user, setUser] = useState(null);
   const [motherData, setMotherData] = useState(null);
   const [activeTab, setActiveTab] = useState('kunjungan-nifas');
+  const autoUpdateJenisKunjungan = useRef(true); // Control auto-update behavior
+
+  // Determine jenis_kunjungan based on days since delivery
+  const getJenisKunjunganByDays = (days) => {
+    if (days <= 2) return 'KF1'; // 0-2 days
+    if (days <= 7) return 'KF2'; // 3-7 days
+    if (days <= 28) return 'KF3'; // 8-28 days
+    return 'KF4'; // 29-42 days
+  };
 
   const [formData, setFormData] = useState({
     tanggal_kunjungan: '',
@@ -119,14 +128,102 @@ const TambahNifas = () => {
     }
   }, [presenter, isEdit, editId]);
 
-  // Load mother data when pregnancy is selected
+  // Fetch latest persalinan data for selected mother to pre-fill baby data
+  const fetchLatestPersalinanForMother = async (pregnancyId) => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('token');
+      
+      // Find the persalinan for this pregnancy
+      const response = await fetch(`/api/nifas/persalinan/by-pregnancy/${pregnancyId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        // If no persalinan found, just clear baby data
+        setBayiData([{
+          urutan_bayi: 1,
+          berat_badan: '',
+          panjang_badan: '',
+          pemberian_asi: 'ASI Eksklusif',
+          kondisi_bayi: 'Sehat',
+          keterangan: ''
+        }]);
+        return;
+      }
+
+      const data = await response.json();
+      
+      // Pre-fill baby data from persalinan
+      if (data.babies && data.babies.length > 0) {
+        const prefillBabies = data.babies.map(baby => ({
+          urutan_bayi: baby.urutan_bayi,
+          berat_badan: baby.berat_badan_lahir ? (baby.berat_badan_lahir / 1000).toFixed(2) : '', // Convert grams to kg
+          panjang_badan: baby.panjang_badan_lahir || '',
+          pemberian_asi: 'ASI Eksklusif', // Default
+          kondisi_bayi: baby.kondisi || 'Sehat',
+          keterangan: `Bayi ${baby.jenis_kelamin}, lahir ${data.persalinan.tanggal_persalinan ? new Date(data.persalinan.tanggal_persalinan).toLocaleDateString('id-ID') : ''}`
+        }));
+        setBayiData(prefillBabies);
+        setFormData(prev => ({ ...prev, jumlah_bayi: prefillBabies.length }));
+      }
+    } catch (error) {
+      console.error('Error fetching persalinan for mother:', error);
+      // Don't show error, just use empty baby data
+      setBayiData([{
+        urutan_bayi: 1,
+        berat_badan: '',
+        panjang_badan: '',
+        pemberian_asi: 'ASI Eksklusif',
+        kondisi_bayi: 'Sehat',
+        keterangan: ''
+      }]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load mother data and baby data when pregnancy is selected
   useEffect(() => {
-    if (formData.forkey_hamil) {
+    if (formData.forkey_hamil && !isEdit) {
+      presenter.loadMotherData(formData.forkey_hamil);
+      fetchLatestPersalinanForMother(formData.forkey_hamil);
+    } else if (formData.forkey_hamil) {
       presenter.loadMotherData(formData.forkey_hamil);
     } else {
       setMotherData(null);
     }
-  }, [formData.forkey_hamil, presenter]);
+  }, [formData.forkey_hamil, presenter, isEdit]);
+
+  // Auto-select jenis_kunjungan based on days since delivery
+  useEffect(() => {
+    if (motherData && motherData.tanggal_persalinan && !isEdit && formData.tanggal_kunjungan && autoUpdateJenisKunjungan.current) {
+      const deliveryDate = new Date(motherData.tanggal_persalinan);
+      const visitDate = new Date(formData.tanggal_kunjungan);
+      const daysDiff = Math.floor((visitDate - deliveryDate) / (1000 * 60 * 60 * 24));
+      
+      const jenisKunjungan = getJenisKunjunganByDays(daysDiff);
+      
+      console.log('Auto-selecting jenis_kunjungan:', {
+        tanggal_persalinan: motherData.tanggal_persalinan,
+        tanggal_kunjungan: formData.tanggal_kunjungan,
+        daysDiff,
+        jenisKunjungan,
+        currentValue: formData.jenis_kunjungan,
+        autoUpdateEnabled: autoUpdateJenisKunjungan.current
+      });
+      
+      // Only update if the calculated value is different from current value
+      if (jenisKunjungan !== formData.jenis_kunjungan) {
+        setFormData(prev => ({
+          ...prev,
+          jenis_kunjungan: jenisKunjungan
+        }));
+      }
+    }
+  }, [motherData, formData.tanggal_kunjungan, isEdit, formData.jenis_kunjungan]);
 
   // Complications handling functions
   const addComplication = () => {
@@ -161,6 +258,11 @@ const TambahNifas = () => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+    
+    // If manually changing jenis_kunjungan, disable auto-update
+    if (name === 'jenis_kunjungan') {
+      autoUpdateJenisKunjungan.current = false;
+    }
     
     // Handle jumlah_bayi change
     if (name === 'jumlah_bayi') {
@@ -211,8 +313,9 @@ const TambahNifas = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
     // Check if we have complications to submit
-    const hasComplications = activeTab === 'komplikasi' && complications.some(comp => 
+    const hasComplications = complications.some(comp => 
       comp.nama_komplikasi.trim() !== ''
     );
 
@@ -469,7 +572,7 @@ const TambahNifas = () => {
                       onChange={handleChange}
                       required
                     >
-                      <option value="KF1">KF1 (6-48 jam)</option>
+                      <option value="KF1">KF1 (0-48 jam)</option>
                       <option value="KF2">KF2 (3-7 hari)</option>
                       <option value="KF3">KF3 (8-28 hari)</option>
                       <option value="KF4">KF4 (29-42 hari)</option>
@@ -707,7 +810,7 @@ const TambahNifas = () => {
                 <div className="form-section">
                   <div className="anc-section-header">
                     <h3>Komplikasi Persalinan</h3>
-                    <button type="button" className="btn-add-complication" onClick={addComplication}>
+                    <button type="button" className="anc-btn-add-complication" onClick={addComplication}>
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor"/>
                       </svg>
@@ -722,26 +825,24 @@ const TambahNifas = () => {
                         {complications.length > 1 && (
                           <button 
                             type="button" 
-                            className="btn-remove-complication"
+                            className="anc-btn-remove-complication"
                             onClick={() => removeComplication(index)}
                           >
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" fill="currentColor"/>
+                              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="currentColor" />
                             </svg>
-                            Hapus
                           </button>
                         )}
                       </div>
 
                       <div className="form-grid">
                         <div className="form-group">
-                          <label>Nama Komplikasi *</label>
+                          <label>Nama Komplikasi</label>
                           <input
                             type="text"
                             value={comp.nama_komplikasi}
                             onChange={(e) => updateComplication(index, 'nama_komplikasi', e.target.value)}
                             placeholder="Contoh: Perdarahan Post Partum"
-                            required
                           />
                         </div>
 
@@ -755,15 +856,6 @@ const TambahNifas = () => {
                             <option value="Saat Bersalin">Saat Bersalin</option>
                             <option value="Saat Hamil">Saat Hamil</option>
                           </select>
-                        </div>
-
-                        <div className="form-group">
-                          <label>Tanggal Diagnosis</label>
-                          <input
-                            type="date"
-                            value={comp.tanggal_diagnosis}
-                            onChange={(e) => updateComplication(index, 'tanggal_diagnosis', e.target.value)}
-                          />
                         </div>
 
                         <div className="form-group">
@@ -801,58 +893,41 @@ const TambahNifas = () => {
                           </label>
                         </div>
 
-                        {comp.rujuk_rs && (
-                          <>
-                            <div className="form-group">
-                              <label>Nama Rumah Sakit</label>
-                              <select
-                                value={comp.nama_rs}
-                                onChange={(e) => updateComplication(index, 'nama_rs', e.target.value)}
-                              >
-                                <option value="">-- Pilih Rumah Sakit --</option>
-                                <option value="RS MOEIS">RS MOEIS</option>
-                                <option value="RS Samarinda Medika Citra">RS Samarinda Medika Citra</option>
-                                <option value="RS Hermina">RS Hermina</option>
-                                <option value="RS Aisyiyah">RS Aisyiyah</option>
-                                <option value="RS Jimmy Medika Borneo">RS Jimmy Medika Borneo</option>
-                                <option value="RS Abdoel Wahab Sjahranie">RS Abdoel Wahab Sjahranie</option>
-                              </select>
-                            </div>
-
-                            <div className="form-group">
-                              <label>Tanggal Rujukan</label>
-                              <input
-                                type="date"
-                                value={comp.tanggal_rujukan}
-                                onChange={(e) => updateComplication(index, 'tanggal_rujukan', e.target.value)}
-                              />
-                            </div>
-                          </>
-                        )}
-
                         <div className="form-group">
-                          <label>Tekanan Darah</label>
-                          <input
-                            type="text"
-                            value={comp.tekanan_darah}
-                            onChange={(e) => updateComplication(index, 'tekanan_darah', e.target.value)}
-                            placeholder="Contoh: 150/100"
-                          />
+                          <label>Nama Rumah Sakit</label>
+                          <select
+                            value={comp.nama_rs}
+                            onChange={(e) => updateComplication(index, 'nama_rs', e.target.value)}
+                            disabled={!comp.rujuk_rs}
+                            style={{
+                              backgroundColor: !comp.rujuk_rs ? '#F3F4F6' : 'white',
+                              cursor: !comp.rujuk_rs ? 'not-allowed' : 'default',
+                              borderColor: !comp.rujuk_rs ? '#D1D5DB' : '#E5E7EB'
+                            }}
+                          >
+                            <option value="">-- Pilih Rumah Sakit --</option>
+                            <option value="RS MOEIS">RS MOEIS</option>
+                            <option value="RS Samarinda Medika Citra">RS Samarinda Medika Citra</option>
+                            <option value="RS Hermina">RS Hermina</option>
+                            <option value="RS Aisyiyah">RS Aisyiyah</option>
+                            <option value="RS Jimmy Medika Borneo">RS Jimmy Medika Borneo</option>
+                            <option value="RS Abdoel Wahab Sjahranie">RS Abdoel Wahab Sjahranie</option>
+                          </select>
                         </div>
 
                         <div className="form-group">
-                          <label>Protein Urine</label>
-                          <select
-                            value={comp.protein_urine}
-                            onChange={(e) => updateComplication(index, 'protein_urine', e.target.value)}
-                          >
-                            <option value="">-- Pilih --</option>
-                            <option value="Negatif">Negatif</option>
-                            <option value="+1">+1</option>
-                            <option value="+2">+2</option>
-                            <option value="+3">+3</option>
-                            <option value="+4">+4</option>
-                          </select>
+                          <label>Tanggal Rujukan</label>
+                          <input
+                            type="date"
+                            value={comp.tanggal_rujukan}
+                            onChange={(e) => updateComplication(index, 'tanggal_rujukan', e.target.value)}
+                            disabled={!comp.rujuk_rs}
+                            style={{
+                              backgroundColor: !comp.rujuk_rs ? '#F3F4F6' : 'white',
+                              cursor: !comp.rujuk_rs ? 'not-allowed' : 'text',
+                              borderColor: !comp.rujuk_rs ? '#D1D5DB' : '#E5E7EB'
+                            }}
+                          />
                         </div>
 
                         <div className="form-group full-width">
@@ -860,8 +935,8 @@ const TambahNifas = () => {
                           <textarea
                             value={comp.gejala_penyerta}
                             onChange={(e) => updateComplication(index, 'gejala_penyerta', e.target.value)}
-                            rows="2"
-                            placeholder="Gejala yang menyertai komplikasi..."
+                            rows="3"
+                            placeholder="Contoh: Sakit kepala, penglihatan kabur, edema..."
                           />
                         </div>
 
@@ -870,8 +945,8 @@ const TambahNifas = () => {
                           <textarea
                             value={comp.terapi_diberikan}
                             onChange={(e) => updateComplication(index, 'terapi_diberikan', e.target.value)}
-                            rows="2"
-                            placeholder="Terapi atau pengobatan yang diberikan..."
+                            rows="3"
+                            placeholder="Contoh: Methyldopa 3x500mg, MgSO4..."
                           />
                         </div>
 
@@ -880,7 +955,7 @@ const TambahNifas = () => {
                           <textarea
                             value={comp.keterangan}
                             onChange={(e) => updateComplication(index, 'keterangan', e.target.value)}
-                            rows="2"
+                            rows="3"
                             placeholder="Keterangan tambahan..."
                           />
                         </div>

@@ -44,8 +44,8 @@ router.get('/stats', async (req, res) => {
     const [totalIbuHamilResult] = await db.query(
       `SELECT COUNT(*) as count FROM kehamilan 
        WHERE status_kehamilan = 'Hamil' 
-       AND YEAR(created_at) = ?`,
-      [currentYear]
+       AND (YEAR(created_at) = ? OR YEAR(updated_at) = ?)`,
+      [currentYear, currentYear]
     );
     const totalIbuHamil = totalIbuHamilResult[0].count;
 
@@ -55,9 +55,9 @@ router.get('/stats', async (req, res) => {
        FROM kehamilan k
        JOIN antenatal_care anc ON k.id = anc.forkey_hamil
        WHERE k.status_kehamilan = 'Hamil' 
-       AND YEAR(k.created_at) = ?
+       AND (YEAR(k.created_at) = ? OR YEAR(k.updated_at) = ?)
        AND anc.status_risiko_visit IN ('Ringan', 'Sedang', 'Tinggi')`,
-      [currentYear]
+      [currentYear, currentYear]
     );
     const ibuHamilRisikoTinggi = highRiskResult[0].count;
 
@@ -65,13 +65,13 @@ router.get('/stats', async (req, res) => {
     const [k1CoverageResult] = await db.query(
       `SELECT 
         COUNT(DISTINCT anc.forkey_hamil) as k1_count,
-        (SELECT COUNT(*) FROM kehamilan WHERE status_kehamilan = 'Hamil' AND YEAR(created_at) = ?) as total_hamil
+        (SELECT COUNT(*) FROM kehamilan WHERE status_kehamilan = 'Hamil' AND (YEAR(created_at) = ? OR YEAR(updated_at) = ?)) as total_hamil
        FROM antenatal_care anc
        JOIN kehamilan k ON anc.forkey_hamil = k.id
        WHERE anc.jenis_kunjungan = 'K1' 
        AND k.status_kehamilan = 'Hamil'
        AND YEAR(anc.tanggal_kunjungan) = ?`,
-      [currentYear, currentYear]
+      [currentYear, currentYear, currentYear]
     );
     const k1Count = k1CoverageResult[0].k1_count;
     const totalHamil = k1CoverageResult[0].total_hamil;
@@ -111,10 +111,10 @@ router.get('/ibu-by-kelurahan', async (req, res) => {
       LEFT JOIN kelurahan kel ON i.kelurahan_id = kel.id
       JOIN kehamilan k ON i.id = k.forkey_ibu
       WHERE k.status_kehamilan = 'Hamil'
-        AND YEAR(k.created_at) = ?
+        AND (YEAR(k.created_at) = ? OR YEAR(k.updated_at) = ?)
       GROUP BY kel.nama_kelurahan
       ORDER BY count DESC
-    `, [currentYear]);
+    `, [currentYear, currentYear]);
     res.json(results);
   } catch (error) {
     console.error('Error fetching ibu by kelurahan:', error);
@@ -275,9 +275,9 @@ router.get('/risk-distribution', async (req, res) => {
       FROM kehamilan k
       LEFT JOIN antenatal_care anc ON k.id = anc.forkey_hamil
       WHERE k.status_kehamilan = 'Hamil'
-        AND YEAR(k.created_at) = ?
+        AND (YEAR(k.created_at) = ? OR YEAR(k.updated_at) = ?)
       GROUP BY risk_category
-    `, [currentYear]);
+    `, [currentYear, currentYear]);
     res.json(results);
   } catch (error) {
     console.error('Error fetching risk distribution:', error);
@@ -548,7 +548,7 @@ router.get('/at-risk-mothers', async (req, res) => {
       ) latest_anc ON k.id = latest_anc.forkey_hamil AND latest_anc.rn = 1
       LEFT JOIN lab_screening latest_lab ON latest_anc.forkey_lab_screening = latest_lab.id
       WHERE k.status_kehamilan = 'Hamil'
-        AND YEAR(k.created_at) = ?
+        AND (YEAR(k.created_at) = ? OR YEAR(k.updated_at) = ?)
         AND (
           (latest_lab.hasil_lab_hb IS NOT NULL AND latest_lab.hasil_lab_hb < 11.0) OR
           (latest_anc.lila IS NOT NULL AND latest_anc.lila < 23.5)
@@ -562,7 +562,7 @@ router.get('/at-risk-mothers', async (req, res) => {
           ELSE 5
         END,
         latest_anc.tanggal_kunjungan DESC
-    `, [currentYear]);
+    `, [currentYear, currentYear]);
     
     res.json(results);
   } catch (error) {

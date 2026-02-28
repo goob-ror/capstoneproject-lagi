@@ -108,8 +108,9 @@ const TambahPersalinan = () => {
         forkey_bidan: data.forkey_bidan || ''
       });
     },
-    onSuccess: (message) => {
+    onSuccess: (message, pregnancyId, persalinanId, isEdit) => {
       alert(message);
+      // Always redirect to persalinan list after successful save
       navigate('/persalinan');
     },
     onLogout: () => navigate('/login')
@@ -275,7 +276,7 @@ const TambahPersalinan = () => {
     e.preventDefault();
     
     // Check if we have complications to submit
-    const hasComplications = activeTab === 'komplikasi' && complications.some(comp => 
+    const hasComplications = complications.some(comp => 
       comp.nama_komplikasi.trim() !== ''
     );
 
@@ -913,9 +914,13 @@ const TambahPersalinan = () => {
               <div className="form-section">
                 <div className="anc-section-header">
                   <h3>Komplikasi Persalinan</h3>
-                  <button type="button" className="btn-add-complication" onClick={addComplication}>
+                  <button
+                    type="button"
+                    className="anc-btn-add-complication"
+                    onClick={addComplication}
+                  >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor"/>
+                      <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor" />
                     </svg>
                     Tambah Komplikasi
                   </button>
@@ -926,28 +931,26 @@ const TambahPersalinan = () => {
                     <div className="anc-complication-header">
                       <h4>Komplikasi {index + 1}</h4>
                       {complications.length > 1 && (
-                        <button 
-                          type="button" 
-                          className="btn-remove-complication"
+                        <button
+                          type="button"
+                          className="anc-btn-remove-complication"
                           onClick={() => removeComplication(index)}
                         >
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" fill="currentColor"/>
+                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="currentColor" />
                           </svg>
-                          Hapus
                         </button>
                       )}
                     </div>
 
                     <div className="form-grid">
                       <div className="form-group">
-                        <label>Nama Komplikasi *</label>
+                        <label>Nama Komplikasi</label>
                         <input
                           type="text"
                           value={comp.nama_komplikasi}
                           onChange={(e) => updateComplication(index, 'nama_komplikasi', e.target.value)}
                           placeholder="Contoh: Perdarahan Post Partum"
-                          required
                         />
                       </div>
 
@@ -961,15 +964,6 @@ const TambahPersalinan = () => {
                           <option value="Saat Nifas">Saat Nifas</option>
                           <option value="Saat Hamil">Saat Hamil</option>
                         </select>
-                      </div>
-
-                      <div className="form-group">
-                        <label>Tanggal Diagnosis</label>
-                        <input
-                          type="date"
-                          value={comp.tanggal_diagnosis}
-                          onChange={(e) => updateComplication(index, 'tanggal_diagnosis', e.target.value)}
-                        />
                       </div>
 
                       <div className="form-group">
@@ -1007,58 +1001,41 @@ const TambahPersalinan = () => {
                         </label>
                       </div>
 
-                      {comp.rujuk_rs && (
-                        <>
-                          <div className="form-group">
-                            <label>Nama Rumah Sakit</label>
-                            <select
-                              value={comp.nama_rs}
-                              onChange={(e) => updateComplication(index, 'nama_rs', e.target.value)}
-                            >
-                              <option value="">-- Pilih Rumah Sakit --</option>
-                              <option value="RS MOEIS">RS MOEIS</option>
-                              <option value="RS Samarinda Medika Citra">RS Samarinda Medika Citra</option>
-                              <option value="RS Hermina">RS Hermina</option>
-                              <option value="RS Aisyiyah">RS Aisyiyah</option>
-                              <option value="RS Jimmy Medika Borneo">RS Jimmy Medika Borneo</option>
-                              <option value="RS Abdoel Wahab Sjahranie">RS Abdoel Wahab Sjahranie</option>
-                            </select>
-                          </div>
-
-                          <div className="form-group">
-                            <label>Tanggal Rujukan</label>
-                            <input
-                              type="date"
-                              value={comp.tanggal_rujukan}
-                              onChange={(e) => updateComplication(index, 'tanggal_rujukan', e.target.value)}
-                            />
-                          </div>
-                        </>
-                      )}
-
                       <div className="form-group">
-                        <label>Tekanan Darah</label>
-                        <input
-                          type="text"
-                          value={comp.tekanan_darah}
-                          onChange={(e) => updateComplication(index, 'tekanan_darah', e.target.value)}
-                          placeholder="Contoh: 150/100"
-                        />
+                        <label>Nama Rumah Sakit</label>
+                        <select
+                          value={comp.nama_rs}
+                          onChange={(e) => updateComplication(index, 'nama_rs', e.target.value)}
+                          disabled={!comp.rujuk_rs}
+                          style={{
+                            backgroundColor: !comp.rujuk_rs ? '#F3F4F6' : 'white',
+                            cursor: !comp.rujuk_rs ? 'not-allowed' : 'default',
+                            borderColor: !comp.rujuk_rs ? '#D1D5DB' : '#E5E7EB'
+                          }}
+                        >
+                          <option value="">-- Pilih Rumah Sakit --</option>
+                          <option value="RS MOEIS">RS MOEIS</option>
+                          <option value="RS Samarinda Medika Citra">RS Samarinda Medika Citra</option>
+                          <option value="RS Hermina">RS Hermina</option>
+                          <option value="RS Aisyiyah">RS Aisyiyah</option>
+                          <option value="RS Jimmy Medika Borneo">RS Jimmy Medika Borneo</option>
+                          <option value="RS Abdoel Wahab Sjahranie">RS Abdoel Wahab Sjahranie</option>
+                        </select>
                       </div>
 
                       <div className="form-group">
-                        <label>Protein Urine</label>
-                        <select
-                          value={comp.protein_urine}
-                          onChange={(e) => updateComplication(index, 'protein_urine', e.target.value)}
-                        >
-                          <option value="">-- Pilih --</option>
-                          <option value="Negatif">Negatif</option>
-                          <option value="+1">+1</option>
-                          <option value="+2">+2</option>
-                          <option value="+3">+3</option>
-                          <option value="+4">+4</option>
-                        </select>
+                        <label>Tanggal Rujukan</label>
+                        <input
+                          type="date"
+                          value={comp.tanggal_rujukan}
+                          onChange={(e) => updateComplication(index, 'tanggal_rujukan', e.target.value)}
+                          disabled={!comp.rujuk_rs}
+                          style={{
+                            backgroundColor: !comp.rujuk_rs ? '#F3F4F6' : 'white',
+                            cursor: !comp.rujuk_rs ? 'not-allowed' : 'text',
+                            borderColor: !comp.rujuk_rs ? '#D1D5DB' : '#E5E7EB'
+                          }}
+                        />
                       </div>
 
                       <div className="form-group full-width">
@@ -1066,8 +1043,8 @@ const TambahPersalinan = () => {
                         <textarea
                           value={comp.gejala_penyerta}
                           onChange={(e) => updateComplication(index, 'gejala_penyerta', e.target.value)}
-                          rows="2"
-                          placeholder="Gejala yang menyertai komplikasi..."
+                          rows="3"
+                          placeholder="Contoh: Kontraksi uterus lemah, perdarahan aktif..."
                         />
                       </div>
 
@@ -1076,8 +1053,8 @@ const TambahPersalinan = () => {
                         <textarea
                           value={comp.terapi_diberikan}
                           onChange={(e) => updateComplication(index, 'terapi_diberikan', e.target.value)}
-                          rows="2"
-                          placeholder="Terapi atau pengobatan yang diberikan..."
+                          rows="3"
+                          placeholder="Contoh: Oksitosin 10 IU IM, masase uterus..."
                         />
                       </div>
 
@@ -1086,7 +1063,7 @@ const TambahPersalinan = () => {
                         <textarea
                           value={comp.keterangan}
                           onChange={(e) => updateComplication(index, 'keterangan', e.target.value)}
-                          rows="2"
+                          rows="3"
                           placeholder="Keterangan tambahan..."
                         />
                       </div>

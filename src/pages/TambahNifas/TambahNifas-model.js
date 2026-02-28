@@ -40,7 +40,7 @@ class TambahNifasModel {
   // Get visit type description
   getVisitTypeDescription(jenis_kunjungan) {
     const descriptions = {
-      'KF1': 'Kunjungan Nifas 1 (6-48 jam)',
+      'KF1': 'Kunjungan Nifas 1 (0-48 jam)',
       'KF2': 'Kunjungan Nifas 2 (3-7 hari)',
       'KF3': 'Kunjungan Nifas 3 (8-28 hari)',
       'KF4': 'Kunjungan Nifas 4 (29-42 hari)'

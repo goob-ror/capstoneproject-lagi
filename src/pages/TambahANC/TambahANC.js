@@ -462,7 +462,7 @@ const TambahANC = () => {
     };
 
     // Check if we have complications to submit
-    const hasComplications = activeTab === 'complications' && complications.some(comp =>
+    const hasComplications = complications.some(comp =>
       comp.nama_komplikasi.trim() !== ''
     );
 
@@ -1458,13 +1458,12 @@ const TambahANC = () => {
 
                     <div className="form-grid">
                       <div className="form-group">
-                        <label>Nama Komplikasi *</label>
+                        <label>Nama Komplikasi</label>
                         <input
                           type="text"
                           value={comp.nama_komplikasi}
                           onChange={(e) => updateComplication(index, 'nama_komplikasi', e.target.value)}
                           placeholder="Contoh: Hipertensi Gestasional"
-                          required
                         />
                       </div>
 

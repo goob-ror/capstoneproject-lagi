@@ -313,6 +313,7 @@ const TambahIbu = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
     // Add flag to indicate if we're adding a new pregnancy
     const submitData = {
       ...formData,

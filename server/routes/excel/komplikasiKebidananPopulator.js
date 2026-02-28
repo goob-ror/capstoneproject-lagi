@@ -1,4 +1,4 @@
-async function populateKomplikasi(workbook, pool, filters) {
+async function populateKomplikasiKebidanan(workbook, pool, filters) {
   const worksheet = workbook.getWorksheet('Komplikasi Kebidanan');
   if (!worksheet) {
     console.log('Komplikasi Kebidanan worksheet not found');
@@ -6,7 +6,7 @@ async function populateKomplikasi(workbook, pool, filters) {
   }
 
   // Fetch statistics for each kelurahan
-  const stats = await fetchKomplikasiStats(pool, filters);
+  const stats = await fetchKomplikasiKebidananStats(pool, filters);
   
   // Kelurahan mapping to row numbers
   const kelurahanRowMap = {
@@ -21,17 +21,17 @@ async function populateKomplikasi(workbook, pool, filters) {
     if (!rowNumber) return;
 
     const row = worksheet.getRow(rowNumber);
-    populateKomplikasiRow(row, stat);
+    populateKomplikasiKebidananRow(row, stat);
   });
 
   // Populate total row (row 10)
   const totalRow = worksheet.getRow(10);
-  populateKomplikasiRow(totalRow, stats.totals);
+  populateKomplikasiKebidananRow(totalRow, stats.totals);
   
   console.log('Komplikasi Kebidanan sheet populated');
 }
 
-async function fetchKomplikasiStats(pool, filters) {
+async function fetchKomplikasiKebidananStats(pool, filters) {
   const kelurahanFilter = filters.kelurahan ? 'AND kel.nama_kelurahan = ?' : '';
   const kelurahanParams = filters.kelurahan ? [filters.kelurahan] : [];
 
@@ -147,8 +147,8 @@ async function fetchKomplikasiStats(pool, filters) {
     LEFT JOIN kehamilan k ON k.forkey_ibu = i.id
     LEFT JOIN antenatal_care ac ON ac.forkey_hamil = k.id
     LEFT JOIN persalinan ps ON ps.forkey_hamil = k.id
-    LEFT JOIN komplikasi ko ON ko.forkey_hamil = k.id
-    WHERE 1=1 ${kelurahanFilter} ${dateWhereKomplikasi}
+    LEFT JOIN komplikasi ko ON ko.forkey_hamil = k.id ${dateWhereKomplikasi}
+    WHERE 1=1 ${kelurahanFilter}
     GROUP BY kel.id, kel.nama_kelurahan
     ORDER BY kel.nama_kelurahan
   `;
@@ -171,7 +171,7 @@ async function fetchKomplikasiStats(pool, filters) {
   return { kelurahanData, totals };
 }
 
-function populateKomplikasiRow(row, stat) {
+function populateKomplikasiKebidananRow(row, stat) {
   row.eachCell({ includeEmpty: false }, (cell) => {
     const cellValue = cell.value;
     if (typeof cellValue !== 'string' || !cellValue.includes('{')) return;
@@ -248,4 +248,4 @@ function populateKomplikasiRow(row, stat) {
   });
 }
 
-module.exports = { populateKomplikasi };
+module.exports = { populateKomplikasiKebidanan };

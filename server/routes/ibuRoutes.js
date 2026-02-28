@@ -25,11 +25,11 @@ router.get('/', authMiddleware, async (req, res) => {
         WHERE id IN (
           SELECT MAX(id) FROM kehamilan GROUP BY forkey_ibu
         )
-        AND YEAR(created_at) = ?
+        AND (YEAR(created_at) = ? OR YEAR(updated_at) = ?)
       ) k ON i.id = k.forkey_ibu
-      WHERE YEAR(i.created_at) = ? OR k.forkey_ibu IS NOT NULL
+      WHERE YEAR(i.created_at) = ? OR YEAR(i.updated_at) = ? OR k.forkey_ibu IS NOT NULL
       ORDER BY i.created_at DESC
-    `, [filterYear, filterYear]);
+    `, [filterYear, filterYear, filterYear, filterYear]);
     res.json(rows);
   } catch (error) {
     console.error('Get ibu error:', error);

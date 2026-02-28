@@ -18,7 +18,7 @@ router.get('/delivered-mothers', auth, async (req, res) => {
       FROM kehamilan k
       JOIN ibu ON k.forkey_ibu = ibu.id
       JOIN persalinan p ON k.id = p.forkey_hamil
-      WHERE k.status_kehamilan = 'Bersalin'
+      WHERE k.status_kehamilan IN ('Bersalin', 'Nifas')
       ORDER BY p.tanggal_persalinan DESC
     `;
     
@@ -64,6 +64,49 @@ router.get('/pregnancy/:pregnancyId/mother', auth, async (req, res) => {
     res.json(rows[0]);
   } catch (error) {
     console.error('Error fetching mother data:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Get persalinan data by pregnancy ID for pre-filling nifas form
+router.get('/persalinan/by-pregnancy/:pregnancyId', auth, async (req, res) => {
+  try {
+    const { pregnancyId } = req.params;
+    
+    // Get persalinan data
+    const persalinanQuery = `
+      SELECT 
+        p.*,
+        ibu.nama_lengkap as nama_ibu,
+        ibu.nik_ibu
+      FROM persalinan p
+      JOIN kehamilan k ON p.forkey_hamil = k.id
+      JOIN ibu ON k.forkey_ibu = ibu.id
+      WHERE p.forkey_hamil = ?
+      ORDER BY p.tanggal_persalinan DESC
+      LIMIT 1
+    `;
+    
+    const [persalinanRows] = await db.execute(persalinanQuery, [pregnancyId]);
+    
+    if (persalinanRows.length === 0) {
+      return res.status(404).json({ message: 'Persalinan data not found for this pregnancy' });
+    }
+    
+    const persalinan = persalinanRows[0];
+    
+    // Get baby data
+    const bayiQuery = `
+      SELECT * FROM bayi WHERE forkey_persalinan = ? ORDER BY urutan_bayi
+    `;
+    const [bayiRows] = await db.execute(bayiQuery, [persalinan.id]);
+    
+    res.json({
+      persalinan,
+      babies: bayiRows
+    });
+  } catch (error) {
+    console.error('Error fetching persalinan by pregnancy:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
@@ -595,6 +638,44 @@ router.post('/with-complications', auth, async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   } finally {
     connection.release();
+  }
+});
+
+// Get persalinan data with babies for KF1 creation
+router.get('/persalinan/:persalinanId/for-kf1', auth, async (req, res) => {
+  try {
+    const { persalinanId } = req.params;
+    
+    // Get persalinan data
+    const [persalinanRows] = await db.execute(
+      `SELECT p.*, k.forkey_ibu, k.gravida, k.partus, k.abortus,
+              ibu.nama_lengkap, ibu.nik_ibu
+       FROM persalinan p
+       JOIN kehamilan k ON p.forkey_hamil = k.id
+       JOIN ibu ON k.forkey_ibu = ibu.id
+       WHERE p.id = ?`,
+      [persalinanId]
+    );
+    
+    if (persalinanRows.length === 0) {
+      return res.status(404).json({ message: 'Persalinan data not found' });
+    }
+    
+    const persalinan = persalinanRows[0];
+    
+    // Get baby data
+    const [bayiRows] = await db.execute(
+      `SELECT * FROM bayi WHERE forkey_persalinan = ? ORDER BY urutan_bayi ASC`,
+      [persalinanId]
+    );
+    
+    res.json({
+      persalinan,
+      babies: bayiRows
+    });
+  } catch (error) {
+    console.error('Error fetching persalinan for KF1:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 });
 

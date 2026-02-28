@@ -203,10 +203,11 @@ router.post('/', auth, async (req, res) => {
       return res.status(400).json({ message: 'Baby data is required and must be an array' });
     }
 
-    if (bayi.length !== (jumlah_bayi || 1)) {
+    const expectedBabyCount = parseInt(jumlah_bayi) || 1;
+    if (bayi.length !== expectedBabyCount) {
       await connection.rollback();
       return res.status(400).json({ 
-        message: `Number of babies (${bayi.length}) does not match jumlah_bayi (${jumlah_bayi || 1})` 
+        message: `Number of babies (${bayi.length}) does not match jumlah_bayi (${expectedBabyCount})` 
       });
     }
 
@@ -324,10 +325,11 @@ router.put('/:id', auth, async (req, res) => {
       return res.status(400).json({ message: 'Baby data is required and must be an array' });
     }
 
-    if (bayi.length !== (jumlah_bayi || 1)) {
+    const expectedBabyCount = parseInt(jumlah_bayi) || 1;
+    if (bayi.length !== expectedBabyCount) {
       await connection.rollback();
       return res.status(400).json({ 
-        message: `Number of babies (${bayi.length}) does not match jumlah_bayi (${jumlah_bayi || 1})` 
+        message: `Number of babies (${bayi.length}) does not match jumlah_bayi (${expectedBabyCount})` 
       });
     }
 

@@ -75,10 +75,13 @@ class TambahPersalinanPresenter {
       this.callbacks.clearError();
 
       // Submit persalinan data
+      let persalinanId;
       if (isEdit) {
         await this.model.updatePersalinan(editId, formData);
+        persalinanId = editId;
       } else {
-        await this.model.createPersalinan(formData);
+        const result = await this.model.createPersalinan(formData);
+        persalinanId = result.id || result.persalinanId;
       }
 
       // Submit complications if any
@@ -100,7 +103,8 @@ class TambahPersalinanPresenter {
         ? 'Data persalinan berhasil diperbarui'
         : 'Data persalinan berhasil disimpan';
 
-      this.callbacks.onSuccess(successMessage);
+      // Pass pregnancy ID and persalinan ID for KF1 creation
+      this.callbacks.onSuccess(successMessage, formData.forkey_hamil, persalinanId, isEdit);
     } catch (error) {
       console.error('Error saving persalinan data:', error);
       if (error.message.includes('401')) {

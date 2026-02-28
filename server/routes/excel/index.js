@@ -61,9 +61,16 @@ router.get('/generate', authMiddleware, async (req, res) => {
 
   } catch (error) {
     console.error('Error generating Excel:', error);
+    console.error('Error stack:', error.stack);
+    if (error.sql) {
+      console.error('SQL Error:', error.sql);
+      console.error('SQL Message:', error.sqlMessage);
+    }
     res.status(500).json({
       message: 'Error generating Excel file',
-      error: error.message
+      error: error.message,
+      sqlMessage: error.sqlMessage || null,
+      details: error.stack
     });
   }
 });
