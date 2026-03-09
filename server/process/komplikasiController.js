@@ -219,6 +219,9 @@ const buildNifasKomplikasiQuery = (whereClause) => {
             kel.id,
             kel.nama_kelurahan as kelurahan,
             
+            -- Total bersalin count
+            COUNT(DISTINCT p.id) as total_bersalin,
+            
             -- Komplikasi Persalinan (from worksheet)
             COUNT(DISTINCT CASE WHEN EXISTS (
                 SELECT 1 FROM komplikasi 
@@ -299,6 +302,9 @@ const mergeKomplikasiData = (bumilData, ancTerpaduData, nifasData) => {
         
         const totalBumil = parseInt(bumil.total_bumil) || 0;
         
+        // Get total_bersalin from nifas data (count of persalinan records)
+        const total_bersalin = parseInt(nifas.total_bersalin) || 0;
+        
         // Sum komplikasi from both sources
         const anemia_jumlah = (parseInt(ancTerpadu.anemia_jumlah) || 0) + (parseInt(nifas.nifas_anemia_jumlah) || 0);
         const kek_jumlah = (parseInt(ancTerpadu.kek_jumlah) || 0) + (parseInt(nifas.nifas_kek_jumlah) || 0);
@@ -326,6 +332,7 @@ const mergeKomplikasiData = (bumilData, ancTerpaduData, nifasData) => {
         return {
             kelurahan: bumil.kelurahan,
             total_bumil: totalBumil,
+            total_bersalin: total_bersalin,
             
             anemia_jumlah,
             anemia_persen: calcPercent(anemia_jumlah),

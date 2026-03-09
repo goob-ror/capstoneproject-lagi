@@ -9,9 +9,39 @@ const fillDataPasienWorksheet = async (workbook, data, tanggal_laporan, nama_pus
 
     // Fill patient data starting from row 5
     if (data && data.data && data.data.length > 0) {
-        let rowIndex = 5;
+        const templateRowIndex = 5; // Row 5 is the template row with styling
+        const templateRow = worksheet.getRow(templateRowIndex);
+        
+        // Store template row styling
+        const templateStyles = [];
+        for (let col = 1; col <= 16; col++) {
+            const cell = templateRow.getCell(col);
+            templateStyles[col] = {
+                font: cell.font ? { ...cell.font } : undefined,
+                alignment: cell.alignment ? { ...cell.alignment } : undefined,
+                border: cell.border ? { ...cell.border } : undefined,
+                fill: cell.fill ? { ...cell.fill } : undefined,
+                numFmt: cell.numFmt
+            };
+        }
+
         data.data.forEach((patient, index) => {
+            const rowIndex = templateRowIndex + index;
             const row = worksheet.getRow(rowIndex);
+            
+            // Copy styling from template to each cell
+            for (let col = 1; col <= 16; col++) {
+                const cell = row.getCell(col);
+                const style = templateStyles[col];
+                
+                if (style.font) cell.font = style.font;
+                if (style.alignment) cell.alignment = style.alignment;
+                if (style.border) cell.border = style.border;
+                if (style.fill) cell.fill = style.fill;
+                if (style.numFmt) cell.numFmt = style.numFmt;
+            }
+
+            // Fill data
             row.getCell(1).value = index + 1; // No
             row.getCell(2).value = patient.datapasien_namapasien || '';
             row.getCell(3).value = patient.datapasien_nik || '';
@@ -28,8 +58,8 @@ const fillDataPasienWorksheet = async (workbook, data, tanggal_laporan, nama_pus
             row.getCell(14).value = patient.datapasien_hpht || '';
             row.getCell(15).value = patient.datapasien_gpa || '';
             row.getCell(16).value = patient.datapasien_tp || '';
+            
             row.commit();
-            rowIndex++;
         });
     }
 };

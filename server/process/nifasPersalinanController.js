@@ -225,9 +225,8 @@ const buildNifasPersalinanQuery = (whereClause) => {
         FROM kelurahan kel
         LEFT JOIN ibu i ON i.kelurahan_id = kel.id
         LEFT JOIN kehamilan k ON k.forkey_ibu = i.id
-        LEFT JOIN persalinan p ON p.forkey_hamil = k.id
+        LEFT JOIN persalinan p ON p.forkey_hamil = k.id ${whereClause ? 'AND ' + whereClause.replace('WHERE ', '') : ''}
         LEFT JOIN kunjungan_nifas kn ON kn.forkey_hamil = k.id
-        ${whereClause}
         GROUP BY kel.id, kel.nama_kelurahan
         ORDER BY kel.nama_kelurahan
     `;
