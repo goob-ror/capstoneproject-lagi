@@ -31,7 +31,7 @@ const TambahANC = () => {
   const [riskScore, setRiskScore] = useState(null);
   const [showRiskNotification, setShowRiskNotification] = useState(false);
   const [selectedPregnancy, setSelectedPregnancy] = useState(null);
-  const autoUpdateJenisKunjungan = useRef(true); // Track if we should auto-update
+  const autoUpdateJenisKunjungan = useRef(true);
 
   // Calculate gestational age in weeks
   const calculateGestationalAge = (lmpDate, currentDate = new Date()) => {
@@ -223,29 +223,24 @@ const TambahANC = () => {
   }, [formData.forkey_hamil, presenter]);
 
   // Auto-select jenis_kunjungan based on gestational age
+  const tanggalKunjungan = formData.tanggal_kunjungan;
+  
   useEffect(() => {
-    if (selectedPregnancy && selectedPregnancy.haid_terakhir && !isEdit && formData.tanggal_kunjungan && autoUpdateJenisKunjungan.current) {
-      const weeks = calculateGestationalAge(selectedPregnancy.haid_terakhir, formData.tanggal_kunjungan);
+    if (selectedPregnancy && selectedPregnancy.haid_terakhir && !isEdit && tanggalKunjungan && autoUpdateJenisKunjungan.current) {
+      const weeks = calculateGestationalAge(selectedPregnancy.haid_terakhir, tanggalKunjungan);
       const jenisKunjungan = getJenisKunjunganByAge(weeks);
       
-      console.log('Auto-selecting jenis_kunjungan:', {
-        haid_terakhir: selectedPregnancy.haid_terakhir,
-        tanggal_kunjungan: formData.tanggal_kunjungan,
-        weeks,
-        jenisKunjungan,
-        currentValue: formData.jenis_kunjungan,
-        autoUpdateEnabled: autoUpdateJenisKunjungan.current
+      setFormData(prev => {
+        if (prev.jenis_kunjungan !== jenisKunjungan) {
+          return {
+            ...prev,
+            jenis_kunjungan: jenisKunjungan
+          };
+        }
+        return prev;
       });
-      
-      // Only update if the calculated value is different from current value
-      if (jenisKunjungan !== formData.jenis_kunjungan) {
-        setFormData(prev => ({
-          ...prev,
-          jenis_kunjungan: jenisKunjungan
-        }));
-      }
     }
-  }, [selectedPregnancy, formData.tanggal_kunjungan, isEdit, formData.jenis_kunjungan]);
+  }, [selectedPregnancy, tanggalKunjungan, isEdit]);
 
   // Extract existing visit types for display
   useEffect(() => {
@@ -783,15 +778,36 @@ const TambahANC = () => {
                       name="forkey_hamil"
                       value={pregnancyOptions.find(opt => opt.value === formData.forkey_hamil) || null}
                       onChange={(selectedOption) => {
-                        setFormData(prev => ({ ...prev, forkey_hamil: selectedOption ? selectedOption.value : '' }));
-                        // Store the full pregnancy data for gestational age calculation
                         if (selectedOption) {
                           const pregnancy = pregnancies.find(p => p.id === selectedOption.value);
-                          console.log('Selected pregnancy:', pregnancy);
+                          
+                          // Disable auto-update temporarily while loading
+                          autoUpdateJenisKunjungan.current = false;
+                          
+                          // Step 1: Set pregnancy ID first
+                          setFormData(prev => ({
+                            ...prev,
+                            forkey_hamil: selectedOption.value
+                          }));
+                          
+                          // Step 2: Set pregnancy data
                           setSelectedPregnancy(pregnancy);
-                          autoUpdateJenisKunjungan.current = true; // Re-enable auto-update when pregnancy changes
+                          
+                          // Step 3: Wait for existing data to load, then enable auto-update
+                          setTimeout(() => {
+                            // Ensure date is set (default to today if empty)
+                            setFormData(prev => ({
+                              ...prev,
+                              tanggal_kunjungan: prev.tanggal_kunjungan || new Date().toISOString().split('T')[0]
+                            }));
+                            
+                            // Re-enable auto-update after data has loaded
+                            autoUpdateJenisKunjungan.current = true;
+                          }, 300); // 300ms delay to allow existing visit data to load
                         } else {
+                          setFormData(prev => ({ ...prev, forkey_hamil: '' }));
                           setSelectedPregnancy(null);
+                          autoUpdateJenisKunjungan.current = false;
                         }
                       }}
                       options={pregnancyOptions}

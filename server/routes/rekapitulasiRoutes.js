@@ -211,22 +211,22 @@ router.get('/', authMiddleware, async (req, res) => {
         COUNT(*) as total_checked,
         -- Trimester 1 (0-13 weeks)
         SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 <= 13 THEN 1 ELSE 0 END) as trimester1_total,
-        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 <= 13 AND ls.hasil_lab_hb >= 11 THEN 1 ELSE 0 END) as trimester1_normal,
-        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 <= 13 AND ls.hasil_lab_hb >= 10 AND ls.hasil_lab_hb < 11 THEN 1 ELSE 0 END) as trimester1_ringan,
-        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 <= 13 AND ls.hasil_lab_hb >= 8 AND ls.hasil_lab_hb < 10 THEN 1 ELSE 0 END) as trimester1_sedang,
-        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 <= 13 AND ls.hasil_lab_hb < 8 THEN 1 ELSE 0 END) as trimester1_berat,
+        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 <= 13 AND ls.hasil_lab_hb >= 12 THEN 1 ELSE 0 END) as trimester1_normal,
+        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 <= 13 AND ls.hasil_lab_hb >= 10 AND ls.hasil_lab_hb < 12 THEN 1 ELSE 0 END) as trimester1_ringan,
+        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 <= 13 AND ls.hasil_lab_hb >= 7 AND ls.hasil_lab_hb < 10 THEN 1 ELSE 0 END) as trimester1_sedang,
+        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 <= 13 AND ls.hasil_lab_hb < 7 THEN 1 ELSE 0 END) as trimester1_berat,
         -- Trimester 2 (14-27 weeks)
         SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 BETWEEN 14 AND 27 THEN 1 ELSE 0 END) as trimester2_total,
-        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 BETWEEN 14 AND 27 AND ls.hasil_lab_hb >= 11 THEN 1 ELSE 0 END) as trimester2_normal,
-        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 BETWEEN 14 AND 27 AND ls.hasil_lab_hb >= 10 AND ls.hasil_lab_hb < 11 THEN 1 ELSE 0 END) as trimester2_ringan,
-        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 BETWEEN 14 AND 27 AND ls.hasil_lab_hb >= 8 AND ls.hasil_lab_hb < 10 THEN 1 ELSE 0 END) as trimester2_sedang,
-        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 BETWEEN 14 AND 27 AND ls.hasil_lab_hb < 8 THEN 1 ELSE 0 END) as trimester2_berat,
+        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 BETWEEN 14 AND 27 AND ls.hasil_lab_hb >= 12 THEN 1 ELSE 0 END) as trimester2_normal,
+        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 BETWEEN 14 AND 27 AND ls.hasil_lab_hb >= 10 AND ls.hasil_lab_hb < 12 THEN 1 ELSE 0 END) as trimester2_ringan,
+        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 BETWEEN 14 AND 27 AND ls.hasil_lab_hb >= 7 AND ls.hasil_lab_hb < 10 THEN 1 ELSE 0 END) as trimester2_sedang,
+        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 BETWEEN 14 AND 27 AND ls.hasil_lab_hb < 7 THEN 1 ELSE 0 END) as trimester2_berat,
         -- Trimester 3 (28+ weeks)
         SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 >= 28 THEN 1 ELSE 0 END) as trimester3_total,
-        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 >= 28 AND ls.hasil_lab_hb >= 11 THEN 1 ELSE 0 END) as trimester3_normal,
-        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 >= 28 AND ls.hasil_lab_hb >= 10 AND ls.hasil_lab_hb < 11 THEN 1 ELSE 0 END) as trimester3_ringan,
-        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 >= 28 AND ls.hasil_lab_hb >= 8 AND ls.hasil_lab_hb < 10 THEN 1 ELSE 0 END) as trimester3_sedang,
-        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 >= 28 AND ls.hasil_lab_hb < 8 THEN 1 ELSE 0 END) as trimester3_berat
+        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 >= 28 AND ls.hasil_lab_hb >= 12 THEN 1 ELSE 0 END) as trimester3_normal,
+        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 >= 28 AND ls.hasil_lab_hb >= 10 AND ls.hasil_lab_hb < 12 THEN 1 ELSE 0 END) as trimester3_ringan,
+        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 >= 28 AND ls.hasil_lab_hb >= 7 AND ls.hasil_lab_hb < 10 THEN 1 ELSE 0 END) as trimester3_sedang,
+        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 >= 28 AND ls.hasil_lab_hb < 7 THEN 1 ELSE 0 END) as trimester3_berat
       FROM antenatal_care ac
       INNER JOIN kehamilan k ON ac.forkey_hamil = k.id
       INNER JOIN ibu i ON k.forkey_ibu = i.id

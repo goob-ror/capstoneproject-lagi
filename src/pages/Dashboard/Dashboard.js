@@ -530,18 +530,9 @@ const Dashboard = () => {
           </div>
 
           <div className="pie-section">
-            <div className="chart-card">
-              <h3 className="chart-title">Distribusi Risiko Kehamilan</h3>
-              {riskDistributionChart && (
-                <div className="chart-container-pie">
-                  <Pie data={riskDistributionChart} options={chartOptions} />
-                </div>
-              )}
-            </div>
-
             <div className="chart-card at-risk-card">
               <h3 className="chart-title">Ibu Berisiko - Perlu Perhatian</h3>
-              <p className="at-risk-subtitle">Anemia dan/atau KEK (LILA &lt; 23.5 cm)</p>
+              <p className="at-risk-subtitle">Anemia dan/atau KEK (LILA &lt; 24 cm)</p>
               {atRiskMothers && atRiskMothers.length > 0 ? (
                 <>
                   <div className="at-risk-list">
@@ -607,6 +598,15 @@ const Dashboard = () => {
                     <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="#22C55E"/>
                   </svg>
                   <p>Tidak ada ibu dengan anemia atau KEK</p>
+                </div>
+              )}
+            </div>
+
+            <div className="chart-card">
+              <h3 className="chart-title">Distribusi Risiko Kehamilan</h3>
+              {riskDistributionChart && (
+                <div className="chart-container-pie">
+                  <Pie data={riskDistributionChart} options={chartOptions} />
                 </div>
               )}
             </div>

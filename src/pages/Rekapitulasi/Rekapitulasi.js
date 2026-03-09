@@ -137,6 +137,19 @@ const Rekapitulasi = () => {
     return months[month] || month;
   };
 
+  const getYearOptions = () => {
+    const currentYear = new Date().getFullYear();
+    const startYear = 2020; // Starting year for the system
+    const years = [];
+    
+    // Generate years from current year down to start year
+    for (let year = currentYear; year >= startYear; year--) {
+      years.push(year);
+    }
+    
+    return years;
+  };
+
   const getPreeklamsiaEklamsiaTotal = () => {
     const preeklamsia = Number(summaryData?.preeklamsiaStatistics?.preeklamsia_count || 0);
     const eklamsia = Number(summaryData?.preeklamsiaStatistics?.eklamsia_count || 0);
@@ -269,10 +282,9 @@ const Rekapitulasi = () => {
                 onChange={handleYearChange}
               >
                 <option value="">Semua Tahun</option>
-                <option value="2025">2025</option>
-                <option value="2024">2024</option>
-                <option value="2023">2023</option>
-                <option value="2026">2026</option>
+                {getYearOptions().map(year => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
               </select>
             </div>
             <div className="filter-section">

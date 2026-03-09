@@ -14,7 +14,8 @@ const rekapitulasiRoutes = require('./routes/rekapitulasiRoutes');
 const posyanduRoutes = require('./routes/posyanduRoutes');
 const kelurahanRoutes = require('./routes/kelurahanRoutes');
 const userRoutes = require('./routes/userRoutes');
-const excelExportRoutes = require('./routes/excel');
+const excelExportRoutes = require('./routes/excelExportRoutes');
+const reportDataRoutes = require('./routes/reportDataRoutes');
 const auth = require('./middleware/auth');
 const { validateAllInputs } = require('./middleware/inputValidator');
 
@@ -41,7 +42,7 @@ app.use((req, res, next) => {
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+  origin: ['http://localhost:6969', 'http://127.0.0.1:6767'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -72,6 +73,7 @@ app.use('/api/posyandu', posyanduRoutes);
 app.use('/api/kelurahan', kelurahanRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/excel-export', excelExportRoutes);
+app.use('/api/report-data', reportDataRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
