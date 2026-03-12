@@ -30,25 +30,42 @@ const ProtectedRoute = ({ children }) => {
   const [isChecking, setIsChecking] = React.useState(true);
   const [isAuthenticated, setIsAuthenticated] = React.useState(false);
   const authModel = React.useMemo(() => new AuthModel(), []);
+  const location = useLocation();
 
   React.useEffect(() => {
     const checkAuth = async () => {
-      // Quick check with localStorage
-      const quickCheck = authModel.isAuthenticated();
-      
-      if (quickCheck) {
-        setIsAuthenticated(true);
-        setIsChecking(false);
-      } else {
-        // Try to restore from IndexedDB
-        const sessionValid = await authModel.checkSessionValidity();
-        setIsAuthenticated(sessionValid);
+      try {
+        // Quick check with localStorage
+        const quickCheck = authModel.isAuthenticated();
+        
+        if (quickCheck) {
+          // Verify token is valid (not just exists)
+          const token = authModel.getToken();
+          const user = authModel.getUser();
+          
+          if (token && user) {
+            setIsAuthenticated(true);
+          } else {
+            // Token or user missing, clear everything
+            authModel.removeToken();
+            authModel.removeUser();
+            setIsAuthenticated(false);
+          }
+        } else {
+          // Try to restore from IndexedDB
+          const sessionValid = await authModel.checkSessionValidity();
+          setIsAuthenticated(sessionValid);
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+        setIsAuthenticated(false);
+      } finally {
         setIsChecking(false);
       }
     };
     
     checkAuth();
-  }, [authModel]);
+  }, [authModel, location.pathname]);
 
   // Show loading while checking authentication
   if (isChecking) {
@@ -77,7 +94,20 @@ const ProtectedRoute = ({ children }) => {
     );
   }
 
-  return isAuthenticated ? children : <Navigate to="/login" replace />;
+  // If not authenticated, redirect to login
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace state={{ from: location }} />;
+  }
+
+  return children;
+};
+
+// Public Route Component (redirects to dashboard if already logged in)
+const PublicRoute = ({ children }) => {
+  const authModel = React.useMemo(() => new AuthModel(), []);
+  const isAuthenticated = authModel.isAuthenticated();
+
+  return isAuthenticated ? <Navigate to="/dashboard" replace /> : children;
 };
 
 // Layout wrapper to handle body classes
@@ -104,8 +134,22 @@ function AppLayout() {
       <OfflineIndicator />
       <Routes>
         <Route path="/" element={<Navigate to="/login" />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
+        <Route 
+          path="/login" 
+          element={
+            <PublicRoute>
+              <LoginPage />
+            </PublicRoute>
+          } 
+        />
+        <Route 
+          path="/register" 
+          element={
+            <PublicRoute>
+              <RegisterPage />
+            </PublicRoute>
+          } 
+        />
         <Route path="/waiting-approval" element={<WaitingApprovalPage />} />
         <Route
           path="/dashboard"
@@ -227,6 +271,8 @@ function AppLayout() {
             </ProtectedRoute>
           }
         />
+        {/* Catch-all route - redirect unknown paths to login */}
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </div>
   );
