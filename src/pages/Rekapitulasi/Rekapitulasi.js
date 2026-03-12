@@ -13,7 +13,7 @@ const Rekapitulasi = () => {
   const [summaryData, setSummaryData] = useState(null);
   const [user, setUser] = useState(null);
   const [selectedKelurahan, setSelectedKelurahan] = useState('');
-  const [selectedYear, setSelectedYear] = useState('');
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
   const [selectedMonth, setSelectedMonth] = useState('');
   const [excelLoading, setExcelLoading] = useState(false);
   const [showExportDropdown, setShowExportDropdown] = useState(false);
@@ -81,14 +81,26 @@ const Rekapitulasi = () => {
         return;
       }
 
+      // Validate required parameters
+      if (!selectedYear) {
+        setError('Silakan pilih tahun terlebih dahulu');
+        setExcelLoading(false);
+        return;
+      }
+
       // Build query parameters
       const params = new URLSearchParams();
-      if (selectedKelurahan) params.append('kelurahan', selectedKelurahan);
-      if (selectedYear) params.append('year', selectedYear);
-      if (selectedMonth) params.append('month', selectedMonth);
+      if (selectedKelurahan) params.append('kelurahan_id', selectedKelurahan);
+      params.append('year', selectedYear);
+      if (selectedMonth && type === 'normal') params.append('month', selectedMonth);
+
+      // Choose endpoint based on type
+      const endpoint = type === 'lengkap' 
+        ? '/api/excel-report-bulanan/generate'  // New comprehensive template
+        : '/api/excel-export/generate';         // Original template
 
       // Make request to server
-      const response = await axios.get(`/api/excel-export/generate?${params.toString()}`, {
+      const response = await axios.get(`${endpoint}?${params.toString()}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         },
@@ -106,8 +118,8 @@ const Rekapitulasi = () => {
       // Generate filename
       const kelurahanName = selectedKelurahan ? `_${selectedKelurahan}` : '_Semua';
       const yearName = selectedYear ? `_${selectedYear}` : '';
-      const monthName = selectedMonth ? `_${getMonthName(selectedMonth)}` : '';
-      const typeLabel = type === 'lengkap' ? '_Lengkap' : '';
+      const monthName = selectedMonth && type === 'normal' ? `_${getMonthName(selectedMonth)}` : '';
+      const typeLabel = type === 'lengkap' ? '_Komprehensif' : '_Standar';
       const filename = `Laporan_Puskesmas${kelurahanName}${yearName}${monthName}${typeLabel}_${new Date().toISOString().split('T')[0]}.xlsx`;
       
       link.setAttribute('download', filename);
@@ -355,7 +367,7 @@ const Rekapitulasi = () => {
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="currentColor"/>
                       </svg>
-                      Lengkap
+                      Laporan Tahunan
                     </button>
                     <button 
                       className="export-dropdown-item"
@@ -364,7 +376,7 @@ const Rekapitulasi = () => {
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z" fill="currentColor"/>
                       </svg>
-                      Normal
+                      Laporan Lengkap
                     </button>
                   </div>
                 )}

@@ -50,7 +50,13 @@ const buildNifasPersalinanQuery = (whereClause) => {
             kel.nama_kelurahan as kelurahan,
             
             -- Jumlah Ibu Bersalin
+            COUNT(DISTINCT k.id) as jumlah_bumil,
             COUNT(DISTINCT p.id) as jumlah_bersalin,
+
+             -- Bumil per Trimester (based on HPHT)
+            COUNT(DISTINCT CASE WHEN DATEDIFF(CURDATE(), k.haid_terakhir) <= 84 THEN k.id END) as tm1,
+            COUNT(DISTINCT CASE WHEN DATEDIFF(CURDATE(), k.haid_terakhir) BETWEEN 85 AND 196 THEN k.id END) as tm2,
+            COUNT(DISTINCT CASE WHEN DATEDIFF(CURDATE(), k.haid_terakhir) > 196 THEN k.id END) as tm3,
             
             -- Persalinan di Fasilitas Kesehatan
             COUNT(DISTINCT CASE WHEN p.tempat_persalinan IN ('RS', 'Puskesmas', 'Klinik') THEN p.id END) as jumlah_faskes,
@@ -225,8 +231,9 @@ const buildNifasPersalinanQuery = (whereClause) => {
         FROM kelurahan kel
         LEFT JOIN ibu i ON i.kelurahan_id = kel.id
         LEFT JOIN kehamilan k ON k.forkey_ibu = i.id
-        LEFT JOIN persalinan p ON p.forkey_hamil = k.id ${whereClause ? 'AND ' + whereClause.replace('WHERE ', '') : ''}
+        LEFT JOIN persalinan p ON p.forkey_hamil = k.id
         LEFT JOIN kunjungan_nifas kn ON kn.forkey_hamil = k.id
+        ${whereClause}
         GROUP BY kel.id, kel.nama_kelurahan
         ORDER BY kel.nama_kelurahan
     `;
@@ -236,13 +243,17 @@ const buildNifasPersalinanQuery = (whereClause) => {
 const calculateTotals = (kelurahanData) => {
     const total = {
         kelurahan: 'TOTAL',
-        jumlah_bersalin: 0
+        jumlah_bumil: 0,
+        jumlah_bersalin: 0,
+        tm1: 0,
+        tm2: 0,
+        tm3: 0
     };
 
-    // Sum all numeric fields that start with 'jumlah_'
+    // Sum all numeric fields that start with 'jumlah_' and tm1, tm2, tm3
     kelurahanData.forEach(row => {
         Object.keys(row).forEach(key => {
-            if (key !== 'kelurahan' && key !== 'id' && key.startsWith('jumlah_')) {
+            if (key !== 'kelurahan' && key !== 'id' && (key.startsWith('jumlah_') || key === 'tm1' || key === 'tm2' || key === 'tm3')) {
                 if (!total[key]) total[key] = 0;
                 total[key] += parseInt(row[key]) || 0;
             }
@@ -251,11 +262,11 @@ const calculateTotals = (kelurahanData) => {
 
     // Calculate percentages for totals
     Object.keys(total).forEach(key => {
-        if (key.startsWith('jumlah_') && key !== 'jumlah_bersalin') {
+        if (key.startsWith('jumlah_') && key !== 'jumlah_bersalin' && key !== 'jumlah_bumil') {
             const persenKey = key.replace('jumlah_', 'persen_');
             total[persenKey] = total.jumlah_bersalin > 0 
                 ? (total[key] * 100 / total.jumlah_bersalin).toFixed(1)
-                : 0;
+                : '0.0';
         }
     });
 

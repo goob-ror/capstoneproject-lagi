@@ -1,0 +1,27 @@
+
+= Worksheet 1 Januari =
+{januari_no_data}	
+{januari_nama_lengkap}	
+{januari_nik}	
+{januari_tanggalLahir}	
+{januari_golDarah_rhesus}	
+{januari_nohp}	
+{januari_kelurahan}	
+{januari_posyandu}	
+{januari_hpht}	
+{januari_gpa}	
+{januari_tp}	
+{januari_kategori_anemia}	
+{januari_kek}
+{januari_hipertensi}
+{januari_diabetes}
+{januari_hiv}
+{januari_hbsag}
+{januari_sifilis}
+{januari_jenisKunjungan}
+
+= Worksheet 2 Februari =
+...
+{desember_jenisKunjungan}
+
+{tanggal_kunjungan}

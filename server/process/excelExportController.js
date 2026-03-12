@@ -69,10 +69,19 @@ const getDataFromController = async (pool, req, controllerFunc) => {
         const mockRes = {
             json: (data) => resolve(data),
             status: (code) => ({
-                json: (data) => reject(new Error(data.error || 'Controller error'))
+                json: (data) => {
+                    console.error(`Controller returned status ${code}:`, data);
+                    reject(new Error(data.error || data.message || 'Controller error'));
+                }
             })
         };
-        controllerFunc(pool, req, mockRes);
+        
+        try {
+            controllerFunc(pool, req, mockRes);
+        } catch (error) {
+            console.error('Error calling controller function:', error);
+            reject(error);
+        }
     });
 };
 

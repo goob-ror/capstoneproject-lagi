@@ -3,7 +3,7 @@
 
 const getDataPasien = async (pool, req, res) => {
     try {
-        const { page = 1, year = '', month = '', kelurahan = '' } = req.query;
+        const { page = 1, year = '', month = '', kelurahan_id = '' } = req.query;
         const limit = 50;
         const offset = (page - 1) * limit;
 
@@ -27,11 +27,11 @@ const getDataPasien = async (pool, req, res) => {
             paramsSubquery.push(month, month);
         }
 
-        if (kelurahan) {
+        if (kelurahan_id) {
             whereConditions.push('i.kelurahan_id = ?');
-            params.push(kelurahan);
+            params.push(kelurahan_id);
             whereConditionsSubquery.push('i2.kelurahan_id = ?');
-            paramsSubquery.push(kelurahan);
+            paramsSubquery.push(kelurahan_id);
         }
 
         const whereClause = whereConditions.length > 0 

@@ -6,6 +6,12 @@ const fillNifasPersalinanWorksheet = async (workbook, data, tanggal_laporan, nam
         return;
     }
 
+    console.log('Filling Nifas Persalinan worksheet with data:', {
+        kelurahanCount: data?.kelurahan?.length || 0,
+        kelurahanNames: data?.kelurahan?.map(k => k.kelurahan) || [],
+        hasTotal: !!data?.total
+    });
+
     // Fill header data
     worksheet.getCell('C1').value = tanggal_laporan;
     worksheet.getCell('A2').value = nama_puskesmas;
@@ -23,11 +29,13 @@ const fillNifasPersalinanWorksheet = async (workbook, data, tanggal_laporan, nam
         return num + '%';
     };
 
-    // Kelurahan name mapping (lowercase, no spaces for placeholder)
-    const kelurahanPlaceholderMap = {
-        'Simpang Pasir': 'simpangpasir',
-        'Rawa Makmur': 'rawamakmur',
-        'Handil Bakti': 'handilbakti'
+    // Kelurahan name mapping (case-insensitive, flexible matching)
+    const getKelurahanPlaceholder = (kelurahanName) => {
+        const name = kelurahanName.toLowerCase().replace(/\s+/g, '');
+        if (name.includes('simpang') && name.includes('pasir')) return 'simpangpasir';
+        if (name.includes('rawa') && name.includes('makmur')) return 'rawamakmur';
+        if (name.includes('handil') && name.includes('bakti')) return 'handilbakti';
+        return null;
     };
 
     // Iterate through all cells and replace placeholders
@@ -38,8 +46,11 @@ const fillNifasPersalinanWorksheet = async (workbook, data, tanggal_laporan, nam
 
                 // Replace for each kelurahan
                 data.kelurahan.forEach(kelData => {
-                    const kelPlaceholder = kelurahanPlaceholderMap[kelData.kelurahan];
-                    if (!kelPlaceholder) return;
+                    const kelPlaceholder = getKelurahanPlaceholder(kelData.kelurahan);
+                    if (!kelPlaceholder) {
+                        console.warn(`No placeholder mapping found for kelurahan: "${kelData.kelurahan}"`);
+                        return;
+                    }
 
                     cellValue = replacePlaceholders(cellValue, kelPlaceholder, kelData, formatPercent);
                 });
