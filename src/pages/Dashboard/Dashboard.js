@@ -66,7 +66,7 @@ const Dashboard = () => {
           }
         });
       } catch (error) {
-        console.error('Error auto-updating statuses:', error);
+        throw error;
       }
     };
     

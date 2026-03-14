@@ -13,9 +13,7 @@ class KomplikasiPresenter {
     try {
       const data = await this.model.getAllKomplikasi(year);
       this.view.displayKomplikasiData(data);
-    } catch (error) {
-      console.error('Load komplikasi error:', error);
-      
+    } catch (error) {      
       if (error.message.includes('401') || error.message.includes('Unauthorized')) {
         this.handleLogout();
         return;
@@ -31,9 +29,7 @@ class KomplikasiPresenter {
     try {
       await this.model.deleteKomplikasi(id);
       await this.loadKomplikasiData();
-    } catch (error) {
-      console.error('Delete komplikasi error:', error);
-      
+    } catch (error) {      
       if (error.message.includes('401') || error.message.includes('Unauthorized')) {
         this.handleLogout();
         return;

@@ -28,7 +28,6 @@ router.post('/auto-update-statuses', async (req, res) => {
     });
   } catch (error) {
     await connection.rollback();
-    console.error('Error auto-updating statuses:', error);
     res.status(500).json({ message: 'Internal server error' });
   } finally {
     connection.release();
@@ -43,9 +42,7 @@ router.get('/stats', async (req, res) => {
     // Total Ibu Hamil (Active Pregnancies - excluding completed/miscarriage)
     const [totalIbuHamilResult] = await db.query(
       `SELECT COUNT(*) as count FROM kehamilan 
-       WHERE status_kehamilan = 'Hamil' 
-       AND (YEAR(created_at) = ? OR YEAR(updated_at) = ?)`,
-      [currentYear, currentYear]
+       WHERE status_kehamilan = 'Hamil'`
     );
     const totalIbuHamil = totalIbuHamilResult[0].count;
 
@@ -93,7 +90,6 @@ router.get('/stats', async (req, res) => {
       komplikasiDirujuk
     });
   } catch (error) {
-    console.error('Error fetching dashboard stats:', error);
     res.status(500).json({ message: 'Failed to fetch dashboard statistics' });
   }
 });
@@ -117,7 +113,6 @@ router.get('/ibu-by-kelurahan', async (req, res) => {
     `, [currentYear, currentYear]);
     res.json(results);
   } catch (error) {
-    console.error('Error fetching ibu by kelurahan:', error);
     res.status(500).json({ message: 'Failed to fetch data' });
   }
 });
@@ -152,7 +147,6 @@ router.get('/age-distribution', async (req, res) => {
     `);
     res.json(results);
   } catch (error) {
-    console.error('Error fetching age distribution:', error);
     res.status(500).json({ message: 'Failed to fetch age distribution' });
   }
 });
@@ -190,7 +184,6 @@ router.get('/anc-per-month', async (req, res) => {
     `);
     res.json(results);
   } catch (error) {
-    console.error('Error fetching ANC per month:', error);
     res.status(500).json({ message: 'Failed to fetch ANC per month' });
   }
 });
@@ -255,7 +248,6 @@ router.get('/immunization-coverage', async (req, res) => {
     res.json(formatted);
 
   } catch (error) {
-    console.error('Error fetching coverage:', error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
 });
@@ -280,7 +272,6 @@ router.get('/risk-distribution', async (req, res) => {
     `, [currentYear, currentYear]);
     res.json(results);
   } catch (error) {
-    console.error('Error fetching risk distribution:', error);
     res.status(500).json({ message: 'Failed to fetch risk distribution' });
   }
 });
@@ -312,7 +303,6 @@ router.get('/nearing-due-dates', async (req, res) => {
     `);
     res.json(results);
   } catch (error) {
-    console.error('Error fetching nearing due dates:', error);
     res.status(500).json({ message: 'Failed to fetch nearing due dates' });
   }
 });
@@ -418,7 +408,6 @@ router.get('/anc-schedule', async (req, res) => {
     
     res.json(formattedResults);
   } catch (error) {
-    console.error('Error fetching ANC schedule:', error);
     res.status(500).json({ message: 'Failed to fetch ANC schedule' });
   }
 });
@@ -445,7 +434,6 @@ router.get('/suami-perokok-kelurahan', async (req, res) => {
     `);
     res.json(results);
   } catch (error) {
-    console.error('Error fetching suami perokok by kelurahan:', error);
     res.status(500).json({ message: 'Failed to fetch suami perokok data' });
   }
 });
@@ -502,7 +490,6 @@ router.get('/imt-distribution-kelurahan', async (req, res) => {
     `);
     res.json(results);
   } catch (error) {
-    console.error('Error fetching IMT distribution by kelurahan:', error);
     res.status(500).json({ message: 'Failed to fetch IMT distribution data' });
   }
 });
@@ -566,7 +553,6 @@ router.get('/at-risk-mothers', async (req, res) => {
     
     res.json(results);
   } catch (error) {
-    console.error('Error fetching at-risk mothers:', error);
     res.status(500).json({ message: 'Failed to fetch at-risk mothers data' });
   }
 });

@@ -9,12 +9,10 @@ class SessionManager {
     // Listen for online/offline events
     window.addEventListener('online', () => {
       this.isOnline = true;
-      console.log('📡 Back online');
     });
     
     window.addEventListener('offline', () => {
       this.isOnline = false;
-      console.log('📴 Gone offline');
     });
   }
 
@@ -26,16 +24,13 @@ class SessionManager {
   // Save session - ONLY when online
   async saveSession(sessionData) {
     if (!this.checkOnlineStatus()) {
-      console.warn('⚠️ Cannot save session while offline');
       return false;
     }
 
     try {
       await indexedDBService.saveSession(sessionData);
-      console.log('✓ Session saved to IndexedDB (online)');
       return true;
     } catch (error) {
-      console.error('Failed to save session:', error);
       return false;
     }
   }
@@ -43,18 +38,15 @@ class SessionManager {
   // Get session - ONLY when offline (read-only)
   async getOfflineSession() {
     if (this.checkOnlineStatus()) {
-      console.warn('⚠️ Use server authentication when online');
       return null;
     }
 
     try {
       const session = await indexedDBService.getSession();
       if (session) {
-        console.log('✓ Retrieved cached session (offline)');
       }
       return session;
     } catch (error) {
-      console.error('Failed to get offline session:', error);
       return null;
     }
   }
@@ -64,7 +56,6 @@ class SessionManager {
     try {
       return await indexedDBService.isSessionValid();
     } catch (error) {
-      console.error('Failed to validate session:', error);
       return false;
     }
   }
@@ -73,10 +64,8 @@ class SessionManager {
   async clearSession() {
     try {
       await indexedDBService.clearSession();
-      console.log('✓ Session cleared');
       return true;
     } catch (error) {
-      console.error('Failed to clear session:', error);
       return false;
     }
   }

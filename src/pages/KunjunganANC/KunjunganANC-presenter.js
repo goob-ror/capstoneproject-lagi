@@ -13,9 +13,7 @@ class KunjunganANCPresenter {
     try {
       const data = await this.model.getAllAnc(year);
       this.view.displayAncData(data);
-    } catch (error) {
-      console.error('Load ANC data error:', error);
-      
+    } catch (error) {      
       if (error.message.includes('401') || error.message.includes('Unauthorized')) {
         this.handleLogout();
         return;
@@ -31,9 +29,7 @@ class KunjunganANCPresenter {
     try {
       await this.model.deleteAnc(id);
       await this.loadAncData();
-    } catch (error) {
-      console.error('Delete ANC error:', error);
-      
+    } catch (error) {      
       if (error.message.includes('401') || error.message.includes('Unauthorized')) {
         this.handleLogout();
         return;

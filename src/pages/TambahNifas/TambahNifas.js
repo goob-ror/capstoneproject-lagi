@@ -170,7 +170,6 @@ const TambahNifas = () => {
         setFormData(prev => ({ ...prev, jumlah_bayi: prefillBabies.length }));
       }
     } catch (error) {
-      console.error('Error fetching persalinan for mother:', error);
       // Don't show error, just use empty baby data
       setBayiData([{
         urutan_bayi: 1,
@@ -205,15 +204,6 @@ const TambahNifas = () => {
       const daysDiff = Math.floor((visitDate - deliveryDate) / (1000 * 60 * 60 * 24));
       
       const jenisKunjungan = getJenisKunjunganByDays(daysDiff);
-      
-      console.log('Auto-selecting jenis_kunjungan:', {
-        tanggal_persalinan: motherData.tanggal_persalinan,
-        tanggal_kunjungan: formData.tanggal_kunjungan,
-        daysDiff,
-        jenisKunjungan,
-        currentValue: formData.jenis_kunjungan,
-        autoUpdateEnabled: autoUpdateJenisKunjungan.current
-      });
       
       // Only update if the calculated value is different from current value
       if (jenisKunjungan !== formData.jenis_kunjungan) {

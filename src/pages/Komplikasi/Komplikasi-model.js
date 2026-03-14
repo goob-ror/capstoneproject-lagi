@@ -28,7 +28,6 @@ class KomplikasiModel {
       this.cachedData = data;
       return data;
     } catch (error) {
-      console.error('Error fetching komplikasi:', error);
       throw error;
     }
   }
@@ -46,7 +45,6 @@ class KomplikasiModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error deleting komplikasi:', error);
       throw error;
     }
   }

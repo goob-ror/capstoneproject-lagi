@@ -19,7 +19,6 @@ router.get('/', auth, async (req, res) => {
       data: rows
     });
   } catch (error) {
-    console.error('Error fetching kelurahan:', error);
     res.status(500).json({
       success: false,
       message: 'Gagal mengambil data kelurahan'
@@ -70,7 +69,6 @@ router.post('/', auth, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error creating kelurahan:', error);
     res.status(500).json({
       success: false,
       message: 'Gagal menambahkan data kelurahan'
@@ -136,7 +134,6 @@ router.put('/:id', auth, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error updating kelurahan:', error);
     res.status(500).json({
       success: false,
       message: 'Gagal memperbarui data kelurahan'
@@ -196,7 +193,6 @@ router.delete('/:id', auth, async (req, res) => {
       message: 'Data kelurahan berhasil dihapus'
     });
   } catch (error) {
-    console.error('Error deleting kelurahan:', error);
     res.status(500).json({
       success: false,
       message: 'Gagal menghapus data kelurahan'
@@ -244,7 +240,6 @@ router.get('/rt-options/:kelurahanId', auth, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error fetching RT options:', error);
     res.status(500).json({
       success: false,
       message: 'Gagal mengambil data RT'
@@ -287,7 +282,6 @@ router.get('/posyandu-assignment/:kelurahanId/:rt', auth, async (req, res) => {
       data: assignedPosyandu
     });
   } catch (error) {
-    console.error('Error getting posyandu assignment:', error);
     res.status(500).json({
       success: false,
       message: 'Gagal mendapatkan penugasan posyandu'

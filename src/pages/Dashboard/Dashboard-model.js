@@ -24,7 +24,6 @@ class DashboardModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error fetching dashboard stats:', error);
       throw error;
     }
   }
@@ -42,7 +41,6 @@ class DashboardModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error fetching ibu by kelurahan:', error);
       throw error;
     }
   }
@@ -60,7 +58,6 @@ class DashboardModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error fetching age distribution:', error);
       throw error;
     }
   }
@@ -78,7 +75,6 @@ class DashboardModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error fetching ANC per month:', error);
       throw error;
     }
   }
@@ -96,7 +92,6 @@ class DashboardModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error fetching immunization coverage:', error);
       throw error;
     }
   }
@@ -114,7 +109,6 @@ class DashboardModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error fetching risk distribution:', error);
       throw error;
     }
   }
@@ -132,7 +126,6 @@ class DashboardModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error fetching nearing due dates:', error);
       throw error;
     }
   }
@@ -150,7 +143,6 @@ class DashboardModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error fetching ANC schedule:', error);
       throw error;
     }
   }
@@ -168,7 +160,6 @@ class DashboardModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error fetching suami perokok by kelurahan:', error);
       throw error;
     }
   }
@@ -186,7 +177,6 @@ class DashboardModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error fetching IMT distribution by kelurahan:', error);
       throw error;
     }
   }
@@ -204,7 +194,6 @@ class DashboardModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error fetching at-risk mothers:', error);
       throw error;
     }
   }

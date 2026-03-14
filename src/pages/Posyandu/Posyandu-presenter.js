@@ -14,7 +14,6 @@ class PosyanduPresenter {
       const data = await this.model.getAllPosyandu();
       this.view.displayPosyanduData(data);
     } catch (error) {
-      console.error('Error loading posyandu data:', error);
       this.view.setError(error.message || 'Gagal memuat data posyandu');
     } finally {
       this.view.setLoading(false);
@@ -26,7 +25,6 @@ class PosyanduPresenter {
       const data = await this.model.getAllKelurahan();
       this.view.displayKelurahanData(data);
     } catch (error) {
-      console.error('Error loading kelurahan data:', error);
       this.view.setError(error.message || 'Gagal memuat data kelurahan');
     }
   }
@@ -53,7 +51,6 @@ class PosyanduPresenter {
       // Reload data
       await this.loadPosyanduData();
     } catch (error) {
-      console.error('Error creating posyandu:', error);
       this.view.setError(error.message || 'Gagal menambahkan data posyandu');
     } finally {
       this.view.setLoading(false);
@@ -82,7 +79,6 @@ class PosyanduPresenter {
       // Reload data
       await this.loadPosyanduData();
     } catch (error) {
-      console.error('Error updating posyandu:', error);
       this.view.setError(error.message || 'Gagal memperbarui data posyandu');
     } finally {
       this.view.setLoading(false);
@@ -100,7 +96,6 @@ class PosyanduPresenter {
       // Reload data
       await this.loadPosyanduData();
     } catch (error) {
-      console.error('Error deleting posyandu:', error);
       this.view.setError(error.message || 'Gagal menghapus data posyandu');
     } finally {
       this.view.setLoading(false);

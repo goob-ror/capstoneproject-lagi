@@ -38,7 +38,6 @@ const getAncTerpaduData = async (pool, req, res) => {
         });
 
     } catch (error) {
-        console.error('Error fetching ANC Terpadu data:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 };

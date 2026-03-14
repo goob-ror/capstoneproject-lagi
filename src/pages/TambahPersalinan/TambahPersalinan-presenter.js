@@ -20,7 +20,6 @@ class TambahPersalinanPresenter {
       const data = await this.model.getReadyToDeliverPregnancies();
       this.callbacks.setPregnancies(data);
     } catch (error) {
-      console.error('Error loading ready to deliver pregnancies:', error);
       if (error.message.includes('401')) {
         this.handleLogout();
         return;
@@ -36,7 +35,6 @@ class TambahPersalinanPresenter {
       const data = await this.model.getMotherDataByPregnancy(pregnancyId);
       this.callbacks.setMotherData(data);
     } catch (error) {
-      console.error('Error loading mother data:', error);
       if (error.message.includes('401')) {
         this.handleLogout();
         return;
@@ -58,7 +56,6 @@ class TambahPersalinanPresenter {
         await this.loadMotherData(data.forkey_hamil);
       }
     } catch (error) {
-      console.error('Error loading persalinan data:', error);
       if (error.message.includes('401')) {
         this.handleLogout();
         return;
@@ -106,7 +103,6 @@ class TambahPersalinanPresenter {
       // Pass pregnancy ID and persalinan ID for KF1 creation
       this.callbacks.onSuccess(successMessage, formData.forkey_hamil, persalinanId, isEdit);
     } catch (error) {
-      console.error('Error saving persalinan data:', error);
       if (error.message.includes('401')) {
         this.handleLogout();
         return;

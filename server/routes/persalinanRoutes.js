@@ -35,7 +35,6 @@ router.get('/pregnancies/ready-to-deliver', auth, async (req, res) => {
     const [rows] = await db.execute(query);
     res.json(rows);
   } catch (error) {
-    console.error('Error fetching ready to deliver pregnancies:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
@@ -74,7 +73,6 @@ router.get('/pregnancy/:pregnancyId/mother', auth, async (req, res) => {
     
     res.json(rows[0]);
   } catch (error) {
-    console.error('Error fetching mother data:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
@@ -136,7 +134,6 @@ router.get('/', auth, async (req, res) => {
     
     res.json(parsedRows);
   } catch (error) {
-    console.error('Error fetching persalinan data:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
@@ -178,7 +175,6 @@ router.get('/:id', auth, async (req, res) => {
     
     res.json(result);
   } catch (error) {
-    console.error('Error fetching persalinan data:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
@@ -297,7 +293,6 @@ router.post('/', auth, async (req, res) => {
     });
   } catch (error) {
     await connection.rollback();
-    console.error('Error creating persalinan:', error);
     res.status(500).json({ message: 'Internal server error', error: error.message });
   } finally {
     connection.release();
@@ -399,7 +394,6 @@ router.put('/:id', auth, async (req, res) => {
     });
   } catch (error) {
     await connection.rollback();
-    console.error('Error updating persalinan:', error);
     res.status(500).json({ message: 'Internal server error', error: error.message });
   } finally {
     connection.release();
@@ -458,7 +452,6 @@ router.delete('/:id', auth, async (req, res) => {
     });
   } catch (error) {
     await connection.rollback();
-    console.error('Error deleting persalinan:', error);
     res.status(500).json({ message: 'Internal server error', error: error.message });
   } finally {
     connection.release();

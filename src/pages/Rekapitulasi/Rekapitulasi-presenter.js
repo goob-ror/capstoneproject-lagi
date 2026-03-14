@@ -13,9 +13,7 @@ class RekapitulasiPresenter {
     try {
       const data = await this.model.getSummaryData(kelurahan, year, month);
       this.view.displaySummaryData(data);
-    } catch (error) {
-      console.error('Load summary error:', error);
-      
+    } catch (error) {      
       if (error.message.includes('401') || error.message.includes('Unauthorized')) {
         this.handleLogout();
         return;

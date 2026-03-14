@@ -22,6 +22,17 @@ class LoginPageModel {
       const data = await response.json();
 
       if (!response.ok) {
+        // Handle rate limiting
+        if (response.status === 429) {
+          const cooldownMinutes = data.cooldownMinutes || data.remainingTime;
+          throw new Error(data.message || `Terlalu banyak percobaan login gagal. Coba lagi dalam ${cooldownMinutes} menit.`);
+        }
+        
+        // Handle other errors with attempts remaining info
+        if (data.attemptsRemaining !== undefined) {
+          throw new Error(`${data.message} (${data.attemptsRemaining} percobaan tersisa)`);
+        }
+        
         throw new Error(data.message || 'Login failed');
       }
 

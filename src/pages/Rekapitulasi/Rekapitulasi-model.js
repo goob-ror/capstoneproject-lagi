@@ -21,9 +21,7 @@ class RekapitulasiModel {
       const url = params.toString() 
         ? `${this.baseURL}?${params.toString()}`
         : this.baseURL;
-        
-      console.log('Fetching from:', url);
-      
+              
       const response = await fetch(url, {
         method: 'GET',
         headers: this.getAuthHeaders()
@@ -31,15 +29,12 @@ class RekapitulasiModel {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Server response:', response.status, errorText);
         throw new Error(`Server error (${response.status}): ${errorText}`);
       }
 
       const data = await response.json();
-      console.log('Received data:', data);
       return data;
     } catch (error) {
-      console.error('Error fetching summary:', error);
       throw error;
     }
   }

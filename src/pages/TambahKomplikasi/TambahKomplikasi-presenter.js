@@ -10,9 +10,7 @@ class TambahKomplikasiPresenter {
     try {
       const pregnancies = await this.model.getActivePregnancies();
       this.view.setPregnancies(pregnancies);
-    } catch (error) {
-      console.error('Load pregnancies error:', error);
-      
+    } catch (error) {      
       if (error.message.includes('401') || error.message.includes('Unauthorized')) {
         this.handleLogout();
         return;
@@ -27,7 +25,6 @@ class TambahKomplikasiPresenter {
       const ancVisits = await this.model.getAncByPregnancy(pregnancyId);
       this.view.setAncVisits(ancVisits);
     } catch (error) {
-      console.error('Load ANC visits error:', error);
       this.view.setAncVisits([]);
     }
   }
@@ -42,9 +39,7 @@ class TambahKomplikasiPresenter {
       if (data.forkey_hamil) {
         await this.loadAncVisits(data.forkey_hamil);
       }
-    } catch (error) {
-      console.error('Load komplikasi error:', error);
-      
+    } catch (error) {      
       if (error.message.includes('401') || error.message.includes('Unauthorized')) {
         this.handleLogout();
         return;
@@ -68,9 +63,7 @@ class TambahKomplikasiPresenter {
         await this.model.createKomplikasi(formData);
         this.view.onSuccess('Data komplikasi berhasil ditambahkan');
       }
-    } catch (error) {
-      console.error('Submit error:', error);
-      
+    } catch (error) {      
       if (error.message.includes('401') || error.message.includes('Unauthorized')) {
         this.handleLogout();
         return;

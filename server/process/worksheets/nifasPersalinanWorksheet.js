@@ -2,15 +2,8 @@
 const fillNifasPersalinanWorksheet = async (workbook, data, tanggal_laporan, nama_puskesmas) => {
     const worksheet = workbook.getWorksheet('Persalinan Nifas');
     if (!worksheet) {
-        console.error('Worksheet "Persalinan Nifas" not found');
         return;
     }
-
-    console.log('Filling Nifas Persalinan worksheet with data:', {
-        kelurahanCount: data?.kelurahan?.length || 0,
-        kelurahanNames: data?.kelurahan?.map(k => k.kelurahan) || [],
-        hasTotal: !!data?.total
-    });
 
     // Fill header data
     worksheet.getCell('C1').value = tanggal_laporan;
@@ -48,7 +41,6 @@ const fillNifasPersalinanWorksheet = async (workbook, data, tanggal_laporan, nam
                 data.kelurahan.forEach(kelData => {
                     const kelPlaceholder = getKelurahanPlaceholder(kelData.kelurahan);
                     if (!kelPlaceholder) {
-                        console.warn(`No placeholder mapping found for kelurahan: "${kelData.kelurahan}"`);
                         return;
                     }
 

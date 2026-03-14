@@ -235,20 +235,13 @@ router.get('/generate', authMiddleware, async (req, res) => {
         const nama_puskesmas = 'Puskesmas Handil Bakti';
 
         // Get yearly data using the correct queries
-        console.log('Fetching yearly data for tahun:', tahun, 'kelurahan_id:', kelurahan_id);
         const yearlyData = await getYearlyData(pool, tahun, kelurahan_id);
-        
-        console.log('Yearly data fetched:', {
-            totalMonths: Object.keys(yearlyData).length,
-            sampleMonth: yearlyData[1] ? yearlyData[1].length : 0
-        });
 
         // Fill monthly worksheets with data
         try {
             await fillMonthlyDataWorksheet(workbook, yearlyData, tanggal_laporan, nama_puskesmas);
         } catch (error) {
-            console.error('Error filling monthly worksheets:', error);
-            console.error('Error details:', error.stack);
+            throw error;
         }
 
         // Generate filename
@@ -263,7 +256,6 @@ router.get('/generate', authMiddleware, async (req, res) => {
         res.end();
 
     } catch (error) {
-        console.error('Error exporting Excel:', error);
         res.status(500).json({
             success: false,
             message: 'Gagal mengekspor laporan',

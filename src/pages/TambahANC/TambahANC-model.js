@@ -24,7 +24,6 @@ class TambahANCModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error fetching pregnancies:', error);
       throw error;
     }
   }
@@ -42,7 +41,6 @@ class TambahANCModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error fetching ANC:', error);
       throw error;
     }
   }
@@ -60,7 +58,6 @@ class TambahANCModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error fetching mother data:', error);
       throw error;
     }
   }
@@ -78,7 +75,6 @@ class TambahANCModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error fetching previous visits:', error);
       throw error;
     }
   }
@@ -96,7 +92,6 @@ class TambahANCModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error checking existing visit:', error);
       throw error;
     }
   }
@@ -116,7 +111,6 @@ class TambahANCModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error creating ANC:', error);
       throw error;
     }
   }
@@ -136,7 +130,6 @@ class TambahANCModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error updating ANC:', error);
       throw error;
     }
   }

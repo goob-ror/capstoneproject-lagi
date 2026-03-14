@@ -10,9 +10,7 @@ class TambahANCPresenter {
     try {
       const pregnancies = await this.model.getActivePregnancies();
       this.view.setPregnancies(pregnancies);
-    } catch (error) {
-      console.error('Load pregnancies error:', error);
-      
+    } catch (error) {      
       if (error.message.includes('401') || error.message.includes('Unauthorized')) {
         this.handleLogout();
         return;
@@ -26,9 +24,7 @@ class TambahANCPresenter {
     try {
       const motherData = await this.model.getMotherDataByPregnancyId(pregnancyId);
       this.view.setMotherData(motherData);
-    } catch (error) {
-      console.error('Load mother data error:', error);
-      
+    } catch (error) {      
       if (error.message.includes('401') || error.message.includes('Unauthorized')) {
         this.handleLogout();
         return;
@@ -42,9 +38,7 @@ class TambahANCPresenter {
     try {
       const visits = await this.model.getPreviousVisitsByPregnancyId(pregnancyId);
       this.view.setPreviousVisits(visits);
-    } catch (error) {
-      console.error('Load previous visits error:', error);
-      
+    } catch (error) {      
       if (error.message.includes('401') || error.message.includes('Unauthorized')) {
         this.handleLogout();
         return;
@@ -68,9 +62,7 @@ class TambahANCPresenter {
         this.view.hideExistingVisitWarning();
         // Don't populate form - let it stay empty for new entry
       }
-    } catch (error) {
-      console.error('Check existing visit error:', error);
-      
+    } catch (error) {      
       if (error.message.includes('401') || error.message.includes('Unauthorized')) {
         this.handleLogout();
         return;
@@ -84,9 +76,7 @@ class TambahANCPresenter {
     try {
       const data = await this.model.getAncById(id);
       this.view.populateForm(data);
-    } catch (error) {
-      console.error('Load ANC error:', error);
-      
+    } catch (error) {      
       if (error.message.includes('401') || error.message.includes('Unauthorized')) {
         this.handleLogout();
         return;
@@ -110,9 +100,7 @@ class TambahANCPresenter {
         await this.model.createAnc(formData);
         this.view.onSuccess('Data kunjungan ANC berhasil ditambahkan');
       }
-    } catch (error) {
-      console.error('Submit error:', error);
-      
+    } catch (error) {      
       if (error.message.includes('401') || error.message.includes('Unauthorized')) {
         this.handleLogout();
         return;

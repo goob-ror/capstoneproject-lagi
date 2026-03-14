@@ -25,7 +25,6 @@ class PersalinanModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error fetching persalinan data:', error);
       throw error;
     }
   }
@@ -43,7 +42,6 @@ class PersalinanModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error deleting persalinan:', error);
       throw error;
     }
   }

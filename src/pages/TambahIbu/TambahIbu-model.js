@@ -24,7 +24,6 @@ class TambahIbuModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error fetching ibu by id:', error);
       throw error;
     }
   }
@@ -44,7 +43,6 @@ class TambahIbuModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error creating ibu:', error);
       throw error;
     }
   }
@@ -64,7 +62,6 @@ class TambahIbuModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error updating ibu:', error);
       throw error;
     }
   }

@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const axios = require('axios');
 const pool = require('../database/db');
+const { rateLimitMiddleware, rateLimiter } = require('../middleware/rateLimiter');
 
 // reCAPTCHA verification function
 async function verifyRecaptcha(token) {
@@ -27,13 +28,12 @@ async function verifyRecaptcha(token) {
 
     return response.data;
   } catch (error) {
-    console.error('reCAPTCHA verification error:', error);
     return { success: false, error: 'Verification failed' };
   }
 }
 
 // Register
-router.post('/register', async (req, res) => {
+router.post('/register', rateLimitMiddleware, async (req, res) => {
   try {
     const { username, password, recaptchaToken } = req.body;
 
@@ -42,6 +42,7 @@ router.post('/register', async (req, res) => {
       const recaptchaResult = await verifyRecaptcha(recaptchaToken);
       
       if (!recaptchaResult.success) {
+        rateLimiter.recordFailedAttempt(req);
         return res.status(400).json({ 
           message: 'Verifikasi reCAPTCHA gagal. Silakan coba lagi.' 
         });
@@ -49,6 +50,7 @@ router.post('/register', async (req, res) => {
 
       // For reCAPTCHA v3, check the score (0.0 - 1.0, higher is better)
       if (recaptchaResult.score && recaptchaResult.score < 0.5) {
+        rateLimiter.recordFailedAttempt(req);
         return res.status(400).json({ 
           message: 'Verifikasi keamanan gagal. Silakan coba lagi.' 
         });
@@ -62,7 +64,19 @@ router.post('/register', async (req, res) => {
     );
 
     if (existing.length > 0) {
-      return res.status(400).json({ message: 'Username already exists' });
+      const result = rateLimiter.recordFailedAttempt(req);
+      
+      if (result.locked) {
+        return res.status(429).json({ 
+          message: `Terlalu banyak percobaan registrasi gagal. Coba lagi dalam ${result.cooldownMinutes} menit.`,
+          locked: true
+        });
+      }
+      
+      return res.status(400).json({ 
+        message: 'Username already exists',
+        attemptsRemaining: result.attemptsRemaining
+      });
     }
 
     // Hash password
@@ -74,18 +88,20 @@ router.post('/register', async (req, res) => {
       [username, hashedPassword, username, 'Bidan', 0]
     );
 
+    // Successful registration - reset rate limit for this IP
+    rateLimiter.recordSuccessfulLogin(req);
+
     res.status(201).json({
       message: 'Registration successful. Waiting for approval.',
       userId: result.insertId
     });
   } catch (error) {
-    console.error('Register error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
 // Login
-router.post('/login', async (req, res) => {
+router.post('/login', rateLimitMiddleware, async (req, res) => {
   try {
     const { username, password, recaptchaToken } = req.body;
 
@@ -94,6 +110,7 @@ router.post('/login', async (req, res) => {
       const recaptchaResult = await verifyRecaptcha(recaptchaToken);
       
       if (!recaptchaResult.success) {
+        rateLimiter.recordFailedAttempt(req);
         return res.status(400).json({ 
           message: 'Verifikasi reCAPTCHA gagal. Silakan coba lagi.' 
         });
@@ -101,6 +118,7 @@ router.post('/login', async (req, res) => {
 
       // For reCAPTCHA v3, check the score (0.0 - 1.0, higher is better)
       if (recaptchaResult.score && recaptchaResult.score < 0.5) {
+        rateLimiter.recordFailedAttempt(req);
         return res.status(400).json({ 
           message: 'Verifikasi keamanan gagal. Silakan coba lagi.' 
         });
@@ -114,7 +132,20 @@ router.post('/login', async (req, res) => {
     );
 
     if (users.length === 0) {
-      return res.status(401).json({ message: 'Usename atau password salah!' });
+      const result = rateLimiter.recordFailedAttempt(req);
+      
+      if (result.locked) {
+        return res.status(429).json({ 
+          message: `Terlalu banyak percobaan login gagal. Akun dikunci selama ${result.cooldownMinutes} menit.`,
+          locked: true,
+          cooldownMinutes: result.cooldownMinutes
+        });
+      }
+      
+      return res.status(401).json({ 
+        message: 'Username atau password salah!',
+        attemptsRemaining: result.attemptsRemaining
+      });
     }
 
     const user = users[0];
@@ -122,16 +153,33 @@ router.post('/login', async (req, res) => {
     // Check password
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
-      return res.status(401).json({ message: 'Username atau password salah!' });
+      const result = rateLimiter.recordFailedAttempt(req);
+      
+      if (result.locked) {
+        return res.status(429).json({ 
+          message: `Terlalu banyak percobaan login gagal. Akun dikunci selama ${result.cooldownMinutes} menit.`,
+          locked: true,
+          cooldownMinutes: result.cooldownMinutes
+        });
+      }
+      
+      return res.status(401).json({ 
+        message: 'Username atau password salah!',
+        attemptsRemaining: result.attemptsRemaining
+      });
     }
 
     // Check if approved
     if (!user.isAuth) {
+      // Don't count this as a failed attempt since credentials are correct
       return res.status(403).json({ 
         message: 'Account pending approval',
         status: 'pending'
       });
     }
+
+    // Successful login - reset rate limit
+    rateLimiter.recordSuccessfulLogin(req);
 
     // Update last_login
     await pool.query(
@@ -157,7 +205,29 @@ router.post('/login', async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Login error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Admin endpoint to check rate limit status (optional - for debugging)
+router.get('/rate-limit-status', async (req, res) => {
+  try {
+    const ip = rateLimiter.getClientIp(req);
+    const status = rateLimiter.getStatus(ip);
+    
+    if (!status) {
+      return res.json({
+        ip,
+        message: 'No rate limit record found for this IP',
+        status: 'clean'
+      });
+    }
+    
+    res.json({
+      ip,
+      ...status
+    });
+  } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }
 });

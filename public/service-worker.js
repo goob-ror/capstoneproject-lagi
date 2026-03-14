@@ -19,36 +19,28 @@ const IMAGE_CACHE_FILES = [
 ];
 
 // Install event - cache core resources
-self.addEventListener('install', (event) => {
-  console.log('[ServiceWorker] Installing...');
-  
+self.addEventListener('install', (event) => {  
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('[ServiceWorker] Caching core files');
         // Cache core files first
         return cache.addAll(CORE_CACHE_FILES)
           .then(() => {
             // Then cache images (don't fail if images fail)
             return cache.addAll(IMAGE_CACHE_FILES).catch((error) => {
-              console.warn('[ServiceWorker] Some images failed to cache:', error);
             });
           });
       })
       .then(() => {
-        console.log('[ServiceWorker] Core files cached successfully');
         self.skipWaiting();
       })
       .catch((error) => {
-        console.error('[ServiceWorker] Cache installation failed:', error);
       })
   );
 });
 
 // Activate event - clean up old caches
-self.addEventListener('activate', (event) => {
-  console.log('[ServiceWorker] Activating...');
-  
+self.addEventListener('activate', (event) => {  
   const currentCaches = [CACHE_NAME, RUNTIME_CACHE];
   
   event.waitUntil(
@@ -56,13 +48,11 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (!currentCaches.includes(cacheName)) {
-            console.log('[ServiceWorker] Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
       );
     }).then(() => {
-      console.log('[ServiceWorker] Activated successfully');
       return self.clients.claim();
     })
   );
@@ -117,7 +107,6 @@ async function networkFirstStrategy(request) {
     const cachedResponse = await caches.match(request);
     
     if (cachedResponse) {
-      console.log('[ServiceWorker] Serving from cache (offline):', request.url);
       return cachedResponse;
     }
     
@@ -158,7 +147,6 @@ async function cacheFirstStrategy(request) {
     
     return networkResponse;
   } catch (error) {
-    console.error('[ServiceWorker] Fetch failed:', error);
     throw error;
   }
 }
@@ -176,7 +164,6 @@ async function navigationStrategy(request) {
     return networkResponse;
   } catch (error) {
     // Network failed, serve cached index.html
-    console.log('[ServiceWorker] Serving cached index.html for navigation');
     const cachedResponse = await caches.match('/index.html');
     
     if (cachedResponse) {
@@ -234,7 +221,6 @@ self.addEventListener('sync', (event) => {
 
 async function syncData() {
   // Implement data synchronization logic here
-  console.log('[ServiceWorker] Syncing data...');
 }
 
 // Push notifications (future enhancement)

@@ -44,7 +44,6 @@ const getKomplikasiData = async (pool, req, res) => {
         res.json(kelurahanData);
 
     } catch (error) {
-        console.error('Error fetching komplikasi data:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 };

@@ -12,9 +12,7 @@ class IndexedDBService {
     try {
       await initDB();
       this.initialized = true;
-      console.log('IndexedDB initialized successfully');
     } catch (error) {
-      console.error('Failed to initialize IndexedDB:', error);
       throw error;
     }
   }
@@ -26,9 +24,7 @@ class IndexedDBService {
         await this.init();
       }
       await saveSession(sessionData);
-      console.log('Session saved to IndexedDB');
     } catch (error) {
-      console.error('Error saving session:', error);
       throw error;
     }
   }
@@ -41,7 +37,6 @@ class IndexedDBService {
       }
       return await getSession();
     } catch (error) {
-      console.error('Error getting session:', error);
       return null;
     }
   }
@@ -62,7 +57,6 @@ class IndexedDBService {
 
       return isValid;
     } catch (error) {
-      console.error('Error checking session validity:', error);
       return false;
     }
   }
@@ -74,9 +68,8 @@ class IndexedDBService {
         await this.init();
       }
       await clearSession();
-      console.log('Session cleared from IndexedDB');
     } catch (error) {
-      console.error('Error clearing session:', error);
+      throw error;
     }
   }
 }

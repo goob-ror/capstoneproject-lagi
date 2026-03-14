@@ -24,7 +24,6 @@ router.get('/pregnancies/active', auth, async (req, res) => {
     const [rows] = await db.execute(query);
     res.json(rows);
   } catch (error) {
-    console.error('Error fetching active pregnancies:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
@@ -54,7 +53,6 @@ router.get('/pregnancy/:pregnancyId/mother', auth, async (req, res) => {
     
     res.json(rows[0]);
   } catch (error) {
-    console.error('Error fetching mother data:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
@@ -81,7 +79,6 @@ router.get('/pregnancy/:pregnancyId/visits', auth, async (req, res) => {
     const [rows] = await db.execute(query, [pregnancyId]);
     res.json(rows);
   } catch (error) {
-    console.error('Error fetching previous visits:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
@@ -105,7 +102,6 @@ router.get('/pregnancy/:pregnancyId/visit/:jenisKunjungan', auth, async (req, re
     
     res.json({ exists: true, data: rows[0] });
   } catch (error) {
-    console.error('Error checking existing visit:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
@@ -138,7 +134,6 @@ router.get('/', auth, async (req, res) => {
     const [rows] = await db.execute(query, [filterYear]);
     res.json(rows);
   } catch (error) {
-    console.error('Error fetching ANC data:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
@@ -195,7 +190,6 @@ router.get('/:id', auth, async (req, res) => {
       jiwa_screening: jiwaScreening
     });
   } catch (error) {
-    console.error('Error fetching ANC visit:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
@@ -310,7 +304,6 @@ router.post('/', auth, async (req, res) => {
     });
   } catch (error) {
     await connection.rollback();
-    console.error('Error creating ANC visit:', error);
     res.status(500).json({ message: 'Internal server error' });
   } finally {
     connection.release();
@@ -483,7 +476,6 @@ router.put('/:id', auth, async (req, res) => {
     res.json({ message: 'ANC visit updated successfully' });
   } catch (error) {
     await connection.rollback();
-    console.error('Error updating ANC visit:', error);
     res.status(500).json({ message: 'Internal server error' });
   } finally {
     connection.release();
@@ -503,7 +495,6 @@ router.delete('/:id', auth, async (req, res) => {
     
     res.json({ message: 'ANC visit deleted successfully' });
   } catch (error) {
-    console.error('Error deleting ANC visit:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });

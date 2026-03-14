@@ -32,7 +32,6 @@ router.get('/', authMiddleware, async (req, res) => {
     `, [filterYear, filterYear, filterYear, filterYear]);
     res.json(rows);
   } catch (error) {
-    console.error('Get ibu error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -81,7 +80,6 @@ router.get('/:id', authMiddleware, async (req, res) => {
 
     res.json(result);
   } catch (error) {
-    console.error('Get ibu error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -213,7 +211,6 @@ router.post('/', authMiddleware, async (req, res) => {
   } catch (error) {
     // Rollback transaction on error
     await connection.rollback();
-    console.error('Create ibu error:', error);
     res.status(500).json({ message: 'Server error' });
   } finally {
     connection.release();
@@ -401,7 +398,6 @@ router.put('/:id', authMiddleware, async (req, res) => {
   } catch (error) {
     // Rollback transaction on error
     await connection.rollback();
-    console.error('Update ibu error:', error);
     res.status(500).json({ message: 'Server error' });
   } finally {
     connection.release();
@@ -422,7 +418,6 @@ router.delete('/:id', authMiddleware, async (req, res) => {
 
     res.json({ message: 'Ibu deleted successfully' });
   } catch (error) {
-    console.error('Delete ibu error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -537,7 +532,6 @@ router.get('/:id/detail', authMiddleware, async (req, res) => {
       pregnancyHistory
     });
   } catch (error) {
-    console.error('Error fetching ibu detail:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });

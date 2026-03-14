@@ -24,7 +24,6 @@ class UserManagementModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error fetching users:', error);
       throw error;
     }
   }
@@ -44,7 +43,6 @@ class UserManagementModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error adding user:', error);
       throw error;
     }
   }
@@ -64,7 +62,6 @@ class UserManagementModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error updating user:', error);
       throw error;
     }
   }
@@ -84,7 +81,6 @@ class UserManagementModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error changing password:', error);
       throw error;
     }
   }
@@ -103,7 +99,6 @@ class UserManagementModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error verifying user:', error);
       throw error;
     }
   }
@@ -122,7 +117,6 @@ class UserManagementModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error deleting user:', error);
       throw error;
     }
   }

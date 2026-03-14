@@ -39,7 +39,6 @@ class LoginPresenter {
           passwordHash: passwordHash
         });
       } catch (dbError) {
-        console.warn('Failed to save session to IndexedDB:', dbError);
         // Don't block login if IndexedDB fails
       }
 

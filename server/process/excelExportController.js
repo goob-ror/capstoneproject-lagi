@@ -58,7 +58,6 @@ const generateExcelReport = async (pool, req, res) => {
         res.end();
 
     } catch (error) {
-        console.error('Error generating Excel report:', error);
         res.status(500).json({ error: 'Internal server error', message: error.message });
     }
 };
@@ -70,7 +69,6 @@ const getDataFromController = async (pool, req, controllerFunc) => {
             json: (data) => resolve(data),
             status: (code) => ({
                 json: (data) => {
-                    console.error(`Controller returned status ${code}:`, data);
                     reject(new Error(data.error || data.message || 'Controller error'));
                 }
             })
@@ -79,7 +77,6 @@ const getDataFromController = async (pool, req, controllerFunc) => {
         try {
             controllerFunc(pool, req, mockRes);
         } catch (error) {
-            console.error('Error calling controller function:', error);
             reject(error);
         }
     });

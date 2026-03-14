@@ -25,7 +25,6 @@ router.get('/delivered-mothers', auth, async (req, res) => {
     const [rows] = await db.execute(query);
     res.json(rows);
   } catch (error) {
-    console.error('Error fetching delivered mothers:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
@@ -63,7 +62,6 @@ router.get('/pregnancy/:pregnancyId/mother', auth, async (req, res) => {
     
     res.json(rows[0]);
   } catch (error) {
-    console.error('Error fetching mother data:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
@@ -106,7 +104,6 @@ router.get('/persalinan/by-pregnancy/:pregnancyId', auth, async (req, res) => {
       babies: bayiRows
     });
   } catch (error) {
-    console.error('Error fetching persalinan by pregnancy:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
@@ -173,7 +170,6 @@ router.get('/', auth, async (req, res) => {
     
     res.json(parsedRows);
   } catch (error) {
-    console.error('Error fetching nifas data:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
@@ -210,7 +206,6 @@ router.get('/:id', auth, async (req, res) => {
     
     res.json({ ...rows[0], babies });
   } catch (error) {
-    console.error('Error fetching nifas data:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
@@ -317,7 +312,6 @@ router.post('/', auth, async (req, res) => {
     });
   } catch (error) {
     await connection.rollback();
-    console.error('Error creating nifas visit:', error);
     res.status(500).json({ message: 'Internal server error' });
   } finally {
     connection.release();
@@ -422,7 +416,6 @@ router.put('/:id', auth, async (req, res) => {
     res.json({ message: 'Data kunjungan nifas berhasil diupdate' });
   } catch (error) {
     await connection.rollback();
-    console.error('Error updating nifas visit:', error);
     res.status(500).json({ message: 'Internal server error' });
   } finally {
     connection.release();
@@ -454,7 +447,6 @@ router.delete('/:id', auth, async (req, res) => {
     res.json({ message: 'Data kunjungan nifas berhasil dihapus' });
   } catch (error) {
     await connection.rollback();
-    console.error('Error deleting nifas visit:', error);
     res.status(500).json({ message: 'Internal server error' });
   } finally {
     connection.release();
@@ -487,7 +479,6 @@ router.post('/auto-update-status', auth, async (req, res) => {
     });
   } catch (error) {
     await connection.rollback();
-    console.error('Error auto-updating pregnancy status:', error);
     res.status(500).json({ message: 'Internal server error' });
   } finally {
     connection.release();
@@ -634,7 +625,6 @@ router.post('/with-complications', auth, async (req, res) => {
 
   } catch (error) {
     await connection.rollback();
-    console.error('Error creating nifas with complications:', error);
     res.status(500).json({ message: 'Internal server error' });
   } finally {
     connection.release();
@@ -674,7 +664,6 @@ router.get('/persalinan/:persalinanId/for-kf1', auth, async (req, res) => {
       babies: bayiRows
     });
   } catch (error) {
-    console.error('Error fetching persalinan for KF1:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });

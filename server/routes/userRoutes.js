@@ -12,7 +12,6 @@ router.get('/', auth, async (req, res) => {
     );
     res.json(users);
   } catch (error) {
-    console.error('Get users error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -51,7 +50,6 @@ router.post('/', auth, async (req, res) => {
       userId: result.insertId
     });
   } catch (error) {
-    console.error('Add user error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -100,7 +98,6 @@ router.put('/:id', auth, async (req, res) => {
 
     res.json({ message: 'User berhasil diupdate' });
   } catch (error) {
-    console.error('Update user error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -136,7 +133,6 @@ router.put('/:id/password', auth, async (req, res) => {
 
     res.json({ message: 'Password berhasil diubah' });
   } catch (error) {
-    console.error('Change password error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -164,7 +160,6 @@ router.put('/:id/verify', auth, async (req, res) => {
 
     res.json({ message: 'User berhasil diverifikasi' });
   } catch (error) {
-    console.error('Verify user error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -192,7 +187,6 @@ router.delete('/:id', auth, async (req, res) => {
 
     res.json({ message: 'User berhasil dihapus' });
   } catch (error) {
-    console.error('Delete user error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });

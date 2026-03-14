@@ -13,19 +13,14 @@ const fillMonthlyDataWorksheet = async (workbook, yearlyData, tanggal_laporan, n
         const worksheet = workbook.getWorksheet(monthName);
         
         if (!worksheet) {
-            console.log(`Worksheet "${monthName}" not found, skipping...`);
             continue;
         }
-
-        console.log(`Processing worksheet: ${monthName}`);
 
         // Get data for this month (monthIndex + 1 because months are 1-based in yearlyData)
         let monthData = [];
         if (yearlyData && yearlyData[monthIndex + 1]) {
             monthData = yearlyData[monthIndex + 1];
-            console.log(`Found ${monthData.length} records for ${monthName}`);
             if (monthData.length > 0) {
-                console.log(`Sample data:`, JSON.stringify(monthData[0], null, 2));
             }
         } else {
             console.log(`No data available for ${monthName}`);
@@ -49,13 +44,11 @@ const fillMonthWorksheet = async (worksheet, monthData, monthPrefix, tanggal_lap
     });
 
     if (!monthData || monthData.length === 0) {
-        console.log(`No data for ${monthPrefix}`);
         // Clear placeholders even if no data
         clearPlaceholders(worksheet, monthPrefix);
         return;
     }
 
-    console.log(`Filling ${monthData.length} records for ${monthPrefix}`);
 
     // Helper function to format dates
     function formatDateDDMMYYYY(date) {
@@ -90,7 +83,6 @@ const fillMonthWorksheet = async (worksheet, monthData, monthPrefix, tanggal_lap
     }
 
     if (!templateRowIndex || !templateRow) {
-        console.log(`Template row not found for ${monthPrefix}`);
         return;
     }
 

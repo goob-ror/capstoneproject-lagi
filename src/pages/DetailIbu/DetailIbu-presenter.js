@@ -13,9 +13,7 @@ class DetailIbuPresenter {
     try {
       const data = await this.model.getIbuDetail(id);
       this.view.displayIbuDetail(data);
-    } catch (error) {
-      console.error('Load ibu detail error:', error);
-      
+    } catch (error) {      
       if (error.message.includes('401') || error.message.includes('Unauthorized')) {
         this.handleLogout();
         return;

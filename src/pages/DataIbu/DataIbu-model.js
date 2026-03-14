@@ -28,7 +28,6 @@ class DataIbuModel {
       this.cachedData = data;
       return data;
     } catch (error) {
-      console.error('Error fetching ibu data:', error);
       throw error;
     }
   }
@@ -46,7 +45,6 @@ class DataIbuModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error fetching ibu by id:', error);
       throw error;
     }
   }
@@ -66,7 +64,6 @@ class DataIbuModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error creating ibu:', error);
       throw error;
     }
   }
@@ -86,7 +83,6 @@ class DataIbuModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error updating ibu:', error);
       throw error;
     }
   }
@@ -104,7 +100,6 @@ class DataIbuModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error deleting ibu:', error);
       throw error;
     }
   }

@@ -24,7 +24,6 @@ class TambahKomplikasiModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error fetching pregnancies:', error);
       throw error;
     }
   }
@@ -42,7 +41,6 @@ class TambahKomplikasiModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error fetching ANC visits:', error);
       throw error;
     }
   }
@@ -60,7 +58,6 @@ class TambahKomplikasiModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error fetching komplikasi:', error);
       throw error;
     }
   }
@@ -80,7 +77,6 @@ class TambahKomplikasiModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error creating komplikasi:', error);
       throw error;
     }
   }
@@ -100,7 +96,6 @@ class TambahKomplikasiModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error updating komplikasi:', error);
       throw error;
     }
   }

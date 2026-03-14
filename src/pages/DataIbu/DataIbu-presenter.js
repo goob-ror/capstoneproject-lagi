@@ -13,9 +13,7 @@ class DataIbuPresenter {
     try {
       const data = await this.model.getAllIbu(year);
       this.view.displayIbuData(data);
-    } catch (error) {
-      console.error('Load ibu data error:', error);
-      
+    } catch (error) {      
       if (error.message.includes('401') || error.message.includes('Unauthorized')) {
         this.handleLogout();
         return;
@@ -33,9 +31,7 @@ class DataIbuPresenter {
       
       // Reload data after successful deletion
       await this.loadIbuData();
-    } catch (error) {
-      console.error('Delete ibu error:', error);
-      
+    } catch (error) {      
       if (error.message.includes('401') || error.message.includes('Unauthorized')) {
         this.handleLogout();
         return;

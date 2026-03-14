@@ -508,10 +508,6 @@ const TambahANC = () => {
       const finalEditId = existingVisitId || editId;
       const finalIsEdit = isEdit || !!existingVisitId;
 
-      console.log('Submit mode:', finalIsEdit ? 'UPDATE' : 'CREATE');
-      console.log('Visit ID:', finalEditId);
-      console.log('Visit Type:', formData.jenis_kunjungan);
-
       await presenter.handleSubmit(submitData, finalIsEdit, finalEditId);
     }
   };

@@ -22,7 +22,6 @@ class PersalinanPresenter {
       this.originalData = data;
       this.callbacks.displayPersalinanData(data);
     } catch (error) {
-      console.error('Error loading persalinan data:', error);
       if (error.message.includes('401')) {
         this.handleLogout();
         return;
@@ -46,7 +45,6 @@ class PersalinanPresenter {
       // Show success message
       alert('Data persalinan berhasil dihapus');
     } catch (error) {
-      console.error('Error deleting persalinan:', error);
       if (error.message.includes('401')) {
         this.handleLogout();
         return;

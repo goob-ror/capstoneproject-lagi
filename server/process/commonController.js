@@ -6,7 +6,6 @@ const getKelurahanList = async (pool, req, res) => {
         const [rows] = await pool.query('SELECT id, nama_kelurahan FROM kelurahan ORDER BY nama_kelurahan');
         res.json(rows);
     } catch (error) {
-        console.error('Error fetching kelurahan:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 };
@@ -21,7 +20,6 @@ const getAvailableYears = async (pool, req, res) => {
         `);
         res.json(rows.map(r => r.year));
     } catch (error) {
-        console.error('Error fetching years:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 };

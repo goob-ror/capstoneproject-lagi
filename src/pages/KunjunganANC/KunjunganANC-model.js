@@ -28,7 +28,6 @@ class KunjunganANCModel {
       this.cachedData = data;
       return data;
     } catch (error) {
-      console.error('Error fetching ANC data:', error);
       throw error;
     }
   }
@@ -46,7 +45,6 @@ class KunjunganANCModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error deleting ANC:', error);
       throw error;
     }
   }

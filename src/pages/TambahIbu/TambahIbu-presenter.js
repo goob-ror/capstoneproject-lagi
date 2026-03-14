@@ -10,9 +10,7 @@ class TambahIbuPresenter {
     try {
       const data = await this.model.getIbuById(id);
       this.view.displayIbuData(data);
-    } catch (error) {
-      console.error('Load ibu data error:', error);
-      
+    } catch (error) {      
       if (error.message.includes('401') || error.message.includes('Unauthorized')) {
         this.handleLogout();
         return;
@@ -47,9 +45,7 @@ class TambahIbuPresenter {
         await this.model.createIbu(formData);
         this.view.onSuccess('Data ibu berhasil ditambahkan!');
       }
-    } catch (error) {
-      console.error('Submit error:', error);
-      
+    } catch (error) {      
       if (error.message.includes('401') || error.message.includes('Unauthorized')) {
         this.handleLogout();
         return;

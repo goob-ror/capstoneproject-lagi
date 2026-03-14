@@ -24,7 +24,6 @@ class TambahPersalinanModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error fetching ready to deliver pregnancies:', error);
       throw error;
     }
   }
@@ -42,7 +41,6 @@ class TambahPersalinanModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error fetching mother data:', error);
       throw error;
     }
   }
@@ -60,7 +58,6 @@ class TambahPersalinanModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error fetching persalinan data:', error);
       throw error;
     }
   }
@@ -80,7 +77,6 @@ class TambahPersalinanModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error creating persalinan:', error);
       throw error;
     }
   }
@@ -100,7 +96,6 @@ class TambahPersalinanModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error updating persalinan:', error);
       throw error;
     }
   }
@@ -120,7 +115,6 @@ class TambahPersalinanModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error creating komplikasi:', error);
       throw error;
     }
   }

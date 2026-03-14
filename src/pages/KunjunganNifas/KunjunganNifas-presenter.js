@@ -39,7 +39,6 @@ class KunjunganNifasPresenter {
       this.originalData = data;
       this.view.displayNifasData(data);
     } catch (error) {
-      console.error('Error loading nifas data:', error);
       this.view.setError('Gagal memuat data kunjungan nifas');
     } finally {
       this.view.setLoading(false);
@@ -73,7 +72,6 @@ class KunjunganNifasPresenter {
       await this.loadNifasData();
       alert('Data kunjungan nifas berhasil dihapus');
     } catch (error) {
-      console.error('Error deleting nifas data:', error);
       this.view.setError('Gagal menghapus data kunjungan nifas');
     } finally {
       this.view.setLoading(false);

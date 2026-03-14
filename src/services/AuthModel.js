@@ -35,7 +35,7 @@ class AuthModel {
         }
       }
     } catch (error) {
-      console.error('Error checking IndexedDB session:', error);
+      throw error;
     }
 
     return false;

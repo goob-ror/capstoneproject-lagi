@@ -186,7 +186,7 @@ const TambahIbu = () => {
         console.error('Failed to load kelurahan options');
       }
     } catch (error) {
-      console.error('Error loading kelurahan options:', error);
+      throw error;
     }
   };
 
@@ -211,11 +211,9 @@ const TambahIbu = () => {
         const result = await response.json();
         setRtOptions(result.data.availableRT || []);
       } else {
-        console.error('Failed to load RT options');
         setRtOptions([]);
       }
     } catch (error) {
-      console.error('Error loading RT options:', error);
       setRtOptions([]);
     } finally {
       setLoadingRT(false);
@@ -241,11 +239,9 @@ const TambahIbu = () => {
         const result = await response.json();
         setAssignedPosyandu(result.data);
       } else {
-        console.error('Failed to get posyandu assignment');
         setAssignedPosyandu(null);
       }
     } catch (error) {
-      console.error('Error getting posyandu assignment:', error);
       setAssignedPosyandu(null);
     }
   };

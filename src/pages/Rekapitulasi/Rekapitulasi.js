@@ -130,7 +130,6 @@ const Rekapitulasi = () => {
 
       setExcelLoading(false);
     } catch (error) {
-      console.error('Error exporting Excel:', error);
       setError('Gagal mengekspor file Excel: ' + (error.response?.data?.message || error.message));
       setExcelLoading(false);
     }

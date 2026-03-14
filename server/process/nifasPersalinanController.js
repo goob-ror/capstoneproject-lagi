@@ -37,7 +37,6 @@ const getNifasPersalinanData = async (pool, req, res) => {
         });
 
     } catch (error) {
-        console.error('Error fetching Nifas Persalinan data:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 };

@@ -28,7 +28,6 @@ class PosyanduModel extends AuthModel {
       const data = await response.json();
       return data.data || [];
     } catch (error) {
-      console.error('Error fetching posyandu data:', error);
       throw error;
     }
   }
@@ -55,7 +54,6 @@ class PosyanduModel extends AuthModel {
       const data = await response.json();
       return data.data || [];
     } catch (error) {
-      console.error('Error fetching kelurahan data:', error);
       throw error;
     }
   }
@@ -82,7 +80,6 @@ class PosyanduModel extends AuthModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error creating posyandu:', error);
       throw error;
     }
   }
@@ -109,7 +106,6 @@ class PosyanduModel extends AuthModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error updating posyandu:', error);
       throw error;
     }
   }
@@ -135,7 +131,6 @@ class PosyanduModel extends AuthModel {
 
       return await response.json();
     } catch (error) {
-      console.error('Error deleting posyandu:', error);
       throw error;
     }
   }

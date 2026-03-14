@@ -7,9 +7,6 @@ const authMiddleware = require('../middleware/auth');
 router.get('/', authMiddleware, async (req, res) => {
   try {
     const { kelurahan, year, month } = req.query;
-    console.log('Rekapitulasi request:', { kelurahan, year, month });
-    console.log('Starting rekapitulasi queries...');
-
     // Disable ONLY_FULL_GROUP_BY for this session to allow aggregate queries
     await pool.query("SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''))");
 
@@ -90,7 +87,6 @@ router.get('/', authMiddleware, async (req, res) => {
     const totalNifas = totalNifasResult[0].count;
 
     // 5. Get ANC by type
-    console.log('Query 5: ANC by type');
     const ancByTypeQuery = `
       SELECT 
         ac.jenis_kunjungan,
@@ -110,7 +106,6 @@ router.get('/', authMiddleware, async (req, res) => {
     const [ancByType] = await pool.query(ancByTypeQuery, [...kelurahanParams, ...dateParamsANC, ...kelurahanParams, ...dateParamsANC]);
 
     // 6. Get nifas by type
-    console.log('Query 6: Nifas by type');
     const nifasByTypeQuery = `
       SELECT 
         nf.jenis_kunjungan,
@@ -341,8 +336,6 @@ router.get('/', authMiddleware, async (req, res) => {
       selectedKelurahan: kelurahan || null
     });
   } catch (error) {
-    console.error('Error fetching summary data:', error);
-    console.error('Error stack:', error.stack);
     res.status(500).json({
       message: 'Internal server error',
       error: error.message,

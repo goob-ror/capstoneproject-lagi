@@ -36,7 +36,6 @@ class TambahNifasPresenter {
       const data = await response.json();
       this.view.setDeliveredMothers(data);
     } catch (error) {
-      console.error('Error loading delivered mothers:', error);
       this.view.setError('Gagal memuat data ibu nifas');
     } finally {
       this.view.setLoading(false);
@@ -65,7 +64,6 @@ class TambahNifasPresenter {
       const data = await response.json();
       this.view.setMotherData(data);
     } catch (error) {
-      console.error('Error loading mother data:', error);
       this.view.setError('Gagal memuat data ibu');
     }
   }
@@ -95,7 +93,6 @@ class TambahNifasPresenter {
       const data = await response.json();
       this.view.populateForm(data);
     } catch (error) {
-      console.error('Error loading nifas data:', error);
       this.view.setError('Gagal memuat data kunjungan nifas');
     } finally {
       this.view.setLoading(false);
@@ -174,7 +171,6 @@ class TambahNifasPresenter {
       
       this.view.onSuccess(result.message || (isEdit ? 'Data kunjungan nifas berhasil diupdate' : 'Data kunjungan nifas berhasil disimpan'));
     } catch (error) {
-      console.error('Error saving nifas data:', error);
       this.view.setError(error.message || 'Gagal menyimpan data kunjungan nifas');
     } finally {
       this.view.setLoading(false);
@@ -200,10 +196,8 @@ class TambahNifasPresenter {
 
         if (!response.ok) {
           const errorData = await response.json();
-          console.error('Failed to create complication:', comp.nama_komplikasi, errorData);
         }
       } catch (error) {
-        console.error('Error creating complication:', error);
       }
     }
   }

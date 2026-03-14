@@ -56,6 +56,9 @@ const detectThreats = (input) => {
   if (SECURITY_PATTERNS.VBSCRIPT_PROTOCOL.test(input)) {
     threats.push('VBScript protocol detected');
   }
+  if (SECURITY_PATTERNS.SQL_INJECTION.test(input)) {
+    threats.push('SQL Injection detected')
+  }
 
   return {
     isValid: threats.length === 0,

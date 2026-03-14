@@ -27,7 +27,6 @@ router.get('/', auth, async (req, res) => {
       data: rows
     });
   } catch (error) {
-    console.error('Error fetching posyandu:', error);
     res.status(500).json({
       success: false,
       message: 'Gagal mengambil data posyandu'
@@ -51,7 +50,6 @@ router.get('/kelurahan', auth, async (req, res) => {
       data: rows
     });
   } catch (error) {
-    console.error('Error fetching kelurahan:', error);
     res.status(500).json({
       success: false,
       message: 'Gagal mengambil data kelurahan'
@@ -126,7 +124,6 @@ router.post('/', auth, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error creating posyandu:', error);
     res.status(500).json({
       success: false,
       message: 'Gagal menambahkan data posyandu'
@@ -216,7 +213,6 @@ router.put('/:id', auth, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error updating posyandu:', error);
     res.status(500).json({
       success: false,
       message: 'Gagal memperbarui data posyandu'
@@ -263,7 +259,6 @@ router.delete('/:id', auth, async (req, res) => {
       message: 'Data posyandu berhasil dihapus'
     });
   } catch (error) {
-    console.error('Error deleting posyandu:', error);
     res.status(500).json({
       success: false,
       message: 'Gagal menghapus data posyandu'
