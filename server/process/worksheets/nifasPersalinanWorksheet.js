@@ -36,15 +36,25 @@ const fillNifasPersalinanWorksheet = async (workbook, data, tanggal_laporan, nam
         row.eachCell((cell) => {
             if (cell.value && typeof cell.value === 'string' && cell.value.includes('{')) {
                 let cellValue = cell.value;
+                let replacedPrefixes = new Set();
 
-                // Replace for each kelurahan
                 data.kelurahan.forEach(kelData => {
                     const kelPlaceholder = getKelurahanPlaceholder(kelData.kelurahan);
-                    if (!kelPlaceholder) {
-                        return;
-                    }
+                    if (!kelPlaceholder) return;
+
+                    replacedPrefixes.add(kelPlaceholder);
 
                     cellValue = replacePlaceholders(cellValue, kelPlaceholder, kelData, formatPercent);
+                });
+
+                cellValue = cellValue.replace(/\{([^}_]+)_([^}]+)\}/g, (match, prefix, field) => {
+                    if (prefix === 'total') return match;
+
+                    if (!replacedPrefixes.has(prefix)) {
+                        return field.includes('persen') ? '0%' : '0';
+                    }
+
+                    return match;
                 });
 
                 // Replace totals
