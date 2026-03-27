@@ -23,7 +23,9 @@ const fillMonthlyDataWorksheet = async (workbook, yearlyData, tanggal_laporan, n
             if (monthData.length > 0) {
             }
         } else {
-            console.log(`No data available for ${monthName}`);
+            if (process.env.NODE_ENV !== 'production') {
+                console.log(`No data available for ${monthName}`);
+            }
         }
 
         // Fill the worksheet with data

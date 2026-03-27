@@ -11,27 +11,66 @@ const LoginPage = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [attemptsRemaining, setAttemptsRemaining] = useState(null);
+  const [lockoutSeconds, setLockoutSeconds] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
   const [recaptchaToken, setRecaptchaToken] = useState(null);
   const navigate = useNavigate();
   const recaptchaRef = useRef(null);
+  const lockoutTimerRef = useRef(null);
+
+  const handleSetError = (msg) => {
+    // Parse "X percobaan tersisa" from error message
+    const attemptsMatch = msg.match(/\((\d+) percobaan tersisa\)/);
+    if (attemptsMatch) {
+      setAttemptsRemaining(parseInt(attemptsMatch[1], 10));
+      setError(msg.replace(/ \(\d+ percobaan tersisa\)/, '').trim());
+    } else {
+      setAttemptsRemaining(null);
+      setError(msg);
+    }
+
+    // Parse cooldown minutes from lockout message
+    const cooldownMatch = msg.match(/dalam (\d+) menit/);
+    if (cooldownMatch) {
+      const seconds = parseInt(cooldownMatch[1], 10) * 60;
+      setLockoutSeconds(seconds);
+    }
+  };
 
   const [presenter] = useState(() => new LoginPresenter({
     setLoading,
-    setError: (msg) => setError(msg),
-    clearError: () => setError(''),
+    setError: handleSetError,
+    clearError: () => { setError(''); setAttemptsRemaining(null); setLockoutSeconds(0); },
     onLoginSuccess: () => navigate('/dashboard'),
     onPendingApproval: () => navigate('/waiting-approval'),
     navigateToRegister: () => navigate('/register')
   }));
 
+  // Countdown timer for lockout
   useEffect(() => {
-    // Clear error after 5 seconds
-    if (error) {
-      const timer = setTimeout(() => setError(''), 5000);
+    if (lockoutSeconds > 0) {
+      lockoutTimerRef.current = setInterval(() => {
+        setLockoutSeconds(prev => {
+          if (prev <= 1) {
+            clearInterval(lockoutTimerRef.current);
+            setError('');
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(lockoutTimerRef.current);
+  }, [lockoutSeconds]);
+
+  useEffect(() => {
+    // Clear non-lockout errors after 5 seconds
+    if (error && lockoutSeconds === 0) {
+      const timer = setTimeout(() => { setError(''); setAttemptsRemaining(null); }, 5000);
       return () => clearTimeout(timer);
     }
-  }, [error]);
+  }, [error, lockoutSeconds]);
 
   const handleChange = (e) => {
     setFormData({
@@ -96,6 +135,19 @@ const LoginPage = () => {
               {error}
             </div>
           )}
+          {attemptsRemaining !== null && attemptsRemaining > 0 && lockoutSeconds === 0 && (
+            <div className="attempts-warning">
+              ⚠️ {attemptsRemaining} percobaan tersisa sebelum akun dikunci
+            </div>
+          )}
+          {lockoutSeconds > 0 && (
+            <div className="lockout-countdown">
+              🔒 Akun dikunci. Coba lagi dalam{' '}
+              <span className="countdown-time">
+                {Math.floor(lockoutSeconds / 60)}:{String(lockoutSeconds % 60).padStart(2, '0')}
+              </span>
+            </div>
+          )}
           <form onSubmit={handleSubmit}>
             <div className="login-form-group">
               <label htmlFor="username">Username</label>
@@ -153,7 +205,7 @@ const LoginPage = () => {
               />
             </div>
             <div className="login-button-wrapper">
-              <button type="submit" className="login-button" disabled={loading}>
+              <button type="submit" className="login-button" disabled={loading || lockoutSeconds > 0}>
                 {loading ? 'LOADING...' : 'LOGIN'}
               </button>
               <p className="register-text">

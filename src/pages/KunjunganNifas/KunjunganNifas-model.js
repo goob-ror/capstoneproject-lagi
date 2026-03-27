@@ -1,6 +1,6 @@
 class KunjunganNifasModel {
   constructor() {
-    this.baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+    this.baseURL = process.env.REACT_APP_API_URL || 'https://dev-apk.samarindakota.go.id/api';
   }
 
   // Format data for display

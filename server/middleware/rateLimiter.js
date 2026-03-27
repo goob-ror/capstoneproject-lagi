@@ -71,7 +71,9 @@ class RateLimiter {
         record.cooldownLevel += 1;
       }
 
-      console.log(`IP ${ip} locked for ${cooldownMinutes} minutes (level ${record.cooldownLevel})`);
+      if (process.env.NODE_ENV !== 'production') {
+        console.log(`IP ${ip} locked for ${cooldownMinutes} minutes (level ${record.cooldownLevel})`);
+      }
       
       return {
         locked: true,

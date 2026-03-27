@@ -32,6 +32,35 @@
   font-family: 'Montserrat', sans-serif;
 }
 
+.attempts-warning {
+  background-color: #FFF7ED;
+  border: 1px solid #FDBA74;
+  color: #C2410C;
+  padding: 8px 10px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  font-size: 13px;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.lockout-countdown {
+  background-color: #FEE2E2;
+  border: 1px solid #FCA5A5;
+  color: #991B1B;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  font-size: 14px;
+  font-family: 'Montserrat', sans-serif;
+  text-align: center;
+}
+
+.countdown-time {
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 1px;
+}
+
 .login-row-one {
   width: 100%;
   display: flex;
