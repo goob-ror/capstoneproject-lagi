@@ -1,6 +1,6 @@
 class TambahNifasModel {
   constructor() {
-    this.baseURL = process.env.REACT_APP_API_URL || 'https://dev-apk.samarindakota.go.id/api';
+    this.baseURL = '/api/nifas';
   }
 
   // Validation methods

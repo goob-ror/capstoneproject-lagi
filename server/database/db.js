@@ -23,9 +23,9 @@ const poolConfig = {
   queueLimit: 0
 };
 
-// Enable SSL in production
-if (process.env.NODE_ENV === 'production') {
-  poolConfig.ssl = { rejectUnauthorized: true };
+// Enable SSL in production only if DB_SSL is explicitly set
+if (process.env.NODE_ENV === 'production' && process.env.DB_SSL === 'true') {
+  poolConfig.ssl = { rejectUnauthorized: false };
 }
 
 const pool = mysql.createPool(poolConfig);

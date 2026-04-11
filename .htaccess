@@ -1,0 +1,13 @@
+RewriteEngine On
+
+# Proxy /api requests to Node.js (all methods)
+RewriteCond %{REQUEST_URI} ^/api [NC]
+RewriteRule ^api/(.*)$ http://127.0.0.1:6767/api/$1 [P,L,QSA]
+
+# Pass through existing files and directories
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# React Router fallback - serve index.html for all other routes
+RewriteRule ^ index.html [L]

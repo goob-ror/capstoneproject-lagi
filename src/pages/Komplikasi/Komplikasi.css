@@ -1,86 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
 
-.dashboard-container {
-  min-height: 100vh;
-  background-color: #EAEAEA;
-  font-family: 'Montserrat', sans-serif;
-  margin: 0;
-  padding: 0;
-}
-
-.sidebar {
-  width: 280px;
-  background-color: #FFFFFF;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
-  display: inline-block;
-  vertical-align: top;
-  height: 100vh;
-  position: fixed;
-  left: 0;
-  top: 0;
-  z-index: 100;
-  overflow-y: auto;
-}
-
-.sidebar-header {
-  padding: 25px 20px;
-  border-bottom: 1px solid #E5E7EB;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.sidebar-logo {
-  width: 45px;
-  height: 45px;
-}
-
-.sidebar-header h2 {
-  font-size: 18px;
-  font-weight: 700;
-  color: #22C55E;
-  margin: 0;
-}
-
-.sidebar-nav {
-  padding: 15px 0;
-  padding-bottom: 180px;
-}
-
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 20px;
-  color: #6B7280;
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.2s;
-  border-left: 3px solid transparent;
-}
-
-.nav-item:hover {
-  background-color: #F9FAFB;
-  color: #22C55E;
-}
-
-.nav-item.active {
-  background-color: #ECFDF5;
-  color: #22C55E;
-  border-left-color: #22C55E;
-}
-
-.sidebar-footer {
-  padding: 15px;
-  border-top: 1px solid #E5E7EB;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background-color: #FFFFFF;
-}
-
 .user-info {
   display: flex;
   align-items: center;
@@ -416,5 +335,36 @@ table.display tbody tr:hover {
     margin-left: 70px;
     width: calc(100% - 70px);
     padding: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar {
+    transform: translateX(-100%);
+    width: 280px;
+  }
+
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+    padding: 12px;
+  }
+
+  .komplikasi-section {
+    padding: 12px;
+  }
+
+  .content-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .content-header h1 {
+    font-size: 22px;
+  }
+
+  .search-bar {
+    max-width: 100%;
   }
 }

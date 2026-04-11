@@ -2,34 +2,51 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const axios = require('axios');
+const https = require('https');
+const querystring = require('querystring');
 const pool = require('../database/db');
 const { rateLimitMiddleware, rateLimiter } = require('../middleware/rateLimiter');
 
-// reCAPTCHA verification function
+// reCAPTCHA verification function using native https (no axios/undici)
 async function verifyRecaptcha(token) {
-  try {
+  return new Promise((resolve) => {
     const secretKey = process.env.RECAPTCHA_SECRET_KEY;
-    
+
     if (!secretKey) {
-      return { success: true, score: 1.0 };
+      return resolve({ success: true, score: 1.0 });
     }
 
-    const response = await axios.post(
-      `https://www.google.com/recaptcha/api/siteverify`,
-      null,
-      {
-        params: {
-          secret: secretKey,
-          response: token
-        }
-      }
-    );
+    const postData = querystring.stringify({
+      secret: secretKey,
+      response: token
+    });
 
-    return response.data;
-  } catch (error) {
-    return { success: false, error: 'Verification failed' };
-  }
+    const options = {
+      hostname: 'www.google.com',
+      path: '/recaptcha/api/siteverify',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Length': Buffer.byteLength(postData)
+      }
+    };
+
+    const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', (chunk) => { data += chunk; });
+      res.on('end', () => {
+        try {
+          resolve(JSON.parse(data));
+        } catch {
+          resolve({ success: false, error: 'Parse error' });
+        }
+      });
+    });
+
+    req.on('error', () => resolve({ success: false, error: 'Request failed' }));
+    req.write(postData);
+    req.end();
+  });
 }
 
 // Register
@@ -96,7 +113,7 @@ router.post('/register', rateLimitMiddleware, async (req, res) => {
       userId: result.insertId
     });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Server error', detail: error.message });
   }
 });
 
@@ -205,7 +222,7 @@ router.post('/login', rateLimitMiddleware, async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Server error', detail: error.message });
   }
 });
 

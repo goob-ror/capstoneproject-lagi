@@ -1,8 +1,8 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const rateLimit = require('express-rate-limit');
-require('dotenv').config();
 
 const authRoutes = require('./routes/authRoutes');
 const ibuRoutes = require('./routes/ibuRoutes');
@@ -83,9 +83,6 @@ app.use('/api', validateAllInputs({
   logThreats: true
 }));
 
-// Serve static files from React app
-app.use(express.static(path.join(__dirname, '../build')));
-
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/ibu', ibuRoutes);
@@ -106,13 +103,6 @@ app.use('/api/report-data', reportDataRoutes);
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Server is running' });
 });
-
-// Serve React app for all other routes (only in production)
-if (process.env.NODE_ENV === 'production') {
-  app.get('/*path', (req, res) => {
-    res.sendFile(path.join(__dirname, '../build', 'index.html'));
-  });
-}
 
 app.listen(PORT, () => {
   if (process.env.NODE_ENV !== 'production') {

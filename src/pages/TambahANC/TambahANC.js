@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Select from 'react-select';
 import TambahANCPresenter from './TambahANC-presenter';
+import Sidebar from '../../components/Sidebar/Sidebar';
 import { calculateBMI, getBMICategory, getBMICategoryColor } from '../../utils/bmiCalculator';
 import { 
   calculateRiskScore, 
@@ -10,7 +11,10 @@ import {
   formatRiskScore,
   getRiskPercentage
 } from '../../utils/maternalRiskScoring';
+import useFormCache, { readCache } from '../../hooks/useFormCache';
 import './TambahANC.css';
+
+const CACHE_KEY_ANC = 'formCache_tambahANC';
 
 const TambahANC = () => {
   const navigate = useNavigate();
@@ -24,14 +28,15 @@ const TambahANC = () => {
   const [user, setUser] = useState(null);
   const [motherData, setMotherData] = useState(null);
   const [previousVisits, setPreviousVisits] = useState([]);
-  const [existingVisitId, setExistingVisitId] = useState(null);
-  const [existingVisitWarning, setExistingVisitWarning] = useState('');
   const [existingVisitTypes, setExistingVisitTypes] = useState([]);
-  const [activeTab, setActiveTab] = useState('anc');
+  const [activeTab, setActiveTab] = useState(
+    () => !isEdit ? readCache(CACHE_KEY_ANC, 'activeTab', 'anc') : 'anc'
+  );
   const [riskScore, setRiskScore] = useState(null);
   const [showRiskNotification, setShowRiskNotification] = useState(false);
   const [selectedPregnancy, setSelectedPregnancy] = useState(null);
   const autoUpdateJenisKunjungan = useRef(true);
+  const currentRiskStatusRef = useRef('Normal');
 
   // Calculate gestational age in weeks
   const calculateGestationalAge = (lmpDate, currentDate = new Date()) => {
@@ -45,16 +50,14 @@ const TambahANC = () => {
   // Determine jenis_kunjungan based on gestational age
   const getJenisKunjunganByAge = (weeks) => {
     if (weeks <= 12) return 'K1';
-    if (weeks <= 16) return 'K2';
-    if (weeks <= 20) return 'K3';
-    if (weeks <= 24) return 'K4';
-    if (weeks <= 28) return 'K5';
-    if (weeks <= 32) return 'K6';
-    if (weeks <= 36) return 'K7';
-    return 'K8';
+    if (weeks <= 19) return 'K2';
+    if (weeks <= 24) return 'K3';
+    if (weeks <= 31) return 'K4';
+    if (weeks <= 36) return 'K5';
+    return 'K6';
   };
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState(() => readCache(CACHE_KEY_ANC, 'formData', {
     tanggal_kunjungan: '',
     jenis_kunjungan: 'K1',
     jenis_akses: 'Murni',
@@ -76,10 +79,10 @@ const TambahANC = () => {
     keterangan_anc: '',
     forkey_hamil: '',
     forkey_bidan: ''
-  });
+  }));
 
   // Lab Screening form data (separate table)
-  const [labScreeningData, setLabScreeningData] = useState({
+  const [labScreeningData, setLabScreeningData] = useState(() => readCache(CACHE_KEY_ANC, 'labScreeningData', {
     hasil_lab_hb: '',
     lab_protein_urine: 'Negatif',
     lab_gula_darah: '',
@@ -96,15 +99,15 @@ const TambahANC = () => {
     status_malaria: 'Belum Diperiksa',
     terapi_kecacingan: false,
     status_kecacingan: 'Belum Diperiksa'
-  });
+  }));
 
   // Jiwa Screening form data (separate table)
-  const [jiwaScreeningData, setJiwaScreeningData] = useState({
-    skrining_jiwa: ''
-  });
+  const [jiwaScreeningData, setJiwaScreeningData] = useState(
+    () => readCache(CACHE_KEY_ANC, 'jiwaScreeningData', { skrining_jiwa: '' })
+  );
 
   // Complications form data
-  const [complications, setComplications] = useState([{
+  const [complications, setComplications] = useState(() => readCache(CACHE_KEY_ANC, 'complications', [{
     nama_komplikasi: '',
     waktu_kejadian: 'Saat Hamil',
     tanggal_diagnosis: '',
@@ -118,7 +121,16 @@ const TambahANC = () => {
     tingkat_keparahan: 'Ringan',
     status_penanganan: 'Ditangani',
     keterangan: ''
-  }]);
+  }]));
+
+  const CACHE_KEY = CACHE_KEY_ANC;
+  const { clearCache } = useFormCache(CACHE_KEY, {
+    formData,
+    labScreeningData,
+    jiwaScreeningData,
+    complications,
+    activeTab
+  }, isEdit);
 
   const [presenter] = useState(() => new TambahANCPresenter({
     setLoading,
@@ -127,13 +139,6 @@ const TambahANC = () => {
     setPregnancies,
     setMotherData,
     setPreviousVisits,
-    setExistingVisitId,
-    showExistingVisitWarning: (jenisKunjungan) => {
-      setExistingVisitWarning(`Data kunjungan ${jenisKunjungan} sudah ada. Form telah diisi dengan data yang ada. Anda dapat memperbarui data ini.`);
-    },
-    hideExistingVisitWarning: () => {
-      setExistingVisitWarning('');
-    },
     populateForm: (data) => {
       setFormData({
         tanggal_kunjungan: data.tanggal_kunjungan ? data.tanggal_kunjungan.split('T')[0] : '',
@@ -189,6 +194,7 @@ const TambahANC = () => {
       }
     },
     onSuccess: (message) => {
+      clearCache();
       alert(message);
       navigate('/kunjungan-anc');
     },
@@ -228,7 +234,20 @@ const TambahANC = () => {
   useEffect(() => {
     if (selectedPregnancy && selectedPregnancy.haid_terakhir && !isEdit && tanggalKunjungan && autoUpdateJenisKunjungan.current) {
       const weeks = calculateGestationalAge(selectedPregnancy.haid_terakhir, tanggalKunjungan);
-      const jenisKunjungan = getJenisKunjunganByAge(weeks);
+      let jenisKunjungan = getJenisKunjunganByAge(weeks);
+
+      // Trimester 3 (week 28+): count existing visits that also fall in trimester 3.
+      // If this would be the 5th trimester-3 visit, auto-tag as K8.
+      if (weeks >= 28 && previousVisits && previousVisits.length > 0) {
+        const t3VisitCount = previousVisits.filter(v => {
+          if (!v.tanggal_kunjungan) return false;
+          const visitWeeks = calculateGestationalAge(selectedPregnancy.haid_terakhir, v.tanggal_kunjungan);
+          return visitWeeks >= 28;
+        }).length;
+        if (t3VisitCount >= 4) {
+          jenisKunjungan = 'K8';
+        }
+      }
       
       setFormData(prev => {
         if (prev.jenis_kunjungan !== jenisKunjungan) {
@@ -240,7 +259,7 @@ const TambahANC = () => {
         return prev;
       });
     }
-  }, [selectedPregnancy, tanggalKunjungan, isEdit]);
+  }, [selectedPregnancy, tanggalKunjungan, isEdit, previousVisits]);
 
   // Extract existing visit types for display
   useEffect(() => {
@@ -250,20 +269,28 @@ const TambahANC = () => {
     }
   }, [previousVisits]);
 
-  // Check for existing visit when pregnancy and visit type are selected (only in add mode, not edit)
-  useEffect(() => {
-    if (!isEdit && formData.forkey_hamil && formData.jenis_kunjungan) {
-      presenter.checkExistingVisit(formData.forkey_hamil, formData.jenis_kunjungan);
-    }
-  }, [formData.forkey_hamil, formData.jenis_kunjungan, isEdit, presenter]);
-
   // Calculate maternal risk score automatically
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (motherData) {
       const calculatedScore = calculateRiskScore({
         motherData,
-        formData,
-        labScreeningData
+        formData: {
+          tekanan_darah: formData.tekanan_darah,
+          lila: formData.lila,
+          denyut_jantung_janin: formData.denyut_jantung_janin,
+          selisih_beratbadan: formData.selisih_beratbadan
+        },
+        labScreeningData: {
+          hasil_lab_hb: labScreeningData.hasil_lab_hb,
+          lab_protein_urine: labScreeningData.lab_protein_urine,
+          skrining_hiv: labScreeningData.skrining_hiv,
+          skrining_sifilis: labScreeningData.skrining_sifilis,
+          skrining_hbsag: labScreeningData.skrining_hbsag,
+          skrining_tb: labScreeningData.skrining_tb,
+          skrining_gonorea: labScreeningData.skrining_gonorea,
+          skrining_klamidia: labScreeningData.skrining_klamidia
+        }
       });
       
       setRiskScore(calculatedScore);
@@ -272,7 +299,8 @@ const TambahANC = () => {
       const autoStatus = getAutomaticRiskStatus(calculatedScore.score, calculatedScore.criticalFactors);
       
       // Auto-update status_risiko_visit if it changed
-      if (formData.status_risiko_visit !== autoStatus) {
+      if (currentRiskStatusRef.current !== autoStatus) {
+        currentRiskStatusRef.current = autoStatus;
         setFormData(prev => ({
           ...prev,
           status_risiko_visit: autoStatus
@@ -300,56 +328,6 @@ const TambahANC = () => {
     labScreeningData.skrining_gonorea,
     labScreeningData.skrining_klamidia
   ]);
-
-  // Function to reset form to initial state (keeping pregnancy and bidan)
-  const resetFormFields = () => {
-    setFormData(prev => ({
-      tanggal_kunjungan: '',
-      jenis_kunjungan: prev.jenis_kunjungan,
-      jenis_akses: 'Murni',
-      pemeriksa: 'Bidan',
-      berat_badan: '',
-      tekanan_darah: '',
-      lila: '',
-      tinggi_fundus: '',
-      denyut_jantung_janin: '',
-      detak_jantung: '',
-      confirm_usg: false,
-      status_imunisasi_tt: 'T0',
-      beri_tablet_fe: false,
-      hasil_usg: '',
-      status_kmk_usg: '',
-      status_risiko_visit: 'Normal',
-      hasil_temu_wicara: '',
-      tata_laksana_kasus: '',
-      keterangan_anc: '',
-      forkey_hamil: prev.forkey_hamil,
-      forkey_bidan: prev.forkey_bidan
-    }));
-
-    setLabScreeningData({
-      hasil_lab_hb: '',
-      lab_protein_urine: 'Negatif',
-      lab_gula_darah: '',
-      hasil_lab_lainnya: '',
-      skrining_gonorea: 'Belum Diperiksa',
-      skrining_klamidia: 'Belum Diperiksa',
-      skrining_hiv: 'Belum Diperiksa',
-      status_art: '',
-      skrining_sifilis: 'Belum Diperiksa',
-      skrining_hbsag: 'Belum Diperiksa',
-      skrining_tb: 'Belum Diperiksa',
-      malaria_diberi_kelambu: 'Tidak',
-      terapi_malaria: false,
-      status_malaria: 'Belum Diperiksa',
-      terapi_kecacingan: false,
-      status_kecacingan: 'Belum Diperiksa'
-    });
-
-    setJiwaScreeningData({
-      skrining_jiwa: ''
-    });
-  };
 
   // Complications handling functions
   const addComplication = () => {
@@ -420,17 +398,7 @@ const TambahANC = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    // If updating existing visit, confirm with user
-    if (existingVisitId && !isEdit) {
-      const confirmUpdate = window.confirm(
-        `Data kunjungan ${formData.jenis_kunjungan} sudah ada. Apakah Anda ingin memperbarui data yang ada?`
-      );
-      if (!confirmUpdate) {
-        return;
-      }
-    }
+    if (e) e.preventDefault();
 
     // Calculate weight difference
     let selisih_beratbadan = null;
@@ -471,6 +439,7 @@ const TambahANC = () => {
           .filter(comp => comp.nama_komplikasi.trim() !== '')
           .map(comp => ({
             ...comp,
+            kejadian: comp.waktu_kejadian,
             // Always use ANC data for these fields in ANC form
             tanggal_diagnosis: formData.tanggal_kunjungan,
             tekanan_darah: formData.tekanan_darah,
@@ -491,6 +460,7 @@ const TambahANC = () => {
         });
 
         if (response.ok) {
+          clearCache();
           alert('Data ANC dan komplikasi berhasil disimpan');
           navigate('/kunjungan-anc');
         } else {
@@ -505,16 +475,24 @@ const TambahANC = () => {
       }
     } else {
       // Submit only ANC data (existing functionality)
-      const finalEditId = existingVisitId || editId;
-      const finalIsEdit = isEdit || !!existingVisitId;
-
-      await presenter.handleSubmit(submitData, finalIsEdit, finalEditId);
+      await presenter.handleSubmit(submitData, isEdit, editId);
     }
   };
 
   const handleLogout = () => {
     presenter.handleLogout();
   };
+
+  const TAB_ORDER = ['anc', 'labScreening', 'jiwaScreening', 'complications'];
+
+  const handleNextTab = () => {
+    const currentIndex = TAB_ORDER.indexOf(activeTab);
+    if (currentIndex < TAB_ORDER.length - 1) {
+      setActiveTab(TAB_ORDER[currentIndex + 1]);
+    }
+  };
+
+  const isLastTab = activeTab === TAB_ORDER[TAB_ORDER.length - 1];
 
   // Prepare options for react-select
   const pregnancyOptions = pregnancies.map(preg => ({
@@ -573,87 +551,7 @@ const TambahANC = () => {
 
   return (
     <div className="dashboard-container">
-      <aside className="sidebar">
-        <div className="sidebar-header">
-          <img src="/images/logo-withText.png" alt="iBundaCare Logo" className="sidebar-logo" />
-          <h2>iBundaCare</h2>
-        </div>
-
-        <nav className="sidebar-nav">
-          <a href="/dashboard" className="nav-item">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" fill="currentColor" />
-            </svg>
-            Dashboard
-          </a>
-          <a href="/data-ibu" className="nav-item">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="currentColor" />
-            </svg>
-            Data Ibu
-          </a>
-          <a href="/kunjungan-anc" className="nav-item active">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" fill="currentColor" />
-            </svg>
-            Kunjungan ANC
-          </a>
-          <a href="/persalinan" className="nav-item">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor" />
-            </svg>
-            Persalinan
-          </a>
-          <a href="/kunjungan-nifas" className="nav-item">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" fill="currentColor"/>
-            </svg>
-            Kunjungan Nifas
-          </a>
-          <a href="/komplikasi" className="nav-item">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm11 15H4v-2h16v2zm0-5H4V8h5.08L7 10.83 8.62 12 11 8.76l1-1.36 1 1.36L15.38 12 17 10.83 14.92 8H20v6z" fill="currentColor" />
-            </svg>
-            Komplikasi
-          </a>
-          <a href="/posyandu" className="nav-item">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor" />
-            </svg>
-            Posyandu
-          </a>
-          <a href="/rekapitulasi" className="nav-item">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" fill="currentColor" />
-            </svg>
-            Rekapitulasi
-          </a>
-          <a href="/user-management" className="nav-item">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" fill="currentColor"/>
-            </svg>
-            Manajemen User
-          </a>
-        </nav>
-
-        <div className="sidebar-footer">
-          <div className="user-info">
-            <div className="user-avatar">
-              {user?.nama_lengkap?.charAt(0) || 'U'}
-            </div>
-            <div className="user-details">
-              <p className="user-name">{user?.nama_lengkap || user?.username}</p>
-              <p className="user-role">{user?.role}</p>
-            </div>
-          </div>
-          <button className="logout-btn" onClick={handleLogout}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z" fill="currentColor" />
-            </svg>
-            Logout
-          </button>
-        </div>
-      </aside>
+      <Sidebar user={user} onLogout={handleLogout} />
 
       <main className="main-content">
         <div className="content-header">
@@ -681,15 +579,6 @@ const TambahANC = () => {
               <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" fill="currentColor" />
             </svg>
             Status risiko otomatis diubah ke "{formData.status_risiko_visit}"
-          </div>
-        )}
-
-        {existingVisitWarning && (
-          <div className="warning-banner">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" fill="currentColor" />
-            </svg>
-            {existingVisitWarning}
           </div>
         )}
 
@@ -761,7 +650,7 @@ const TambahANC = () => {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="anc-form">
+        <form className="anc-form">
           {activeTab === 'anc' && (
             <>
               <div className="form-section">
@@ -838,7 +727,7 @@ const TambahANC = () => {
                         onChange={handleChange}
                         required
                       >
-                        {['K1', 'K2', 'K3', 'K4', 'K5', 'K6', 'K7', 'K8'].map(type => (
+                        {['K1', 'K2', 'K3', 'K4', 'K5', 'K6', 'K8'].map(type => (
                           <option key={type} value={type}>
                             {type} {existingVisitTypes.includes(type) ? '✓ (Ada)' : ''}
                           </option>
@@ -1611,15 +1500,22 @@ const TambahANC = () => {
             </div>
           )}
 
-          <div className="form-actions">
-            <button type="button" className="btn-cancel" onClick={() => navigate('/kunjungan-anc')}>
-              Batal
-            </button>
-            <button type="submit" className="btn-submit" disabled={loading}>
+        </form>
+
+        <div className="form-actions">
+          <button type="button" className="btn-cancel" onClick={() => navigate('/kunjungan-anc')}>
+            Batal
+          </button>
+          {isLastTab ? (
+            <button type="button" className="btn-submit" disabled={loading} onClick={handleSubmit}>
               {loading ? 'Menyimpan...' : (isEdit ? 'Update Data' : 'Simpan Data')}
             </button>
-          </div>
-        </form>
+          ) : (
+            <button type="button" className="btn-submit" onClick={handleNextTab}>
+              Selanjutnya
+            </button>
+          )}
+        </div>
       </main>
     </div>
   );

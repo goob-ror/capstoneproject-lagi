@@ -357,3 +357,33 @@
     width: 95%;
   }
 }
+
+@media (max-width: 480px) {
+  .sidebar {
+    transform: translateX(-100%);
+    width: 280px;
+  }
+
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+    padding: 12px;
+  }
+
+  .content-header h1 {
+    font-size: 22px;
+  }
+
+  .user-management-section {
+    padding: 12px;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .btn-cancel,
+  .btn-submit {
+    width: 100%;
+  }
+}

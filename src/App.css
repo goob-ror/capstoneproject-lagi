@@ -12,13 +12,17 @@ body.dashboard-page {
   background-color: #EAEAEA;
   display: block;
   height: auto;
+  overflow-x: hidden;
 }
 
 body.login-page {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  min-height: 100vh;
+  padding: 20px 0;
+  box-sizing: border-box;
+  overflow-y: auto;
 }
 
 button {
@@ -48,5 +52,22 @@ button {
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* Give main content breathing room for the hamburger button on mobile */
+@media (max-width: 1024px) {
+  .main-content {
+    margin-left: 70px !important;
+    width: calc(100% - 70px) !important;
+    padding-top: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+    padding-top: 70px !important;
   }
 }

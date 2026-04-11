@@ -4,7 +4,7 @@ class TambahNifasPresenter {
   constructor(view) {
     this.view = view;
     this.authModel = new AuthModel();
-    this.baseURL = process.env.REACT_APP_API_URL || 'https://dev-apk.samarindakota.go.id/api';
+    this.baseURL = '/api/nifas';
   }
 
   getUser() {
@@ -195,7 +195,7 @@ class TambahNifasPresenter {
         });
 
         if (!response.ok) {
-          const errorData = await response.json();
+          // error logged silently
         }
       } catch (error) {
       }

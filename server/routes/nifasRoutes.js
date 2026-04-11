@@ -137,7 +137,7 @@ router.get('/', auth, async (req, res) => {
       FROM kunjungan_nifas n
       JOIN kehamilan k ON n.forkey_hamil = k.id
       JOIN ibu ON k.forkey_ibu = ibu.id
-      JOIN bidan ON n.forkey_bidan = bidan.id
+      LEFT JOIN bidan ON n.forkey_bidan = bidan.id
       LEFT JOIN kunjungan_nifas_bayi nb ON n.id = nb.forkey_kunjungan_nifas
       WHERE YEAR(n.tanggal_kunjungan) = ?
       GROUP BY n.id

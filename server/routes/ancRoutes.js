@@ -73,7 +73,6 @@ router.get('/pregnancy/:pregnancyId/visits', auth, async (req, res) => {
       FROM antenatal_care
       WHERE forkey_hamil = ?
       ORDER BY tanggal_kunjungan DESC
-      LIMIT 5
     `;
     
     const [rows] = await db.execute(query, [pregnancyId]);
@@ -125,7 +124,7 @@ router.get('/', auth, async (req, res) => {
       FROM antenatal_care anc
       JOIN kehamilan k ON anc.forkey_hamil = k.id
       JOIN ibu ON k.forkey_ibu = ibu.id
-      JOIN bidan ON anc.forkey_bidan = bidan.id
+      LEFT JOIN bidan ON anc.forkey_bidan = bidan.id
       LEFT JOIN lab_screening lab ON anc.forkey_lab_screening = lab.id
       WHERE YEAR(anc.tanggal_kunjungan) = ?
       ORDER BY anc.tanggal_kunjungan DESC

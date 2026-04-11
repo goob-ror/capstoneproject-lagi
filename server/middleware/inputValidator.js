@@ -10,13 +10,13 @@ const SECURITY_PATTERNS = {
   JAVASCRIPT_PROTOCOL: /javascript:/gi,
   EVENT_HANDLER: /\bon\w+\s*=/gi,
   DATA_PROTOCOL: /data:text\/html/gi,
-  EVAL_PATTERNS: /\b(eval|Function|setTimeout|setInterval)\s*\(/gi,
+  EVAL_PATTERNS: /\b(eval|Function)\s*\(/gi,
   IFRAME_TAG: /<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi,
   OBJECT_EMBED_TAG: /<(object|embed)\b[^<]*(?:(?!<\/\1>)<[^<]*)*<\/\1>/gi,
-  SQL_INJECTION: /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|EXECUTE|UNION|DECLARE)\b)|(-{2})|(\bOR\b.*=.*)|(\bAND\b.*=.*)/gi,
+  // Only flag clear SQL injection patterns: stacked queries, comment sequences, or UNION-based attacks
+  SQL_INJECTION: /(;\s*(SELECT|INSERT|UPDATE|DELETE|DROP|ALTER|EXEC|EXECUTE|DECLARE)\b)|(--\s)|(\/\*[\s\S]*?\*\/)|(UNION\s+SELECT)/gi,
   CSS_EXPRESSION: /expression\s*\(/gi,
   VBSCRIPT_PROTOCOL: /vbscript:/gi,
-  IMPORT_STATEMENT: /\bimport\s+/gi,
 };
 
 /**
@@ -57,7 +57,7 @@ const detectThreats = (input) => {
     threats.push('VBScript protocol detected');
   }
   if (SECURITY_PATTERNS.SQL_INJECTION.test(input)) {
-    threats.push('SQL Injection detected')
+    threats.push('SQL Injection pattern detected');
   }
 
   return {
@@ -87,7 +87,6 @@ const sanitizeInput = (input) => {
   sanitized = sanitized.replace(SECURITY_PATTERNS.EVAL_PATTERNS, '');
   sanitized = sanitized.replace(SECURITY_PATTERNS.CSS_EXPRESSION, '');
   sanitized = sanitized.replace(SECURITY_PATTERNS.HTML_TAG, '');
-  sanitized = sanitized.replace(SECURITY_PATTERNS.IMPORT_STATEMENT, '');
 
   // Encode special characters
   sanitized = sanitized
