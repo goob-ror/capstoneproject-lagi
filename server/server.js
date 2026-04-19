@@ -18,6 +18,7 @@ const userRoutes = require('./routes/userRoutes');
 const excelExportRoutes = require('./routes/excelExportRoutes');
 const excelReportBulananRoutes = require('./routes/excelReportBulananRoutes');
 const reportDataRoutes = require('./routes/reportDataRoutes');
+const importRoutes = require('./routes/importRoutes');
 const auth = require('./middleware/auth');
 const { validateAllInputs } = require('./middleware/inputValidator');
 
@@ -98,6 +99,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/excel-export', excelExportRoutes);
 app.use('/api/excel-report-bulanan', excelReportBulananRoutes);
 app.use('/api/report-data', reportDataRoutes);
+app.use('/api/import', importRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

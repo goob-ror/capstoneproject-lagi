@@ -40,7 +40,7 @@ const Rekapitulasi = () => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (showExportDropdown && !event.target.closest('.export-dropdown-container')) {
+      if (showExportDropdown && !event.target.closest('.rekap-export-dropdown-container')) {
         setShowExportDropdown(false);
       }
     };
@@ -185,8 +185,8 @@ const Rekapitulasi = () => {
       
       <Sidebar user={user} onLogout={handleLogout} />
 
-      <main className="main-content">
-        <div className="content-header">
+      <main className="rekap-main-content">
+        <div className="rekap-content-header">
           <div style={{
             width: '100%'
           }}>
@@ -194,22 +194,22 @@ const Rekapitulasi = () => {
             <p>
               Laporan dan ringkasan data kesehatan ibu
               {selectedKelurahan && (
-                <span className="filter-indicator"> - Kelurahan: <strong>{selectedKelurahan}</strong></span>
+                <span className="rekap-filter-indicator"> - Kelurahan: <strong>{selectedKelurahan}</strong></span>
               )}
               {selectedYear && (
-                <span className="filter-indicator"> - Tahun: <strong>{selectedYear}</strong></span>
+                <span className="rekap-filter-indicator"> - Tahun: <strong>{selectedYear}</strong></span>
               )}
               {selectedMonth && (
-                <span className="filter-indicator"> - Bulan: <strong>{getMonthName(selectedMonth)}</strong></span>
+                <span className="rekap-filter-indicator"> - Bulan: <strong>{getMonthName(selectedMonth)}</strong></span>
               )}
             </p>
           </div>
-          <div className="header-actions">
-            <div className="filter-section">
-              <label htmlFor="year-filter" className="filter-label">Tahun:</label>
+          <div className="rekap-header-actions">
+            <div className="rekap-filter-section">
+              <label htmlFor="year-filter" className="rekap-filter-label">Tahun:</label>
               <select 
                 id="year-filter"
-                className="filter-select"
+                className="rekap-filter-select"
                 value={selectedYear}
                 onChange={handleYearChange}
               >
@@ -219,11 +219,11 @@ const Rekapitulasi = () => {
                 ))}
               </select>
             </div>
-            <div className="filter-section">
-              <label htmlFor="month-filter" className="filter-label">Bulan:</label>
+            <div className="rekap-filter-section">
+              <label htmlFor="month-filter" className="rekap-filter-label">Bulan:</label>
               <select 
                 id="month-filter"
-                className="filter-select"
+                className="rekap-filter-select"
                 value={selectedMonth}
                 onChange={handleMonthChange}
               >
@@ -242,11 +242,11 @@ const Rekapitulasi = () => {
                 <option value="12">Desember</option>
               </select>
             </div>
-            <div className="filter-section">
-              <label htmlFor="kelurahan-filter" className="filter-label">Kelurahan:</label>
+            <div className="rekap-filter-section">
+              <label htmlFor="kelurahan-filter" className="rekap-filter-label">Kelurahan:</label>
               <select 
                 id="kelurahan-filter"
-                className="filter-select"
+                className="rekap-filter-select"
                 value={selectedKelurahan}
                 onChange={handleKelurahanChange}
               >
@@ -258,10 +258,10 @@ const Rekapitulasi = () => {
                 ))}
               </select>
             </div>
-            <div className="export-buttons">
-              <div className="export-dropdown-container">
+            <div className="rekap-export-buttons">
+              <div className="rekap-export-dropdown-container">
                 <button 
-                  className="btn-export" 
+                  className="rekap-btn-export" 
                   onClick={() => setShowExportDropdown(!showExportDropdown)}
                 >
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -279,9 +279,9 @@ const Rekapitulasi = () => {
                   </svg>
                 </button>
                 {showExportDropdown && (
-                  <div className="export-dropdown-menu">
+                  <div className="rekap-export-dropdown-menu">
                     <button 
-                      className="export-dropdown-item"
+                      className="rekap-export-dropdown-item"
                       onClick={() => handleExportExcelTemplate('lengkap')}
                     >
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -290,7 +290,7 @@ const Rekapitulasi = () => {
                       Laporan Tahunan
                     </button>
                     <button 
-                      className="export-dropdown-item"
+                      className="rekap-export-dropdown-item"
                       onClick={() => handleExportExcelTemplate('normal')}
                     >
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -306,142 +306,142 @@ const Rekapitulasi = () => {
         </div>
 
         {error && (
-          <div className="error-banner">
+          <div className="rekap-error-banner">
             {error}
           </div>
         )}
 
-        <div className="summary-grid">
+        <div className="rekap-summary-grid">
           {summaryData && (
             <>
-              <div className="summary-card">
-                <div className="card-icon blue">
+              <div className="rekap-summary-card">
+                <div className="rekap-card-icon blue">
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="currentColor"/>
                   </svg>
                 </div>
-                <div className="card-content">
+                <div className="rekap-card-content">
                   <h3>Total Ibu</h3>
-                  <p className="card-value">{summaryData.totalIbu || 0}</p>
-                  <p className="card-label">Terdaftar</p>
+                  <p className="rekap-card-value">{summaryData.totalIbu || 0}</p>
+                  <p className="rekap-card-label">Terdaftar</p>
                 </div>
               </div>
 
-              <div className="summary-card">
-                <div className="card-icon green">
+              <div className="rekap-summary-card">
+                <div className="rekap-card-icon green">
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z" fill="currentColor"/>
                   </svg>
                 </div>
-                <div className="card-content">
+                <div className="rekap-card-content">
                   <h3>Ibu Hamil</h3>
-                  <p className="card-value">{summaryData.totalHamil || 0}</p>
-                  <p className="card-label">Aktif</p>
+                  <p className="rekap-card-value">{summaryData.totalHamil || 0}</p>
+                  <p className="rekap-card-label">Aktif</p>
                 </div>
               </div>
 
-              <div className="summary-card">
-                <div className="card-icon purple">
+              <div className="rekap-summary-card">
+                <div className="rekap-card-icon purple">
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" fill="currentColor"/>
                   </svg>
                 </div>
-                <div className="card-content">
+                <div className="rekap-card-content">
                   <h3>Kunjungan ANC</h3>
-                  <p className="card-value">{summaryData.totalANC || 0}</p>
-                  <p className="card-label">Total Kunjungan</p>
+                  <p className="rekap-card-value">{summaryData.totalANC || 0}</p>
+                  <p className="rekap-card-label">Total Kunjungan</p>
                 </div>
               </div>
 
-              <div className="summary-card">
-                <div className="card-icon red">
+              <div className="rekap-summary-card">
+                <div className="rekap-card-icon red">
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" fill="currentColor"/>
                   </svg>
                 </div>
-                <div className="card-content">
+                <div className="rekap-card-content">
                   <h3>Kunjungan Nifas</h3>
-                  <p className="card-value">{summaryData.totalNifas || 0}</p>
-                  <p className="card-label">Total Kunjungan</p>
+                  <p className="rekap-card-value">{summaryData.totalNifas || 0}</p>
+                  <p className="rekap-card-label">Total Kunjungan</p>
                 </div>
               </div>
 
-              <div className="summary-card">
-                <div className="card-icon orange">
+              <div className="rekap-summary-card">
+                <div className="rekap-card-icon orange">
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" fill="currentColor"/>
                   </svg>
                 </div>
-                <div className="card-content">
+                <div className="rekap-card-content">
                   <h3>KEK (LILA &lt; 23.5)</h3>
-                  <p className="card-value">{summaryData.kekStatistics?.total_kek_given || 0}</p>
-                  <p className="card-label">{summaryData.kekStatistics?.percentage_kek || 0}% dari kunjungan</p>
+                  <p className="rekap-card-value">{summaryData.kekStatistics?.total_kek_given || 0}</p>
+                  <p className="rekap-card-label">{summaryData.kekStatistics?.percentage_kek || 0}% dari kunjungan</p>
                 </div>
               </div>
 
-              <div className="summary-card">
-                <div className="card-icon teal">
+              <div className="rekap-summary-card">
+                <div className="rekap-card-icon teal">
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" fill="currentColor"/>
                   </svg>
                 </div>
-                <div className="card-content">
+                <div className="rekap-card-content">
                   <h3>HIV Positif</h3>
-                  <p className="card-value">{summaryData.hivStatistics?.hiv_positive || 0}</p>
-                  <p className="card-label">{summaryData.hivStatistics?.hiv_percentage || 0}% dari yang diskrining</p>
+                  <p className="rekap-card-value">{summaryData.hivStatistics?.hiv_positive || 0}</p>
+                  <p className="rekap-card-label">{summaryData.hivStatistics?.hiv_percentage || 0}% dari yang diskrining</p>
                 </div>
               </div>
 
-              <div className="summary-card">
-                <div className="card-icon purple">
+              <div className="rekap-summary-card">
+                <div className="rekap-card-icon purple">
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" fill="currentColor"/>
                   </svg>
                 </div>
-                <div className="card-content">
+                <div className="rekap-card-content">
                   <h3>Obesitas (BMI ≥30)</h3>
-                  <p className="card-value">{summaryData.obesityStatistics?.obese_count || 0}</p>
-                  <p className="card-label">{summaryData.obesityStatistics?.obese_percentage || 0}% dari ibu hamil</p>
+                  <p className="rekap-card-value">{summaryData.obesityStatistics?.obese_count || 0}</p>
+                  <p className="rekap-card-label">{summaryData.obesityStatistics?.obese_percentage || 0}% dari ibu hamil</p>
                 </div>
               </div>
 
-              <div className="summary-card">
-                <div className="card-icon danger">
+              <div className="rekap-summary-card">
+                <div className="rekap-card-icon danger">
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" fill="currentColor"/>
                   </svg>
                 </div>
-                <div className="card-content">
+                <div className="rekap-card-content">
                   <h3>Preeklamsia/Eklamsia</h3>
-                  <p className="card-value">{getPreeklamsiaEklamsiaTotal()}</p>
-                  <p className="card-label">
+                  <p className="rekap-card-value">{getPreeklamsiaEklamsiaTotal()}</p>
+                  <p className="rekap-card-label">
                     {summaryData?.preeklamsiaStatistics?.eklamsia_count || 0} eklamsia, 
                     {summaryData?.preeklamsiaStatistics?.preeklamsia_count || 0} preeklamsia
                   </p>
                 </div>
               </div>
 
-              <div className="summary-card">
-                <div className="card-icon warning">
+              <div className="rekap-summary-card">
+                <div className="rekap-card-icon warning">
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z" fill="currentColor"/>
                   </svg>
                 </div>
-                <div className="card-content">
+                <div className="rekap-card-content">
                   <h3>Hepatitis B</h3>
-                  <p className="card-value">{summaryData.hepatitisStatistics?.hepatitis_b_positive || 0}</p>
-                  <p className="card-label">{summaryData.hepatitisStatistics?.hepatitis_percentage || 0}% dari yang diskrining</p>
+                  <p className="rekap-card-value">{summaryData.hepatitisStatistics?.hepatitis_b_positive || 0}</p>
+                  <p className="rekap-card-label">{summaryData.hepatitisStatistics?.hepatitis_percentage || 0}% dari yang diskrining</p>
                 </div>
               </div>
             </>
           )}
         </div>
 
-        <div className="report-section">
-          <div className="report-card">
+        <div className="rekap-report-section">
+          <div className="rekap-report-card">
             <h3>Rekapitulasi Kunjungan ANC</h3>
-            <div className="table-responsive">
-              <table className="report-table">
+            <div className="rekap-table-responsive">
+              <table className="rekap-report-table">
                 <thead>
                   <tr>
                     <th>Jenis Kunjungan</th>
@@ -455,12 +455,12 @@ const Rekapitulasi = () => {
                       <td>{item.jenis_kunjungan}</td>
                       <td>{item.count}</td>
                       <td>
-                        <div className="progress-bar">
+                        <div className="rekap-progress-bar">
                           <div 
-                            className="progress-fill" 
+                            className="rekap-progress-fill" 
                             style={{ width: `${item.percentage}%` }}
                           ></div>
-                          <span className="progress-text">{item.percentage}%</span>
+                          <span className="rekap-progress-text">{item.percentage}%</span>
                         </div>
                       </td>
                     </tr>
@@ -470,10 +470,10 @@ const Rekapitulasi = () => {
             </div>
           </div>
 
-          <div className="report-card">
+          <div className="rekap-report-card">
             <h3>Rekapitulasi Kunjungan Nifas</h3>
-            <div className="table-responsive">
-              <table className="report-table">
+            <div className="rekap-table-responsive">
+              <table className="rekap-report-table">
                 <thead>
                   <tr>
                     <th>Jenis Kunjungan</th>
@@ -485,22 +485,22 @@ const Rekapitulasi = () => {
                   {summaryData?.nifasByType?.map(item => (
                     <tr key={item.jenis_kunjungan}>
                       <td>
-                        <span className={`status-badge ${
-                          item.jenis_kunjungan === 'KF1' ? 'badge-info' : 
-                          item.jenis_kunjungan === 'KF2' ? 'badge-success' : 
-                          item.jenis_kunjungan === 'KF3' ? 'badge-warning' : 'badge-primary'
+                        <span className={`rekap-status-badge ${
+                          item.jenis_kunjungan === 'KF1' ? 'rekap-badge-info' : 
+                          item.jenis_kunjungan === 'KF2' ? 'rekap-badge-success' : 
+                          item.jenis_kunjungan === 'KF3' ? 'rekap-badge-warning' : 'rekap-badge-primary'
                         }`}>
                           {item.jenis_kunjungan}
                         </span>
                       </td>
                       <td>{item.count}</td>
                       <td>
-                        <div className="progress-bar">
+                        <div className="rekap-progress-bar">
                           <div 
-                            className="progress-fill" 
+                            className="rekap-progress-fill" 
                             style={{ width: `${item.percentage}%` }}
                           ></div>
-                          <span className="progress-text">{item.percentage}%</span>
+                          <span className="rekap-progress-text">{item.percentage}%</span>
                         </div>
                       </td>
                     </tr>
@@ -511,11 +511,11 @@ const Rekapitulasi = () => {
           </div>
         </div>
 
-        <div className="report-section">
-          <div className="report-card">
+        <div className="rekap-report-section">
+          <div className="rekap-report-card">
             <h3>Status Risiko Kehamilan</h3>
-            <div className="table-responsive">
-              <table className="report-table">
+            <div className="rekap-table-responsive">
+              <table className="rekap-report-table">
                 <thead>
                   <tr>
                     <th>Status Risiko</th>
@@ -527,20 +527,20 @@ const Rekapitulasi = () => {
                   {summaryData?.riskDistribution?.map(item => (
                     <tr key={item.status_risiko_visit}>
                       <td>
-                        <span className={`status-badge ${
-                          item.status_risiko_visit === 'Risiko Tinggi' ? 'badge-danger' : 'badge-success'
+                        <span className={`rekap-status-badge ${
+                          item.status_risiko_visit === 'Risiko Tinggi' ? 'rekap-badge-danger' : 'rekap-badge-success'
                         }`}>
                           {item.status_risiko_visit}
                         </span>
                       </td>
                       <td>{item.count}</td>
                       <td>
-                        <div className="progress-bar">
+                        <div className="rekap-progress-bar">
                           <div 
-                            className="progress-fill" 
+                            className="rekap-progress-fill" 
                             style={{ width: `${item.percentage}%` }}
                           ></div>
-                          <span className="progress-text">{item.percentage}%</span>
+                          <span className="rekap-progress-text">{item.percentage}%</span>
                         </div>
                       </td>
                     </tr>
@@ -550,10 +550,10 @@ const Rekapitulasi = () => {
             </div>
           </div>
 
-          <div className="report-card">
+          <div className="rekap-report-card">
             <h3>Status Imunisasi TT</h3>
-            <div className="table-responsive">
-              <table className="report-table">
+            <div className="rekap-table-responsive">
+              <table className="rekap-report-table">
                 <thead>
                   <tr>
                     <th>Status TT</th>
@@ -565,18 +565,18 @@ const Rekapitulasi = () => {
                   {summaryData?.ttImmunization?.map(item => (
                     <tr key={item.status_imunisasi_tt}>
                       <td>
-                        <span className="status-badge badge-info">
+                        <span className="rekap-status-badge rekap-badge-info">
                           {item.status_imunisasi_tt}
                         </span>
                       </td>
                       <td>{item.count}</td>
                       <td>
-                        <div className="progress-bar">
+                        <div className="rekap-progress-bar">
                           <div 
-                            className="progress-fill" 
+                            className="rekap-progress-fill" 
                             style={{ width: `${item.percentage}%` }}
                           ></div>
-                          <span className="progress-text">{item.percentage}%</span>
+                          <span className="rekap-progress-text">{item.percentage}%</span>
                         </div>
                       </td>
                     </tr>
@@ -587,30 +587,30 @@ const Rekapitulasi = () => {
           </div>
         </div>
 
-        <div className="report-section">
-          <div className="report-card full-width">
+        <div className="rekap-report-section">
+          <div className="rekap-report-card full-width">
             <h3>Kategori Hemoglobin (Hb) Berdasarkan Trimester</h3>
-            <div className="hb-category-summary">
-              <div className="hb-summary-item">
-                <span className="hb-summary-label">Rata-rata Hb:</span>
-                <span className="hb-summary-value">{summaryData?.hbStatistics?.avg_hb || 0} g/dL</span>
+            <div className="rekap-hb-category-summary">
+              <div className="rekap-hb-summary-item">
+                <span className="rekap-hb-summary-label">Rata-rata Hb:</span>
+                <span className="rekap-hb-summary-value">{summaryData?.hbStatistics?.avg_hb || 0} g/dL</span>
               </div>
-              <div className="hb-summary-item">
-                <span className="hb-summary-label">Total Diperiksa:</span>
-                <span className="hb-summary-value">{summaryData?.hbStatistics?.total_checked || 0} kunjungan</span>
+              <div className="rekap-hb-summary-item">
+                <span className="rekap-hb-summary-label">Total Diperiksa:</span>
+                <span className="rekap-hb-summary-value">{summaryData?.hbStatistics?.total_checked || 0} kunjungan</span>
               </div>
             </div>
 
             {/* Trimester Grid */}
-            <div className="trimester-grid">
+            <div className="rekap-trimester-grid">
               {/* Trimester 1 */}
-              <div className="trimester-card">
-                <h4 className="trimester-title">Trimester 1 (0-13 minggu)</h4>
-                <div className="trimester-total">
+              <div className="rekap-trimester-card">
+                <h4 className="rekap-trimester-title">Trimester 1 (0-13 minggu)</h4>
+                <div className="rekap-trimester-total">
                   Total: <strong>{summaryData?.hbStatistics?.trimester1_total || 0}</strong> kunjungan
                 </div>
-                <div className="table-responsive">
-                  <table className="report-table hb-category-table">
+                <div className="rekap-table-responsive">
+                  <table className="rekap-report-table rekap-hb-category-table">
                     <thead>
                       <tr>
                         <th>Kategori</th>
@@ -621,25 +621,25 @@ const Rekapitulasi = () => {
                     </thead>
                     <tbody>
                       <tr>
-                        <td><span className="status-badge badge-success">Normal</span></td>
+                        <td><span className="rekap-status-badge rekap-badge-success">Normal</span></td>
                         <td>≥ 11.0</td>
                         <td>{summaryData?.hbStatistics?.trimester1_normal || 0}</td>
                         <td>{summaryData?.hbStatistics?.trimester1_total > 0 ? Math.round((summaryData?.hbStatistics?.trimester1_normal || 0) * 100 / summaryData?.hbStatistics?.trimester1_total) : 0}%</td>
                       </tr>
                       <tr>
-                        <td><span className="status-badge badge-warning-light">Anemia Ringan</span></td>
+                        <td><span className="rekap-status-badge rekap-badge-warning-light">Anemia Ringan</span></td>
                         <td>10.0 - 10.9</td>
                         <td>{summaryData?.hbStatistics?.trimester1_ringan || 0}</td>
                         <td>{summaryData?.hbStatistics?.trimester1_total > 0 ? Math.round((summaryData?.hbStatistics?.trimester1_ringan || 0) * 100 / summaryData?.hbStatistics?.trimester1_total) : 0}%</td>
                       </tr>
                       <tr>
-                        <td><span className="status-badge badge-warning">Anemia Sedang</span></td>
+                        <td><span className="rekap-status-badge rekap-badge-warning">Anemia Sedang</span></td>
                         <td>8.0 - 9.9</td>
                         <td>{summaryData?.hbStatistics?.trimester1_sedang || 0}</td>
                         <td>{summaryData?.hbStatistics?.trimester1_total > 0 ? Math.round((summaryData?.hbStatistics?.trimester1_sedang || 0) * 100 / summaryData?.hbStatistics?.trimester1_total) : 0}%</td>
                       </tr>
                       <tr>
-                        <td><span className="status-badge badge-danger">Anemia Berat</span></td>
+                        <td><span className="rekap-status-badge rekap-badge-danger">Anemia Berat</span></td>
                         <td>&lt; 7.9</td>
                         <td>{summaryData?.hbStatistics?.trimester1_berat || 0}</td>
                         <td>{summaryData?.hbStatistics?.trimester1_total > 0 ? Math.round((summaryData?.hbStatistics?.trimester1_berat || 0) * 100 / summaryData?.hbStatistics?.trimester1_total) : 0}%</td>
@@ -650,13 +650,13 @@ const Rekapitulasi = () => {
               </div>
 
               {/* Trimester 2 */}
-              <div className="trimester-card">
-                <h4 className="trimester-title">Trimester 2 (14-27 minggu)</h4>
-                <div className="trimester-total">
+              <div className="rekap-trimester-card">
+                <h4 className="rekap-trimester-title">Trimester 2 (14-27 minggu)</h4>
+                <div className="rekap-trimester-total">
                   Total: <strong>{summaryData?.hbStatistics?.trimester2_total || 0}</strong> kunjungan
                 </div>
-                <div className="table-responsive">
-                  <table className="report-table hb-category-table">
+                <div className="rekap-table-responsive">
+                  <table className="rekap-report-table rekap-hb-category-table">
                     <thead>
                       <tr>
                         <th>Kategori</th>
@@ -667,25 +667,25 @@ const Rekapitulasi = () => {
                     </thead>
                     <tbody>
                       <tr>
-                        <td><span className="status-badge badge-success">Normal</span></td>
+                        <td><span className="rekap-status-badge rekap-badge-success">Normal</span></td>
                         <td>≥ 11.0</td>
                         <td>{summaryData?.hbStatistics?.trimester2_normal || 0}</td>
                         <td>{summaryData?.hbStatistics?.trimester2_total > 0 ? Math.round((summaryData?.hbStatistics?.trimester2_normal || 0) * 100 / summaryData?.hbStatistics?.trimester2_total) : 0}%</td>
                       </tr>
                       <tr>
-                        <td><span className="status-badge badge-warning-light">Anemia Ringan</span></td>
+                        <td><span className="rekap-status-badge rekap-badge-warning-light">Anemia Ringan</span></td>
                         <td>10.0 - 10.9</td>
                         <td>{summaryData?.hbStatistics?.trimester2_ringan || 0}</td>
                         <td>{summaryData?.hbStatistics?.trimester2_total > 0 ? Math.round((summaryData?.hbStatistics?.trimester2_ringan || 0) * 100 / summaryData?.hbStatistics?.trimester2_total) : 0}%</td>
                       </tr>
                       <tr>
-                        <td><span className="status-badge badge-warning">Anemia Sedang</span></td>
+                        <td><span className="rekap-status-badge rekap-badge-warning">Anemia Sedang</span></td>
                         <td>8.0 - 9.9</td>
                         <td>{summaryData?.hbStatistics?.trimester2_sedang || 0}</td>
                         <td>{summaryData?.hbStatistics?.trimester2_total > 0 ? Math.round((summaryData?.hbStatistics?.trimester2_sedang || 0) * 100 / summaryData?.hbStatistics?.trimester2_total) : 0}%</td>
                       </tr>
                       <tr>
-                        <td><span className="status-badge badge-danger">Anemia Berat</span></td>
+                        <td><span className="rekap-status-badge rekap-badge-danger">Anemia Berat</span></td>
                         <td>&lt; 7.9</td>
                         <td>{summaryData?.hbStatistics?.trimester2_berat || 0}</td>
                         <td>{summaryData?.hbStatistics?.trimester2_total > 0 ? Math.round((summaryData?.hbStatistics?.trimester2_berat || 0) * 100 / summaryData?.hbStatistics?.trimester2_total) : 0}%</td>
@@ -696,13 +696,13 @@ const Rekapitulasi = () => {
               </div>
 
               {/* Trimester 3 */}
-              <div className="trimester-card">
-                <h4 className="trimester-title">Trimester 3 (28+ minggu)</h4>
-                <div className="trimester-total">
+              <div className="rekap-trimester-card">
+                <h4 className="rekap-trimester-title">Trimester 3 (28+ minggu)</h4>
+                <div className="rekap-trimester-total">
                   Total: <strong>{summaryData?.hbStatistics?.trimester3_total || 0}</strong> kunjungan
                 </div>
-                <div className="table-responsive">
-                  <table className="report-table hb-category-table">
+                <div className="rekap-table-responsive">
+                  <table className="rekap-report-table rekap-hb-category-table">
                     <thead>
                       <tr>
                         <th>Kategori</th>
@@ -713,25 +713,25 @@ const Rekapitulasi = () => {
                     </thead>
                     <tbody>
                       <tr>
-                        <td><span className="status-badge badge-success">Normal</span></td>
+                        <td><span className="rekap-status-badge rekap-badge-success">Normal</span></td>
                         <td>≥ 11.0</td>
                         <td>{summaryData?.hbStatistics?.trimester3_normal || 0}</td>
                         <td>{summaryData?.hbStatistics?.trimester3_total > 0 ? Math.round((summaryData?.hbStatistics?.trimester3_normal || 0) * 100 / summaryData?.hbStatistics?.trimester3_total) : 0}%</td>
                       </tr>
                       <tr>
-                        <td><span className="status-badge badge-warning-light">Anemia Ringan</span></td>
+                        <td><span className="rekap-status-badge rekap-badge-warning-light">Anemia Ringan</span></td>
                         <td>10.0 - 10.9</td>
                         <td>{summaryData?.hbStatistics?.trimester3_ringan || 0}</td>
                         <td>{summaryData?.hbStatistics?.trimester3_total > 0 ? Math.round((summaryData?.hbStatistics?.trimester3_ringan || 0) * 100 / summaryData?.hbStatistics?.trimester3_total) : 0}%</td>
                       </tr>
                       <tr>
-                        <td><span className="status-badge badge-warning">Anemia Sedang</span></td>
+                        <td><span className="rekap-status-badge rekap-badge-warning">Anemia Sedang</span></td>
                         <td>8.0 - 9.9</td>
                         <td>{summaryData?.hbStatistics?.trimester3_sedang || 0}</td>
                         <td>{summaryData?.hbStatistics?.trimester3_total > 0 ? Math.round((summaryData?.hbStatistics?.trimester3_sedang || 0) * 100 / summaryData?.hbStatistics?.trimester3_total) : 0}%</td>
                       </tr>
                       <tr>
-                        <td><span className="status-badge badge-danger">Anemia Berat</span></td>
+                        <td><span className="rekap-status-badge rekap-badge-danger">Anemia Berat</span></td>
                         <td>&lt; 7.9</td>
                         <td>{summaryData?.hbStatistics?.trimester3_berat || 0}</td>
                         <td>{summaryData?.hbStatistics?.trimester3_total > 0 ? Math.round((summaryData?.hbStatistics?.trimester3_berat || 0) * 100 / summaryData?.hbStatistics?.trimester3_total) : 0}%</td>
@@ -744,11 +744,11 @@ const Rekapitulasi = () => {
           </div>
         </div>
 
-        <div className="report-section">
-          <div className="report-card full-width">
+        <div className="rekap-report-section">
+          <div className="rekap-report-card full-width">
             <h3>Distribusi Ibu per Kelurahan</h3>
-            <div className="table-responsive">
-              <table className="report-table">
+            <div className="rekap-table-responsive">
+              <table className="rekap-report-table">
                 <thead>
                   <tr>
                     <th>Kelurahan</th>
@@ -764,12 +764,12 @@ const Rekapitulasi = () => {
                       <td>{item.total}</td>
                       <td>{item.hamil}</td>
                       <td>
-                        <div className="progress-bar">
+                        <div className="rekap-progress-bar">
                           <div 
-                            className="progress-fill" 
+                            className="rekap-progress-fill" 
                             style={{ width: `${item.percentage}%` }}
                           ></div>
-                          <span className="progress-text">{item.percentage}%</span>
+                          <span className="rekap-progress-text">{item.percentage}%</span>
                         </div>
                       </td>
                     </tr>

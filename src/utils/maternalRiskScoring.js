@@ -49,16 +49,14 @@ export const calculateRiskScore = ({
 }) => {
   let score = 0;
   const factors = [];
-  const criticalFactors = [];
   
-  // 1. MATERNAL AGE RISK (Max: 15 points)
+  // 1. MATERNAL AGE RISK
   if (motherData?.tanggal_lahir) {
     const age = calculateAge(motherData.tanggal_lahir);
     if (age !== null) {
       if (age < 18) {
-        score += 15;
-        factors.push(`Usia ${age} tahun (< 18) → +15 poin`);
-        criticalFactors.push('Usia < 18 tahun');
+        score += 50;
+        factors.push(`Usia ${age} tahun (< 18) → +50 poin`);
       } else if (age >= 18 && age < 20) {
         score += 10;
         factors.push(`Usia ${age} tahun (18-20) → +10 poin`);
@@ -66,14 +64,13 @@ export const calculateRiskScore = ({
         score += 10;
         factors.push(`Usia ${age} tahun (35-40) → +10 poin`);
       } else if (age > 40) {
-        score += 15;
-        factors.push(`Usia ${age} tahun (> 40) → +15 poin`);
-        criticalFactors.push('Usia > 40 tahun');
+        score += 50;
+        factors.push(`Usia ${age} tahun (> 40) → +50 poin`);
       }
     }
   }
   
-  // 2. PARITY RISK (Max: 15 points)
+  // 2. PARITY RISK
   if (motherData?.kehamilan) {
     const gravida = parseInt(motherData.kehamilan.gravida) || 0;
     const partus = parseInt(motherData.kehamilan.partus) || 0;
@@ -83,26 +80,23 @@ export const calculateRiskScore = ({
       score += 5;
       factors.push('Primigravida (G1) → +5 poin');
     } else if (partus >= 4) {
-      score += 15;
-      factors.push(`Grande multipara (P${partus}) → +15 poin`);
-      criticalFactors.push('Grande multipara');
+      score += 50;
+      factors.push(`Grande multipara (P${partus}) → +50 poin`);
     }
     
-    // Abortion history
     if (abortus >= 1) {
       score += 10;
       factors.push(`Riwayat abortus ${abortus}x → +10 poin`);
     }
   }
   
-  // 3. BLOOD PRESSURE RISK (Max: 20 points)
+  // 3. BLOOD PRESSURE RISK
   if (formData?.tekanan_darah) {
     const bp = parseBP(formData.tekanan_darah);
     if (bp.systolic !== null && bp.diastolic !== null) {
       if (bp.systolic >= 160 || bp.diastolic >= 110) {
-        score += 20;
-        factors.push(`TD ${formData.tekanan_darah} (Hipertensi berat) → +20 poin`);
-        criticalFactors.push('Hipertensi berat');
+        score += 50;
+        factors.push(`TD ${formData.tekanan_darah} (Hipertensi berat) → +50 poin`);
       } else if (bp.systolic >= 140 || bp.diastolic >= 90) {
         score += 15;
         factors.push(`TD ${formData.tekanan_darah} (Hipertensi ringan-sedang) → +15 poin`);
@@ -116,7 +110,7 @@ export const calculateRiskScore = ({
     }
   }
   
-  // 4. LILA RISK (Max: 15 points)
+  // 4. LILA RISK
   if (formData?.lila) {
     const lila = parseFloat(formData.lila);
     if (!isNaN(lila)) {
@@ -130,14 +124,13 @@ export const calculateRiskScore = ({
     }
   }
   
-  // 5. HEMOGLOBIN RISK (Max: 20 points)
+  // 5. HEMOGLOBIN RISK
   if (labScreeningData?.hasil_lab_hb) {
     const hb = parseFloat(labScreeningData.hasil_lab_hb);
     if (!isNaN(hb)) {
       if (hb < 7) {
-        score += 20;
-        factors.push(`HB ${hb} g/dL (Anemia berat) → +20 poin`);
-        criticalFactors.push('Anemia berat');
+        score += 50;
+        factors.push(`HB ${hb} g/dL (Anemia berat) → +50 poin`);
       } else if (hb < 9) {
         score += 15;
         factors.push(`HB ${hb} g/dL (Anemia sedang) → +15 poin`);
@@ -148,13 +141,12 @@ export const calculateRiskScore = ({
     }
   }
   
-  // 6. PROTEIN URINE RISK (Max: 20 points)
+  // 6. PROTEIN URINE RISK
   if (labScreeningData?.lab_protein_urine) {
     const protein = labScreeningData.lab_protein_urine;
     if (protein === '+4') {
-      score += 20;
-      factors.push('Proteinuria +4 (Berat) → +20 poin');
-      criticalFactors.push('Proteinuria berat');
+      score += 50;
+      factors.push('Proteinuria +4 (Berat) → +50 poin');
     } else if (protein === '+3') {
       score += 15;
       factors.push('Proteinuria +3 (Sedang) → +15 poin');
@@ -167,17 +159,15 @@ export const calculateRiskScore = ({
     }
   }
   
-  // 7. INFECTIOUS DISEASE SCREENING (Max: 25 points cumulative)
+  // 7. INFECTIOUS DISEASE SCREENING (cap at 50)
   let infectionScore = 0;
   if (labScreeningData?.skrining_hiv === 'Reaktif') {
-    infectionScore += 15;
-    factors.push('HIV Reaktif → +15 poin');
-    criticalFactors.push('HIV Reaktif');
+    infectionScore += 50;
+    factors.push('HIV Reaktif → +50 poin');
   }
   if (labScreeningData?.skrining_sifilis === 'Reaktif') {
-    infectionScore += 15;
-    factors.push('Sifilis Reaktif → +15 poin');
-    criticalFactors.push('Sifilis Reaktif');
+    infectionScore += 50;
+    factors.push('Sifilis Reaktif → +50 poin');
   }
   if (labScreeningData?.skrining_hbsag === 'Reaktif') {
     infectionScore += 10;
@@ -195,12 +185,7 @@ export const calculateRiskScore = ({
     infectionScore += 5;
     factors.push('Klamidia Reaktif → +5 poin');
   }
-  // Cap infection score at 25
-  const cappedInfectionScore = Math.min(infectionScore, 25);
-  score += cappedInfectionScore;
-  if (infectionScore > 25) {
-    factors.push(`(Skor infeksi dibatasi: ${infectionScore} → 25 poin)`);
-  }
+  score += infectionScore;
   
   // 8. WEIGHT GAIN RISK (Max: 10 points)
   if (formData?.selisih_beratbadan) {
@@ -233,7 +218,7 @@ export const calculateRiskScore = ({
   return {
     score,
     factors,
-    criticalFactors,
+    criticalFactors: [], // kept for API compatibility, no longer used for overrides
     maxScore: 160
   };
 };
@@ -295,12 +280,7 @@ export const hasCriticalFactors = (criticalFactors) => {
  * @returns {string} 'Normal', 'Ringan', 'Sedang', or 'Tinggi'
  */
 export const getAutomaticRiskStatus = (score, criticalFactors) => {
-  // Automatic high risk if critical factors present
-  if (hasCriticalFactors(criticalFactors)) {
-    return 'Tinggi';
-  }
-  
-  // Otherwise use score thresholds
+  // Score-only thresholds — no hidden overrides
   if (score >= 50) {
     return 'Tinggi';
   } else if (score >= 30) {

@@ -21,6 +21,8 @@ import TambahKomplikasi from './pages/TambahKomplikasi/TambahKomplikasi';
 import Posyandu from './pages/Posyandu/Posyandu';
 import Rekapitulasi from './pages/Rekapitulasi/Rekapitulasi';
 import UserManagement from './pages/UserManagement/UserManagement';
+import ImportData from './pages/ImportData/ImportData';
+import ImportDraft from './pages/ImportDraft/ImportDraft';
 import OfflineIndicator from './components/OfflineIndicator/OfflineIndicator';
 import AuthModel from './services/AuthModel';
 import './App.css';
@@ -119,7 +121,7 @@ function AppLayout() {
     document.body.className = '';
 
     // Add appropriate class based on route
-    const dashboardRoutes = ['/dashboard', '/data-ibu', '/detail-ibu', '/tambah-ibu', '/kunjungan-anc', '/tambah-anc', '/persalinan', '/tambah-persalinan', '/kunjungan-nifas', '/tambah-nifas', '/komplikasi', '/tambah-komplikasi', '/posyandu', '/rekapitulasi', '/user-management'];
+    const dashboardRoutes = ['/dashboard', '/data-ibu', '/detail-ibu', '/tambah-ibu', '/kunjungan-anc', '/tambah-anc', '/persalinan', '/tambah-persalinan', '/kunjungan-nifas', '/tambah-nifas', '/komplikasi', '/tambah-komplikasi', '/posyandu', '/rekapitulasi', '/user-management', '/import-data', '/import-draft'];
     if (dashboardRoutes.some(route => location.pathname.startsWith(route))) {
       document.body.classList.add('dashboard-page');
     } else {
@@ -127,7 +129,7 @@ function AppLayout() {
     }
   }, [location]);
 
-  const isDashboard = ['/dashboard', '/data-ibu', '/detail-ibu', '/tambah-ibu', '/kunjungan-anc', '/tambah-anc', '/persalinan', '/tambah-persalinan', '/kunjungan-nifas', '/tambah-nifas', '/komplikasi', '/tambah-komplikasi', '/posyandu', '/rekapitulasi', '/user-management'].some(route => location.pathname.startsWith(route));
+  const isDashboard = ['/dashboard', '/data-ibu', '/detail-ibu', '/tambah-ibu', '/kunjungan-anc', '/tambah-anc', '/persalinan', '/tambah-persalinan', '/kunjungan-nifas', '/tambah-nifas', '/komplikasi', '/tambah-komplikasi', '/posyandu', '/rekapitulasi', '/user-management', '/import-data', '/import-draft'].some(route => location.pathname.startsWith(route));
 
   return (
     <div className={isDashboard ? 'App' : 'App centered'}>
@@ -268,6 +270,22 @@ function AppLayout() {
           element={
             <ProtectedRoute>
               <UserManagement />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/import-data"
+          element={
+            <ProtectedRoute>
+              <ImportData />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/import-draft"
+          element={
+            <ProtectedRoute>
+              <ImportDraft />
             </ProtectedRoute>
           }
         />

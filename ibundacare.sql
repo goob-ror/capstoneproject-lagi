@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Mar 12, 2026 at 07:57 AM
+-- Generation Time: Apr 12, 2026 at 06:44 AM
 -- Server version: 8.0.30
 -- PHP Version: 8.1.10
 
@@ -151,7 +151,30 @@ INSERT INTO `antenatal_care` (`id`, `tanggal_kunjungan`, `jenis_kunjungan`, `jen
 (87, '2026-03-06 00:00:00', 'K1', 'Murni', 'Bidan', 56.00, '122/80', 26.00, 1.00, 0.00, NULL, 86, 1, 'T2', 1, NULL, 'Sesuai', 'Normal', NULL, NULL, NULL, 61, 6, 50, NULL, '2026-03-06 10:53:31', '2026-03-06 10:53:31'),
 (88, '2026-03-08 00:00:00', 'K5', 'Murni', 'Bidan', 51.50, '110/70', 26.00, -6.50, 10.00, NULL, 94, 0, 'T0', 1, NULL, NULL, 'Tinggi', NULL, NULL, NULL, 19, 2, 51, NULL, '2026-03-08 04:25:15', '2026-03-08 04:25:15'),
 (89, '2026-03-10 00:00:00', 'K2', 'Murni', 'Bidan', 68.00, '112/72', 23.00, 0.99, 20.00, 10, 100, 1, 'T0', 0, NULL, 'Sesuai', 'Ringan', NULL, NULL, NULL, 54, 6, 52, NULL, '2026-03-10 02:34:01', '2026-03-10 02:34:01'),
-(90, '2026-03-10 00:00:00', 'K8', 'Murni', 'Bidan', 53.00, '150/93', 23.00, -2.00, NULL, NULL, 100, 0, 'T2', 1, NULL, NULL, 'Tinggi', NULL, NULL, NULL, 10, 4, 53, NULL, '2026-03-10 06:51:19', '2026-03-10 06:51:19');
+(90, '2026-03-10 00:00:00', 'K8', 'Murni', 'Bidan', 53.00, '150/93', 23.00, -2.00, NULL, NULL, 100, 0, 'T2', 1, NULL, NULL, 'Tinggi', NULL, NULL, NULL, 10, 4, 53, NULL, '2026-03-10 06:51:19', '2026-03-10 06:51:19'),
+(91, '2026-04-09 00:00:00', 'K3', 'Murni', 'Bidan', 60.00, '112/72', 24.00, 9.00, 22.00, 140, 95, 0, 'T0', 0, NULL, NULL, 'Normal', NULL, NULL, NULL, 51, 6, 54, NULL, '2026-04-09 13:16:50', '2026-04-09 13:16:50'),
+(92, '2026-04-09 00:00:00', 'K3', 'Murni', 'Bidan', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 'T0', 0, NULL, NULL, 'Normal', NULL, NULL, NULL, 51, 6, 55, NULL, '2026-04-09 13:17:02', '2026-04-09 13:17:02'),
+(93, '2026-04-09 00:00:00', 'K3', 'Murni', 'Bidan', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 'T0', 0, NULL, NULL, 'Normal', NULL, NULL, NULL, 51, 6, 56, NULL, '2026-04-09 13:17:13', '2026-04-09 13:17:13'),
+(94, '2026-04-09 00:00:00', 'K3', 'Murni', 'Bidan', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 'T0', 0, NULL, NULL, 'Normal', NULL, NULL, NULL, 51, 6, 57, NULL, '2026-04-09 13:17:22', '2026-04-09 13:17:22'),
+(95, '2026-04-09 00:00:00', 'K3', 'Murni', 'Bidan', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 'T0', 0, NULL, NULL, 'Normal', NULL, NULL, NULL, 51, 6, 58, NULL, '2026-04-09 13:17:32', '2026-04-09 13:17:32'),
+(96, '2026-04-09 00:00:00', 'K3', 'Murni', 'Bidan', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 'T0', 0, NULL, NULL, 'Normal', NULL, NULL, NULL, 51, 6, 59, NULL, '2026-04-09 13:17:44', '2026-04-09 13:17:44'),
+(97, '2026-04-09 00:00:00', 'K6', 'Murni', 'Bidan', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 'T0', 0, NULL, NULL, 'Normal', NULL, NULL, NULL, 23, 6, 60, NULL, '2026-04-09 13:18:35', '2026-04-09 13:18:35'),
+(98, '2026-04-09 00:00:00', 'K6', 'Murni', 'Bidan', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 'T0', 0, NULL, NULL, 'Normal', NULL, NULL, NULL, 13, 6, 61, NULL, '2026-04-09 13:18:45', '2026-04-09 13:18:45'),
+(99, '2026-04-09 00:00:00', 'K8', 'Murni', 'Bidan', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 'T0', 0, NULL, NULL, 'Normal', NULL, NULL, NULL, 13, 6, 62, NULL, '2026-04-09 13:19:00', '2026-04-09 13:19:00'),
+(100, '2026-04-09 00:00:00', 'K8', 'Murni', 'Bidan', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 'T0', 0, NULL, NULL, 'Normal', NULL, NULL, NULL, 23, 6, 63, NULL, '2026-04-09 13:19:31', '2026-04-09 13:19:31'),
+(101, '2026-04-09 00:00:00', 'K6', 'Murni', 'Bidan', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 'T0', 0, NULL, NULL, 'Normal', NULL, NULL, NULL, 18, 6, 64, NULL, '2026-04-09 23:42:26', '2026-04-09 23:42:26'),
+(102, '2026-04-09 00:00:00', 'K6', 'Murni', 'Bidan', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 'T0', 0, NULL, NULL, 'Normal', NULL, NULL, NULL, 18, 6, 65, NULL, '2026-04-09 23:42:42', '2026-04-09 23:42:42'),
+(103, '2026-04-09 00:00:00', 'K6', 'Murni', 'Bidan', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 'T0', 0, NULL, NULL, 'Normal', NULL, NULL, NULL, 18, 6, 66, NULL, '2026-04-09 23:42:53', '2026-04-09 23:42:53'),
+(104, '2026-04-09 00:00:00', 'K6', 'Murni', 'Bidan', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 'T0', 0, NULL, NULL, 'Normal', NULL, NULL, NULL, 18, 6, 67, NULL, '2026-04-09 23:43:03', '2026-04-09 23:43:03'),
+(105, '2026-04-09 00:00:00', 'K8', 'Murni', 'Bidan', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 'T0', 0, NULL, NULL, 'Normal', NULL, NULL, NULL, 18, 6, 68, NULL, '2026-04-09 23:43:22', '2026-04-09 23:43:22'),
+(106, '2026-04-10 00:00:00', 'K6', 'Murni', 'Bidan', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 'T0', 0, NULL, NULL, 'Normal', NULL, NULL, NULL, 13, 6, 69, NULL, '2026-04-10 00:11:34', '2026-04-10 00:11:34'),
+(107, '2026-04-10 00:00:00', 'K6', 'Murni', 'Bidan', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 'T0', 0, NULL, NULL, 'Normal', NULL, NULL, NULL, 3, 6, 70, NULL, '2026-04-10 00:23:21', '2026-04-10 00:23:21'),
+(108, '2026-04-10 00:00:00', 'K6', 'Murni', 'Bidan', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 'T0', 0, NULL, NULL, 'Normal', NULL, NULL, NULL, 18, 6, 71, NULL, '2026-04-10 00:23:55', '2026-04-10 00:23:55'),
+(109, '2026-04-10 00:00:00', 'K6', 'Murni', 'Bidan', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 'T0', 0, NULL, NULL, 'Normal', NULL, NULL, NULL, 18, 6, 72, NULL, '2026-04-10 00:24:07', '2026-04-10 00:24:07'),
+(110, '2026-04-10 00:00:00', 'K6', 'Murni', 'Bidan', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 'T0', 0, NULL, NULL, 'Normal', NULL, NULL, NULL, 18, 6, 73, NULL, '2026-04-10 00:24:19', '2026-04-10 00:24:19'),
+(111, '2026-04-10 00:00:00', 'K6', 'Murni', 'Bidan', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 'T0', 0, NULL, NULL, 'Normal', NULL, NULL, NULL, 18, 6, 74, NULL, '2026-04-10 00:24:45', '2026-04-10 00:24:45'),
+(112, '2026-04-10 00:00:00', 'K6', 'Murni', 'Bidan', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 'T0', 0, NULL, NULL, 'Normal', NULL, NULL, NULL, 18, 6, 75, NULL, '2026-04-10 00:26:10', '2026-04-10 00:26:10'),
+(113, '2026-04-10 00:00:00', 'K6', 'Murni', 'Bidan', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 'T0', 0, NULL, NULL, 'Normal', NULL, NULL, NULL, 18, 6, 76, NULL, '2026-04-10 00:26:54', '2026-04-10 00:26:54');
 
 -- --------------------------------------------------------
 
@@ -241,8 +264,9 @@ INSERT INTO `bidan` (`id`, `username`, `password`, `nama_lengkap`, `no_hp`, `rol
 (3, 'bidan_ratna', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Bd. Ratna Sari, A.Md.Keb', '082190903003', 'Bidan', 1, NULL, '2025-11-23 14:21:48', '2025-11-23 14:21:48'),
 (4, 'bidan_eka', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Bd. Eka Yuliana, S.Tr.Keb', '085280804004', 'Bidan', 1, NULL, '2025-11-23 14:21:48', '2025-11-23 14:21:48'),
 (5, 'admin_puskes', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Rina Wati, S.K.M.', '081170705005', 'Admin', 1, NULL, '2025-11-23 14:21:48', '2025-11-23 14:21:48'),
-(6, 'adminBidan', '$2b$12$sq5JJ7vq2i.z/YQdKBs/muZYtBLeIbCExNZF3fq.2C8dmOs.ZJTYe', 'adminBidan', NULL, 'Bidan', 1, '2026-03-12 05:22:31', '2025-11-23 14:35:00', '2026-03-12 05:22:31'),
-(7, 'testUser', '$2b$12$iFrmu/TE.1ktOwD2FYdd..btiJWg3dlAZ0VtXYNoezzKoxMLRR0hC', 'testUser', NULL, 'Bidan', 0, NULL, '2026-02-02 02:42:10', '2026-02-02 02:42:10');
+(6, 'adminBidan', '$2b$12$sq5JJ7vq2i.z/YQdKBs/muZYtBLeIbCExNZF3fq.2C8dmOs.ZJTYe', 'adminBidan', NULL, 'Bidan', 1, '2026-04-12 01:15:30', '2025-11-23 14:35:00', '2026-04-12 01:15:30'),
+(7, 'testUser', '$2b$12$iFrmu/TE.1ktOwD2FYdd..btiJWg3dlAZ0VtXYNoezzKoxMLRR0hC', 'testUser', NULL, 'Bidan', 0, NULL, '2026-02-02 02:42:10', '2026-02-02 02:42:10'),
+(8, 'admin-puskesmaspalaran123', '$2b$12$zFDAkAUMIUB2LRjokNQMz.8b4HpE4Eodw3Jl6DbtjiDOmuas0PWFa', 'G7#kP2!zL9@q', '0895360022327', 'Bidan', 1, NULL, '2026-04-10 08:06:42', '2026-04-10 08:06:42');
 
 -- --------------------------------------------------------
 
@@ -334,7 +358,9 @@ INSERT INTO `ibu` (`id`, `nik_ibu`, `nama_lengkap`, `tanggal_lahir`, `no_hp`, `g
 (55, '6472022210050896', 'Rio Septianti', '1997-07-08', '080001111125', 'A', 165.00, 65, 'Belum Diperiksa', '+', 'Ada', 'IRT', 'SMA', 2, 15, 'Jalan Daeng Mangkona, Citra 3', 3, '2026-02-02 02:16:07', '2026-02-02 02:16:07'),
 (56, '6472022210050096', '<script>alert(test)</script>', '2007-05-04', '080001111125', 'AB', 165.00, 55, 'Belum Diperiksa', '+', 'Ada', 'Wiraswasta', 'SMA', 3, 20, '<bold>Alamat</bold>', 26, '2026-02-02 02:27:37', '2026-02-02 02:27:37'),
 (57, '6472016403940001', 'LINA NUR', '1994-03-24', '085248885152', 'B', 155.00, 65, 'Belum Diperiksa', '+', 'Ada', 'IRT', 'SMA', 1, 17, 'JL. MULAWRMAN RT 17 RAWA MAKMUR', 22, '2026-02-21 03:41:59', '2026-02-21 03:41:59'),
-(59, '6472022210050676', 'Ibu Test 1', '1995-05-19', '0843231123532', 'B', 160.00, 55, 'Belum Diperiksa', '+', 'Ada', 'IRT', 'SMA', 1, 9, '', 16, '2026-03-06 10:51:18', '2026-03-06 10:51:18');
+(59, '6472022210050676', 'Ibu Test 1', '1995-05-19', '0843231123532', 'B', 160.00, 55, 'Belum Diperiksa', '+', 'Ada', 'IRT', 'SMA', 1, 9, '', 16, '2026-03-06 10:51:18', '2026-03-06 10:51:18'),
+(60, '6472022210050020', 'Ibundrop Table', '1980-10-08', '', '', 150.00, 55, 'Belum Diperiksa', '+', 'Ada', 'IRT', 'SMA', 2, 3, '', 4, '2026-03-12 08:00:21', '2026-03-12 08:13:45'),
+(61, '6472022210050076', 'Walelolooi Woi', '1994-02-10', '080001111100', 'O', 165.00, 65, 'Belum Diperiksa', '-', 'Ada', 'Wiraswasta', 'SMA', 3, 8, 'Bebas aja alamatnya dimana', 25, '2026-03-22 11:40:04', '2026-03-22 11:41:56');
 
 -- --------------------------------------------------------
 
@@ -412,7 +438,7 @@ INSERT INTO `kehamilan` (`id`, `gravida`, `partus`, `abortus`, `haid_pertama`, `
 (1, 1, 0, 0, NULL, '2025-02-10', '2025-11-17', 'Hamil', NULL, 1, '2025-11-23 14:21:48', '2025-11-23 14:21:48'),
 (2, 2, 1, 0, NULL, '2025-03-15', '2025-12-22', 'Hamil', NULL, 2, '2025-11-23 14:21:48', '2025-11-23 14:21:48'),
 (3, 1, 0, 0, NULL, '2025-04-20', '2026-01-27', 'Hamil', NULL, 3, '2025-11-23 14:21:48', '2025-11-23 14:21:48'),
-(4, 3, 3, 0, NULL, '2025-05-05', '2026-02-12', 'Nifas', NULL, 4, '2025-11-23 14:21:48', '2026-02-28 03:14:22'),
+(4, 3, 3, 0, NULL, '2025-05-05', '2026-02-12', 'Selesai', NULL, 4, '2025-11-23 14:21:48', '2026-04-12 01:15:30'),
 (5, 1, 0, 0, NULL, '2025-06-01', '2026-03-08', 'Hamil', NULL, 5, '2025-11-23 14:21:48', '2025-11-23 14:21:48'),
 (6, 2, 0, 1, NULL, '2025-01-20', '2025-10-27', 'Hamil', NULL, 6, '2025-11-23 14:21:48', '2025-11-23 14:21:48'),
 (7, 1, 0, 0, NULL, '2025-07-10', '2026-04-17', 'Hamil', NULL, 7, '2025-11-23 14:21:48', '2025-11-23 14:21:48'),
@@ -430,7 +456,7 @@ INSERT INTO `kehamilan` (`id`, `gravida`, `partus`, `abortus`, `haid_pertama`, `
 (19, 1, 0, 0, NULL, '2025-08-20', '2026-05-27', 'Hamil', NULL, 19, '2025-11-23 14:21:48', '2025-11-23 14:21:48'),
 (20, 2, 1, 0, NULL, '2025-02-14', '2025-11-21', 'Selesai', NULL, 20, '2025-11-23 14:21:48', '2025-11-24 17:47:41'),
 (21, 1, 0, 0, NULL, '2025-05-12', '2026-02-19', 'Hamil', NULL, 21, '2025-11-23 14:21:48', '2025-11-23 14:21:48'),
-(22, 4, 3, 1, NULL, '2025-01-05', '2025-10-12', 'Nifas', NULL, 22, '2025-11-23 14:21:48', '2026-02-28 03:46:11'),
+(22, 4, 3, 1, NULL, '2025-01-05', '2025-10-12', 'Selesai', NULL, 22, '2025-11-23 14:21:48', '2026-03-22 10:45:34'),
 (23, 1, 0, 0, NULL, '2025-06-25', '2026-04-01', 'Hamil', NULL, 23, '2025-11-23 14:21:48', '2025-11-23 14:21:48'),
 (24, 2, 1, 0, NULL, '2025-09-10', '2026-06-17', 'Hamil', NULL, 24, '2025-11-23 14:21:48', '2025-11-23 14:21:48'),
 (25, 1, 0, 0, NULL, '2025-03-30', '2026-01-06', 'Hamil', NULL, 25, '2025-11-23 14:21:48', '2025-11-23 14:21:48'),
@@ -450,7 +476,7 @@ INSERT INTO `kehamilan` (`id`, `gravida`, `partus`, `abortus`, `haid_pertama`, `
 (39, 1, 0, 0, NULL, '2025-02-01', '2025-11-08', 'Selesai', NULL, 39, '2025-11-23 14:21:48', '2026-02-18 09:08:11'),
 (40, 2, 0, 1, NULL, '2024-11-20', '2025-08-27', 'Selesai', NULL, 40, '2025-11-23 14:21:48', '2026-02-18 09:08:11'),
 (41, 1, 0, 0, NULL, '2024-12-25', '2025-10-01', 'Selesai', NULL, 41, '2025-11-23 14:21:48', '2026-02-18 09:08:11'),
-(42, 3, 2, 0, NULL, '2025-01-01', '2025-10-08', 'Nifas', NULL, 42, '2025-11-23 14:21:48', '2025-11-23 14:21:48'),
+(42, 3, 2, 0, NULL, '2025-01-01', '2025-10-08', 'Selesai', NULL, 42, '2025-11-23 14:21:48', '2026-04-09 12:47:14'),
 (43, 1, 0, 0, NULL, '2024-11-05', '2025-08-12', 'Selesai', NULL, 43, '2025-11-23 14:21:48', '2026-02-18 09:08:11'),
 (44, 2, 1, 0, NULL, '2024-12-30', '2025-10-06', 'Selesai', NULL, 44, '2025-11-23 14:21:48', '2026-02-18 09:08:11'),
 (45, 1, 0, 0, NULL, '2025-01-20', '2025-10-27', 'Selesai', NULL, 45, '2025-11-23 14:21:48', '2026-02-18 09:08:11'),
@@ -463,12 +489,14 @@ INSERT INTO `kehamilan` (`id`, `gravida`, `partus`, `abortus`, `haid_pertama`, `
 (52, 1, 1, 0, NULL, '2024-07-16', '2025-04-22', 'Selesai', NULL, 50, '2025-11-24 17:25:40', '2025-11-24 17:30:27'),
 (53, 2, 1, 0, NULL, '2025-04-20', '2026-01-25', 'Hamil', NULL, 50, '2025-11-24 17:31:01', '2025-11-24 17:31:01'),
 (54, 1, 0, 0, NULL, '2025-12-10', '2026-09-16', 'Hamil', NULL, 53, '2026-01-15 01:08:55', '2026-01-15 01:10:19'),
-(55, 1, 1, 0, NULL, '2025-04-27', '2026-02-01', 'Nifas', NULL, 54, '2026-01-20 05:58:12', '2026-02-28 03:06:44'),
+(55, 1, 1, 0, NULL, '2025-04-27', '2026-02-01', 'Selesai', NULL, 54, '2026-01-20 05:58:12', '2026-04-12 01:15:30'),
 (56, 1, 1, 0, NULL, '2025-02-02', '2025-11-09', 'Bersalin', NULL, 55, '2026-02-02 02:16:07', '2026-02-02 02:19:25'),
 (57, 1, 0, 0, NULL, '2025-10-09', '2026-07-16', 'Hamil', NULL, 56, '2026-02-02 02:27:37', '2026-02-02 02:27:37'),
 (58, 3, 2, 0, NULL, '2025-07-20', '2026-04-26', 'Hamil', NULL, 57, '2026-02-21 03:41:59', '2026-02-21 03:41:59'),
 (59, 3, 2, 0, NULL, '2026-02-12', '2026-11-19', 'Hamil', NULL, 27, '2026-02-27 22:15:00', '2026-02-27 22:15:00'),
-(61, 1, 0, 0, NULL, '2026-02-17', '2026-11-24', 'Hamil', NULL, 59, '2026-03-06 10:51:18', '2026-03-06 10:51:18');
+(61, 1, 0, 0, NULL, '2026-02-17', '2026-11-24', 'Hamil', NULL, 59, '2026-03-06 10:51:18', '2026-03-06 10:51:18'),
+(62, 1, 0, 0, NULL, '2026-02-17', '2026-11-24', 'Hamil', NULL, 60, '2026-03-12 08:00:21', '2026-03-12 08:13:45'),
+(63, 1, 0, 0, NULL, '2025-05-09', '2026-02-13', 'Hamil', NULL, 61, '2026-03-22 11:40:04', '2026-03-22 11:58:10');
 
 -- --------------------------------------------------------
 
@@ -822,7 +850,30 @@ INSERT INTO `lab_screening` (`id`, `hasil_lab_hb`, `lab_protein_urine`, `lab_gul
 (50, 9.00, 'Negatif', '86', NULL, 'Non-Reaktif', 'Non-Reaktif', 'Non-Reaktif', NULL, 'Non-Reaktif', 'Non-Reaktif', 'Negatif', 'Tidak', 0, 'Negatif', 0, 'Negatif', 61, '2026-03-06 10:53:31', '2026-03-06 10:53:31'),
 (51, 6.00, 'Negatif', '100', NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', 'Tidak', 0, 'Belum Diperiksa', 0, 'Belum Diperiksa', 19, '2026-03-08 04:25:15', '2026-03-08 04:25:15'),
 (52, NULL, 'Negatif', NULL, NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', 'Tidak', 0, 'Belum Diperiksa', 0, 'Belum Diperiksa', 54, '2026-03-10 02:34:01', '2026-03-10 02:34:01'),
-(53, 10.00, 'Negatif', '160', NULL, 'Reaktif', 'Reaktif', 'Reaktif', 'Sedang ART', 'Reaktif', 'Reaktif', 'Positif', 'Tidak', 1, 'Positif', 1, 'Positif', 10, '2026-03-10 06:51:19', '2026-03-10 06:51:19');
+(53, 10.00, 'Negatif', '160', NULL, 'Reaktif', 'Reaktif', 'Reaktif', 'Sedang ART', 'Reaktif', 'Reaktif', 'Positif', 'Tidak', 1, 'Positif', 1, 'Positif', 10, '2026-03-10 06:51:19', '2026-03-10 06:51:19'),
+(54, NULL, 'Negatif', NULL, NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', 'Tidak', 0, 'Belum Diperiksa', 0, 'Belum Diperiksa', 51, '2026-04-09 13:16:50', '2026-04-09 13:16:50'),
+(55, NULL, 'Negatif', NULL, NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', 'Tidak', 0, 'Belum Diperiksa', 0, 'Belum Diperiksa', 51, '2026-04-09 13:17:02', '2026-04-09 13:17:02'),
+(56, NULL, 'Negatif', NULL, NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', 'Tidak', 0, 'Belum Diperiksa', 0, 'Belum Diperiksa', 51, '2026-04-09 13:17:13', '2026-04-09 13:17:13'),
+(57, NULL, 'Negatif', NULL, NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', 'Tidak', 0, 'Belum Diperiksa', 0, 'Belum Diperiksa', 51, '2026-04-09 13:17:22', '2026-04-09 13:17:22'),
+(58, NULL, 'Negatif', NULL, NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', 'Tidak', 0, 'Belum Diperiksa', 0, 'Belum Diperiksa', 51, '2026-04-09 13:17:32', '2026-04-09 13:17:32'),
+(59, NULL, 'Negatif', NULL, NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', 'Tidak', 0, 'Belum Diperiksa', 0, 'Belum Diperiksa', 51, '2026-04-09 13:17:44', '2026-04-09 13:17:44'),
+(60, NULL, 'Negatif', NULL, NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', 'Tidak', 0, 'Belum Diperiksa', 0, 'Belum Diperiksa', 23, '2026-04-09 13:18:35', '2026-04-09 13:18:35'),
+(61, NULL, 'Negatif', NULL, NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', 'Tidak', 0, 'Belum Diperiksa', 0, 'Belum Diperiksa', 13, '2026-04-09 13:18:45', '2026-04-09 13:18:45'),
+(62, NULL, 'Negatif', NULL, NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', 'Tidak', 0, 'Belum Diperiksa', 0, 'Belum Diperiksa', 13, '2026-04-09 13:19:00', '2026-04-09 13:19:00'),
+(63, NULL, 'Negatif', NULL, NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', 'Tidak', 0, 'Belum Diperiksa', 0, 'Belum Diperiksa', 23, '2026-04-09 13:19:31', '2026-04-09 13:19:31'),
+(64, NULL, 'Negatif', NULL, NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', 'Tidak', 0, 'Belum Diperiksa', 0, 'Belum Diperiksa', 18, '2026-04-09 23:42:26', '2026-04-09 23:42:26'),
+(65, NULL, 'Negatif', NULL, NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', 'Tidak', 0, 'Belum Diperiksa', 0, 'Belum Diperiksa', 18, '2026-04-09 23:42:42', '2026-04-09 23:42:42'),
+(66, NULL, 'Negatif', NULL, NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', 'Tidak', 0, 'Belum Diperiksa', 0, 'Belum Diperiksa', 18, '2026-04-09 23:42:52', '2026-04-09 23:42:52'),
+(67, NULL, 'Negatif', NULL, NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', 'Tidak', 0, 'Belum Diperiksa', 0, 'Belum Diperiksa', 18, '2026-04-09 23:43:03', '2026-04-09 23:43:03'),
+(68, NULL, 'Negatif', NULL, NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', 'Tidak', 0, 'Belum Diperiksa', 0, 'Belum Diperiksa', 18, '2026-04-09 23:43:22', '2026-04-09 23:43:22'),
+(69, NULL, 'Negatif', NULL, NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', 'Tidak', 0, 'Belum Diperiksa', 0, 'Belum Diperiksa', 13, '2026-04-10 00:11:34', '2026-04-10 00:11:34'),
+(70, NULL, 'Negatif', NULL, NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', 'Tidak', 0, 'Belum Diperiksa', 0, 'Belum Diperiksa', 3, '2026-04-10 00:23:21', '2026-04-10 00:23:21'),
+(71, NULL, 'Negatif', NULL, NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', 'Tidak', 0, 'Belum Diperiksa', 0, 'Belum Diperiksa', 18, '2026-04-10 00:23:55', '2026-04-10 00:23:55'),
+(72, NULL, 'Negatif', NULL, NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', 'Tidak', 0, 'Belum Diperiksa', 0, 'Belum Diperiksa', 18, '2026-04-10 00:24:07', '2026-04-10 00:24:07'),
+(73, NULL, 'Negatif', NULL, NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', 'Tidak', 0, 'Belum Diperiksa', 0, 'Belum Diperiksa', 18, '2026-04-10 00:24:19', '2026-04-10 00:24:19'),
+(74, NULL, 'Negatif', NULL, NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', 'Tidak', 0, 'Belum Diperiksa', 0, 'Belum Diperiksa', 18, '2026-04-10 00:24:45', '2026-04-10 00:24:45'),
+(75, NULL, 'Negatif', NULL, NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', 'Tidak', 0, 'Belum Diperiksa', 0, 'Belum Diperiksa', 18, '2026-04-10 00:26:10', '2026-04-10 00:26:10'),
+(76, NULL, 'Negatif', NULL, NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', NULL, 'Belum Diperiksa', 'Belum Diperiksa', 'Belum Diperiksa', 'Tidak', 0, 'Belum Diperiksa', 0, 'Belum Diperiksa', 18, '2026-04-10 00:26:54', '2026-04-10 00:26:54');
 
 -- --------------------------------------------------------
 
@@ -916,7 +967,8 @@ INSERT INTO `riwayat_penyakit` (`id`, `nama_penyakit`, `kategori_penyakit`, `tah
 (13, 'Asma', 'Penyakit Kronis', '2016', 'Dalam Pengobatan', 'Terkontrol dengan obat', 38, '2025-12-08 17:30:16', '2025-12-08 17:30:16'),
 (14, 'Hipertensi', 'Penyakit Tidak Menular', '2021', 'Dalam Pengobatan', 'Pre-eklampsia pada kehamilan lalu', 40, '2025-12-08 17:30:16', '2025-12-08 17:30:16'),
 (15, 'Anemia', 'Penyakit Tidak Menular', '2022', 'Sembuh', 'Hb sudah normal', 42, '2025-12-08 17:30:16', '2025-12-08 17:30:16'),
-(17, 'Hipertensi', 'Lainnya', '2020', 'Sembuh', NULL, 52, '2025-12-25 15:49:53', '2025-12-25 15:49:53');
+(17, 'Hipertensi', 'Lainnya', '2020', 'Sembuh', NULL, 52, '2025-12-25 15:49:53', '2025-12-25 15:49:53'),
+(21, 'Asma', 'Lainnya', '2018', 'Dalam Pengobatan', NULL, 61, '2026-03-22 11:41:56', '2026-03-22 11:41:56');
 
 -- --------------------------------------------------------
 
@@ -993,7 +1045,8 @@ INSERT INTO `suami` (`id`, `nik_suami`, `nama_lengkap`, `tanggal_lahir`, `no_hp`
 (47, '6472021837324567', 'Suami Manusia Testing', '1985-04-18', '081234567067', 'A', 'PNS', 'S1', 1, 53, '2026-01-15 01:10:19', '2026-01-15 01:10:19'),
 (48, '6472021837324581', 'Emilia Putra', '1995-04-11', '083434567453', 'B', 'Pedagang', 'SMA', 1, 54, '2026-01-22 02:00:20', '2026-01-22 02:00:20'),
 (49, '6472021837324579', 'Rio Septianto', '1996-04-09', '080001111163', 'B', 'Wiraswasta', 'S1', 1, 55, '2026-02-02 02:16:07', '2026-02-02 02:16:07'),
-(51, '6472021837324569', 'Suami Test 1', '1995-05-20', '081234567027', 'AB', 'Swasta', 'SMA', 1, 59, '2026-03-06 10:51:18', '2026-03-06 10:51:18');
+(51, '6472021837324569', 'Suami Test 1', '1995-05-20', '081234567027', 'AB', 'Swasta', 'SMA', 1, 59, '2026-03-06 10:51:18', '2026-03-06 10:51:18'),
+(52, '6472021837332132', 'Orang Orangna', '1990-08-13', '081234567027', 'AB', 'Swasta', 'SMA', 1, 61, '2026-03-22 11:40:04', '2026-03-22 11:41:56');
 
 -- --------------------------------------------------------
 
@@ -1182,25 +1235,25 @@ ALTER TABLE `wilker_posyandu`
 -- AUTO_INCREMENT for table `antenatal_care`
 --
 ALTER TABLE `antenatal_care`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=91;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=114;
 
 --
 -- AUTO_INCREMENT for table `bayi`
 --
 ALTER TABLE `bayi`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
 
 --
 -- AUTO_INCREMENT for table `bidan`
 --
 ALTER TABLE `bidan`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `ibu`
 --
 ALTER TABLE `ibu`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=60;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=62;
 
 --
 -- AUTO_INCREMENT for table `jiwa_screening`
@@ -1212,7 +1265,7 @@ ALTER TABLE `jiwa_screening`
 -- AUTO_INCREMENT for table `kehamilan`
 --
 ALTER TABLE `kehamilan`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=62;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
 
 --
 -- AUTO_INCREMENT for table `kelurahan`
@@ -1242,25 +1295,25 @@ ALTER TABLE `kunjungan_nifas_bayi`
 -- AUTO_INCREMENT for table `lab_screening`
 --
 ALTER TABLE `lab_screening`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=54;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=77;
 
 --
 -- AUTO_INCREMENT for table `persalinan`
 --
 ALTER TABLE `persalinan`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT for table `riwayat_penyakit`
 --
 ALTER TABLE `riwayat_penyakit`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `suami`
 --
 ALTER TABLE `suami`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=53;
 
 --
 -- AUTO_INCREMENT for table `wilker_posyandu`

@@ -62,7 +62,7 @@
   background-color: #FECACA;
 }
 
-.main-content {
+.rekap-main-content {
   display: inline-block;
   vertical-align: top;
   width: calc(100% - 280px);
@@ -72,7 +72,7 @@
   min-height: 100vh;
 }
 
-.content-header {
+.rekap-content-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -81,44 +81,44 @@
   gap: 15px;
 }
 
-.content-header h1 {
+.rekap-content-header h1 {
   font-size: 28px;
   font-weight: 700;
   color: #111827;
   margin: 0 0 5px 0;
 }
 
-.content-header p {
+.rekap-content-header p {
   font-size: 14px;
   color: #6B7280;
   margin: 0;
 }
 
-.filter-indicator {
+.rekap-filter-indicator {
   color: #22C55E;
   font-weight: 500;
 }
 
-.filter-indicator strong {
+.rekap-filter-indicator strong {
   color: #16A34A;
   font-weight: 700;
 }
 
-.filter-section {
+.rekap-filter-section {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
 }
 
-.filter-label {
+.rekap-filter-label {
   font-size: 13px;
   font-weight: 600;
   color: #374151;
   white-space: nowrap;
 }
 
-.filter-select {
+.rekap-filter-select {
   padding: 8px 12px;
   border: 1px solid #D1D5DB;
   border-radius: 6px;
@@ -132,17 +132,17 @@
   height: 40px;
 }
 
-.filter-select:hover {
+.rekap-filter-select:hover {
   border-color: #22C55E;
 }
 
-.filter-select:focus {
+.rekap-filter-select:focus {
   outline: none;
   border-color: #22C55E;
   box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
 }
 
-.error-banner {
+.rekap-error-banner {
   background-color: #FEE2E2;
   border: 1px solid #FCA5A5;
   color: #991B1B;
@@ -152,7 +152,7 @@
   font-size: 13px;
 }
 
-.summary-grid {
+.rekap-summary-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 20px;
@@ -160,12 +160,12 @@
 }
 
 @media (min-width: 1400px) {
-  .summary-grid {
+  .rekap-summary-grid {
     grid-template-columns: repeat(3, 1fr);
   }
 }
 
-.summary-card {
+.rekap-summary-card {
   background: white;
   border-radius: 12px;
   padding: 25px;
@@ -176,12 +176,12 @@
   transition: all 0.2s;
 }
 
-.summary-card:hover {
+.rekap-summary-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
 
-.card-icon {
+.rekap-card-icon {
   width: 60px;
   height: 60px;
   border-radius: 12px;
@@ -191,35 +191,35 @@
   color: white;
 }
 
-.card-icon.blue {
+.rekap-card-icon.blue {
   background: linear-gradient(135deg, #3B82F6, #1E40AF);
 }
 
-.card-icon.green {
+.rekap-card-icon.green {
   background: linear-gradient(135deg, #22C55E, #16A34A);
 }
 
-.card-icon.purple {
+.rekap-card-icon.purple {
   background: linear-gradient(135deg, #8B5CF6, #7C3AED);
 }
 
-.card-icon.red {
+.rekap-card-icon.red {
   background: linear-gradient(135deg, #EF4444, #DC2626);
 }
 
-.card-icon.orange {
+.rekap-card-icon.orange {
   background: linear-gradient(135deg, #F97316, #EA580C);
 }
 
-.card-icon.teal {
+.rekap-card-icon.teal {
   background: linear-gradient(135deg, #14B8A6, #0D9488);
 }
 
-.card-content {
+.rekap-card-content {
   flex: 1;
 }
 
-.card-content h3 {
+.rekap-card-content h3 {
   font-size: 14px;
   font-weight: 600;
   color: #6B7280;
@@ -228,7 +228,7 @@
   letter-spacing: 0.5px;
 }
 
-.card-value {
+.rekap-card-value {
   font-size: 32px;
   font-weight: 700;
   color: #111827;
@@ -236,31 +236,31 @@
   line-height: 1;
 }
 
-.card-label {
+.rekap-card-label {
   font-size: 12px;
   color: #9CA3AF;
   margin: 0;
 }
 
-.report-section {
+.rekap-report-section {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
   gap: 20px;
   margin-bottom: 30px;
 }
 
-.report-card {
+.rekap-report-card {
   background: white;
   border-radius: 12px;
   padding: 25px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-.report-card.full-width {
+.rekap-report-card.full-width {
   grid-column: 1 / -1;
 }
 
-.report-card h3 {
+.rekap-report-card h3 {
   font-size: 18px;
   font-weight: 600;
   color: #111827;
@@ -269,17 +269,17 @@
   border-bottom: 2px solid #E5E7EB;
 }
 
-.table-responsive {
+.rekap-table-responsive {
   overflow-x: auto;
 }
 
-.report-table {
+.rekap-report-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 14px;
 }
 
-.report-table thead th {
+.rekap-report-table thead th {
   padding: 12px;
   text-align: left;
   font-weight: 600;
@@ -288,17 +288,17 @@
   border-bottom: 2px solid #E5E7EB;
 }
 
-.report-table tbody td {
+.rekap-report-table tbody td {
   padding: 12px;
   border-bottom: 1px solid #E5E7EB;
   color: #6B7280;
 }
 
-.report-table tbody tr:hover {
+.rekap-report-table tbody tr:hover {
   background-color: #F9FAFB;
 }
 
-.progress-bar {
+.rekap-progress-bar {
   position: relative;
   width: 100px;
   height: 20px;
@@ -307,14 +307,14 @@
   overflow: hidden;
 }
 
-.progress-fill {
+.rekap-progress-fill {
   height: 100%;
   background: linear-gradient(90deg, #22C55E, #16A34A);
   border-radius: 10px;
   transition: width 0.3s ease;
 }
 
-.progress-text {
+.rekap-progress-text {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -324,7 +324,7 @@
   color: #000000ff;
 }
 
-.status-badge {
+.rekap-status-badge {
   padding: 4px 8px;
   border-radius: 12px;
   font-size: 11px;
@@ -333,28 +333,28 @@
   letter-spacing: 0.5px;
 }
 
-.badge-success {
+.rekap-badge-success {
   background-color: #DCFCE7;
   color: #166534;
 }
 
-.badge-warning {
+.rekap-badge-warning {
   background-color: #FEF3C7;
   color: #92400E;
 }
 
-.badge-danger {
+.rekap-badge-danger {
   background-color: #FEE2E2;
   color: #991B1B;
 }
 
-.badge-info {
+.rekap-badge-info {
   background-color: #DBEAFE;
   color: #1E40AF;
 }
 
 /* Hemoglobin Category Styles */
-.hb-category-summary {
+.rekap-hb-category-summary {
   display: flex;
   gap: 30px;
   padding: 15px 20px;
@@ -364,36 +364,36 @@
   border: 1px solid #E5E7EB;
 }
 
-.hb-summary-item {
+.rekap-hb-summary-item {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.hb-summary-label {
+.rekap-hb-summary-label {
   font-size: 14px;
   font-weight: 600;
   color: #6B7280;
 }
 
-.hb-summary-value {
+.rekap-hb-summary-value {
   font-size: 18px;
   font-weight: 700;
   color: #111827;
 }
 
-.hb-category-table tbody td {
+.rekap-hb-category-table tbody td {
   vertical-align: middle;
 }
 
 /* Trimester Grid Styles */
-.trimester-grid {
+.rekap-trimester-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   gap: 20px;
 }
 
-.trimester-card {
+.rekap-trimester-card {
   background-color: #F9FAFB;
   border: 2px solid #E5E7EB;
   border-radius: 10px;
@@ -401,12 +401,12 @@
   transition: all 0.2s;
 }
 
-.trimester-card:hover {
+.rekap-trimester-card:hover {
   border-color: #22C55E;
   box-shadow: 0 4px 12px rgba(34, 197, 94, 0.1);
 }
 
-.trimester-title {
+.rekap-trimester-title {
   font-size: 16px;
   font-weight: 700;
   color: #111827;
@@ -415,7 +415,7 @@
   border-bottom: 2px solid #22C55E;
 }
 
-.trimester-total {
+.rekap-trimester-total {
   font-size: 13px;
   color: #6B7280;
   margin-bottom: 15px;
@@ -424,67 +424,67 @@
   border-radius: 6px;
 }
 
-.trimester-total strong {
+.rekap-trimester-total strong {
   color: #111827;
   font-weight: 700;
   font-size: 16px;
 }
 
-.trimester-card .report-table {
+.rekap-trimester-card .rekap-report-table {
   font-size: 12px;
 }
 
-.trimester-card .report-table thead th {
+.rekap-trimester-card .rekap-report-table thead th {
   padding: 10px 8px;
   font-size: 11px;
 }
 
-.trimester-card .report-table tbody td {
+.rekap-trimester-card .rekap-report-table tbody td {
   padding: 10px 8px;
   font-size: 12px;
 }
 
-.trimester-card .status-badge {
+.rekap-trimester-card .rekap-status-badge {
   font-size: 10px;
   padding: 3px 6px;
 }
 
 /* Responsive Trimester Grid */
 @media (max-width: 1200px) {
-  .trimester-grid {
+  .rekap-trimester-grid {
     grid-template-columns: 1fr;
   }
 }
 
 /* Additional badge colors for Hb categories */
-.badge-warning-light {
+.rekap-badge-warning-light {
   background-color: #FEF3C7;
   color: #92400E;
 }
 
-.badge-danger-dark {
+.rekap-badge-danger-dark {
   background-color: #7F1D1D;
   color: #FFFFFF;
 }
 
 /* Progress bar color variants */
-.progress-fill.progress-success {
+.rekap-progress-fill.progress-success {
   background: linear-gradient(90deg, #22C55E, #16A34A);
 }
 
-.progress-fill.progress-warning-light {
+.rekap-progress-fill.progress-warning-light {
   background: linear-gradient(90deg, #FCD34D, #F59E0B);
 }
 
-.progress-fill.progress-warning {
+.rekap-progress-fill.progress-warning {
   background: linear-gradient(90deg, #F97316, #EA580C);
 }
 
-.progress-fill.progress-danger {
+.rekap-progress-fill.progress-danger {
   background: linear-gradient(90deg, #EF4444, #DC2626);
 }
 
-.progress-fill.progress-danger-dark {
+.rekap-progress-fill.progress-danger-dark {
   background: linear-gradient(90deg, #DC2626, #991B1B);
 }
 
@@ -511,52 +511,52 @@
 }
 
 @media (max-width: 768px) {
-  .main-content {
+  .rekap-main-content {
     margin-left: 70px;
     width: calc(100% - 70px);
     padding: 15px;
   }
 
-  .content-header {
+  .rekap-content-header {
     flex-direction: column;
     align-items: flex-start;
   }
 
-  .filter-section {
+  .rekap-filter-section {
     width: 100%;
     flex-direction: column;
     align-items: flex-start;
   }
 
-  .filter-select {
+  .rekap-filter-select {
     width: 100%;
   }
 
-  .summary-grid {
+  .rekap-summary-grid {
     grid-template-columns: 1fr;
   }
 
-  .report-section {
+  .rekap-report-section {
     grid-template-columns: 1fr;
   }
 
-  .summary-card {
+  .rekap-summary-card {
     flex-direction: column;
     text-align: center;
   }
 }
 
 /* Additional card icon colors */
-.card-icon.danger {
+.rekap-card-icon.danger {
   background: linear-gradient(135deg, #DC2626, #991B1B);
 }
 
-.card-icon.warning {
+.rekap-card-icon.warning {
   background: linear-gradient(135deg, #F59E0B, #D97706);
 }
 
 /* Header Actions */
-.header-actions {
+.rekap-header-actions {
   display: flex;
   align-items: flex-start;
   gap: 12px;
@@ -565,17 +565,17 @@
 }
 
 /* Export Buttons */
-.export-buttons {
+.rekap-export-buttons {
   display: flex;
   gap: 10px;
   flex-shrink: 0;
 }
 
-.export-dropdown-container {
+.rekap-export-dropdown-container {
   position: relative;
 }
 
-.btn-export {
+.rekap-btn-export {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -591,17 +591,17 @@
   font-family: 'Montserrat', sans-serif;
 }
 
-.btn-export:hover {
+.rekap-btn-export:hover {
   background-color: #16A34A;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
 }
 
-.btn-export svg {
+.rekap-btn-export svg {
   flex-shrink: 0;
 }
 
-.export-dropdown-menu {
+.rekap-export-dropdown-menu {
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
@@ -614,7 +614,7 @@
   overflow: hidden;
 }
 
-.export-dropdown-item {
+.rekap-export-dropdown-item {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -632,16 +632,16 @@
   border-bottom: 1px solid #F3F4F6;
 }
 
-.export-dropdown-item:last-child {
+.rekap-export-dropdown-item:last-child {
   border-bottom: none;
 }
 
-.export-dropdown-item:hover {
+.rekap-export-dropdown-item:hover {
   background-color: #F9FAFB;
   color: #22C55E;
 }
 
-.export-dropdown-item svg {
+.rekap-export-dropdown-item svg {
   flex-shrink: 0;
   width: 16px;
   height: 16px;
@@ -649,21 +649,21 @@
 
 /* Responsive */
 @media (max-width: 768px) {
-  .header-actions {
+  .rekap-header-actions {
     flex-direction: column;
     align-items: stretch;
     width: 100%;
   }
 
-  .filter-section {
+  .rekap-filter-section {
     width: 100%;
   }
 
-  .export-buttons {
+  .rekap-export-buttons {
     width: 100%;
   }
 
-  .btn-export {
+  .rekap-btn-export {
     flex: 1;
     justify-content: center;
   }
@@ -675,22 +675,28 @@
     width: 280px;
   }
 
-  .main-content {
+  .rekap-main-content {
     margin-left: 0;
     width: 100%;
     padding: 12px;
   }
 
-  .content-header h1 {
+  .rekap-content-header h1 {
     font-size: 22px;
   }
 
-  .summary-card {
+  .rekap-summary-card {
     flex-direction: column;
     text-align: center;
   }
 
-  .card-value {
+  .rekap-card-value {
     font-size: 26px;
   }
+}
+
+/* Badge primary */
+.rekap-badge-primary {
+  background-color: #EDE9FE;
+  color: #5B21B6;
 }
