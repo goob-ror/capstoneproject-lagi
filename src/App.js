@@ -1,5 +1,5 @@
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { useEffect, useCallback } from 'react';
 import React from 'react';
 import LoginPage from './pages/LoginPage/LoginPage';
 import RegisterPage from './pages/RegisterPage/RegisterPage';
@@ -25,6 +25,8 @@ import ImportData from './pages/ImportData/ImportData';
 import ImportDraft from './pages/ImportDraft/ImportDraft';
 import OfflineIndicator from './components/OfflineIndicator/OfflineIndicator';
 import AuthModel from './services/AuthModel';
+import sessionManager from './services/sessionManager';
+import { SESSION_EXPIRED_EVENT } from './services/sessionExpiredEvent';
 import './App.css';
 
 // Protected Route Component
@@ -112,9 +114,74 @@ const PublicRoute = ({ children }) => {
   return isAuthenticated ? <Navigate to="/dashboard" replace /> : children;
 };
 
-// Layout wrapper to handle body classes
+// ── Session-Expired Modal ────────────────────────────────────────────────────
+function SessionExpiredModal({ onConfirm }) {
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 9999,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      fontFamily: 'Montserrat, sans-serif',
+    }}>
+      <div style={{
+        backgroundColor: '#fff', borderRadius: '12px',
+        padding: '32px 28px', maxWidth: '380px', width: '90%',
+        textAlign: 'center', boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+      }}>
+        {/* Icon */}
+        <div style={{
+          width: '56px', height: '56px', borderRadius: '50%',
+          backgroundColor: '#FEF2F2', display: 'flex',
+          alignItems: 'center', justifyContent: 'center',
+          margin: '0 auto 16px',
+        }}>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
+            stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+        </div>
+        <h3 style={{ margin: '0 0 8px', fontSize: '18px', fontWeight: '700', color: '#111827' }}>
+          Sesi Telah Berakhir
+        </h3>
+        <p style={{ margin: '0 0 24px', fontSize: '14px', color: '#6B7280', lineHeight: '1.5' }}>
+          Sesi login Anda telah kedaluwarsa. Silakan login kembali untuk melanjutkan.
+        </p>
+        <button
+          onClick={onConfirm}
+          style={{
+            width: '100%', padding: '10px 0', borderRadius: '8px',
+            border: 'none', backgroundColor: '#22C55E', color: '#fff',
+            fontSize: '14px', fontWeight: '600', cursor: 'pointer',
+          }}
+        >
+          Login Kembali
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── Layout wrapper ───────────────────────────────────────────────────────────
 function AppLayout() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const [sessionExpired, setSessionExpired] = React.useState(false);
+
+  // Clear all session data and redirect to login
+  const handleSessionExpiredConfirm = useCallback(async () => {
+    setSessionExpired(false);
+    await sessionManager.logout(); // clears localStorage + IndexedDB
+    navigate('/login', { replace: true });
+  }, [navigate]);
+
+  // Listen for the global session-expired event fired by apiClient
+  useEffect(() => {
+    const handler = () => setSessionExpired(true);
+    window.addEventListener(SESSION_EXPIRED_EVENT, handler);
+    return () => window.removeEventListener(SESSION_EXPIRED_EVENT, handler);
+  }, []);
 
   useEffect(() => {
     // Remove all body classes
@@ -133,6 +200,9 @@ function AppLayout() {
 
   return (
     <div className={isDashboard ? 'App' : 'App centered'}>
+      {sessionExpired && (
+        <SessionExpiredModal onConfirm={handleSessionExpiredConfirm} />
+      )}
       <OfflineIndicator />
       <Routes>
         <Route path="/" element={<Navigate to="/login" />} />

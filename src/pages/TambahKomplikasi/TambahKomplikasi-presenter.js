@@ -10,12 +10,8 @@ class TambahKomplikasiPresenter {
     try {
       const pregnancies = await this.model.getActivePregnancies();
       this.view.setPregnancies(pregnancies);
-    } catch (error) {      
-      if (error.message.includes('401') || error.message.includes('Unauthorized')) {
-        this.handleLogout();
-        return;
-      }
-      
+    } catch (error) {
+      if (error.status === 401) return;
       this.view.setError('Gagal memuat data kehamilan.');
     }
   }
@@ -39,12 +35,8 @@ class TambahKomplikasiPresenter {
       if (data.forkey_hamil) {
         await this.loadAncVisits(data.forkey_hamil);
       }
-    } catch (error) {      
-      if (error.message.includes('401') || error.message.includes('Unauthorized')) {
-        this.handleLogout();
-        return;
-      }
-      
+    } catch (error) {
+      if (error.status === 401) return;
       this.view.setError('Gagal memuat data komplikasi.');
     } finally {
       this.view.setLoading(false);
@@ -63,12 +55,8 @@ class TambahKomplikasiPresenter {
         await this.model.createKomplikasi(formData);
         this.view.onSuccess('Data komplikasi berhasil ditambahkan');
       }
-    } catch (error) {      
-      if (error.message.includes('401') || error.message.includes('Unauthorized')) {
-        this.handleLogout();
-        return;
-      }
-      
+    } catch (error) {
+      if (error.status === 401) return;
       this.view.setError(error.message || 'Gagal menyimpan data. Silakan coba lagi.');
     } finally {
       this.view.setLoading(false);

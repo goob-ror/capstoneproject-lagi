@@ -1,107 +1,48 @@
+import apiClient from '../../services/apiClient';
+
 class DataIbuModel {
   constructor() {
     this.baseURL = '/api/ibu';
     this.cachedData = [];
   }
 
-  getAuthHeaders() {
-    const token = localStorage.getItem('token');
-    return {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    };
-  }
-
   async getAllIbu(year = null) {
-    try {
-      const url = year ? `${this.baseURL}?year=${year}` : this.baseURL;
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: this.getAuthHeaders()
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch ibu data');
-      }
-
-      const data = await response.json();
-      this.cachedData = data;
-      return data;
-    } catch (error) {
-      throw error;
-    }
+    const url = year ? `${this.baseURL}?year=${year}` : this.baseURL;
+    const response = await apiClient.get(url);
+    if (!response.ok) throw new Error('Failed to fetch ibu data');
+    const data = await response.json();
+    this.cachedData = data;
+    return data;
   }
 
   async getIbuById(id) {
-    try {
-      const response = await fetch(`${this.baseURL}/${id}`, {
-        method: 'GET',
-        headers: this.getAuthHeaders()
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch ibu data');
-      }
-
-      return await response.json();
-    } catch (error) {
-      throw error;
-    }
+    const response = await apiClient.get(`${this.baseURL}/${id}`);
+    if (!response.ok) throw new Error('Failed to fetch ibu data');
+    return response.json();
   }
 
   async createIbu(ibuData) {
-    try {
-      const response = await fetch(this.baseURL, {
-        method: 'POST',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(ibuData)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to create ibu data');
-      }
-
-      return await response.json();
-    } catch (error) {
-      throw error;
+    const response = await apiClient.post(this.baseURL, ibuData);
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to create ibu data');
     }
+    return response.json();
   }
 
   async updateIbu(id, ibuData) {
-    try {
-      const response = await fetch(`${this.baseURL}/${id}`, {
-        method: 'PUT',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(ibuData)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update ibu data');
-      }
-
-      return await response.json();
-    } catch (error) {
-      throw error;
+    const response = await apiClient.put(`${this.baseURL}/${id}`, ibuData);
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to update ibu data');
     }
+    return response.json();
   }
 
   async deleteIbu(id) {
-    try {
-      const response = await fetch(`${this.baseURL}/${id}`, {
-        method: 'DELETE',
-        headers: this.getAuthHeaders()
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete ibu data');
-      }
-
-      return await response.json();
-    } catch (error) {
-      throw error;
-    }
+    const response = await apiClient.delete(`${this.baseURL}/${id}`);
+    if (!response.ok) throw new Error('Failed to delete ibu data');
+    return response.json();
   }
 
   /**

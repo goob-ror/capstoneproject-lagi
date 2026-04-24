@@ -13,12 +13,8 @@ class DataIbuPresenter {
     try {
       const data = await this.model.getAllIbu(year);
       this.view.displayIbuData(data);
-    } catch (error) {      
-      if (error.message.includes('401') || error.message.includes('Unauthorized')) {
-        this.handleLogout();
-        return;
-      }
-      
+    } catch (error) {
+      if (error.status === 401) return; // apiClient already dispatched session-expired event
       this.view.setError('Gagal memuat data ibu. Silakan coba lagi.');
     } finally {
       this.view.setLoading(false);
@@ -28,15 +24,9 @@ class DataIbuPresenter {
   async deleteIbu(id) {
     try {
       await this.model.deleteIbu(id);
-      
-      // Reload data after successful deletion
       await this.loadIbuData();
-    } catch (error) {      
-      if (error.message.includes('401') || error.message.includes('Unauthorized')) {
-        this.handleLogout();
-        return;
-      }
-      
+    } catch (error) {
+      if (error.status === 401) return;
       this.view.setError('Gagal menghapus data. Silakan coba lagi.');
     }
   }

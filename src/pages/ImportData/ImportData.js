@@ -2,6 +2,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import AuthModel from '../../services/AuthModel';
 import Swal from 'sweetalert2';
+import apiClient from '../../services/apiClient';
 import {
   processImportFile,
   loadImportPreview,
@@ -719,16 +720,9 @@ const ImportData = () => {
 
     let commitResult;
     try {
-      const resp = await fetch('/api/import/commit', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({
-          records: previewData.records,
-          locationMap,
-        }),
+      const resp = await apiClient.post('/api/import/commit', {
+        records: previewData.records,
+        locationMap,
       });
 
       commitResult = await resp.json();
@@ -737,6 +731,7 @@ const ImportData = () => {
         throw new Error(commitResult.message || `HTTP ${resp.status}`);
       }
     } catch (fetchErr) {
+      if (fetchErr.status === 401) return;
       Swal.fire({
         icon: 'error',
         title: 'Import Gagal',

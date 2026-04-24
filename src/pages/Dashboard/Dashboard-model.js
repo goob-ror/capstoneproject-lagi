@@ -1,201 +1,82 @@
+import apiClient from '../../services/apiClient';
+
 class DashboardModel {
   constructor() {
     this.baseURL = '/api';
   }
 
-  getAuthHeaders() {
-    const token = localStorage.getItem('token');
-    return {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    };
-  }
-
   async getDashboardStats() {
-    try {
-      const response = await fetch(`${this.baseURL}/dashboard/stats`, {
-        method: 'GET',
-        headers: this.getAuthHeaders()
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch dashboard stats');
-      }
-
-      return await response.json();
-    } catch (error) {
-      throw error;
-    }
+    const response = await apiClient.get(`${this.baseURL}/dashboard/stats`);
+    if (!response.ok) throw new Error('Failed to fetch dashboard stats');
+    return response.json();
   }
 
   async getIbuByKelurahan() {
-    try {
-      const response = await fetch(`${this.baseURL}/dashboard/ibu-by-kelurahan`, {
-        method: 'GET',
-        headers: this.getAuthHeaders()
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch ibu by kelurahan');
-      }
-
-      return await response.json();
-    } catch (error) {
-      throw error;
-    }
+    const response = await apiClient.get(`${this.baseURL}/dashboard/ibu-by-kelurahan`);
+    if (!response.ok) throw new Error('Failed to fetch ibu by kelurahan');
+    return response.json();
   }
 
   async getAgeDistribution() {
-    try {
-      const response = await fetch(`${this.baseURL}/dashboard/age-distribution`, {
-        method: 'GET',
-        headers: this.getAuthHeaders()
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch age distribution');
-      }
-
-      return await response.json();
-    } catch (error) {
-      throw error;
-    }
+    const response = await apiClient.get(`${this.baseURL}/dashboard/age-distribution`);
+    if (!response.ok) throw new Error('Failed to fetch age distribution');
+    return response.json();
   }
 
   async getANCPerMonth() {
-    try {
-      const response = await fetch(`${this.baseURL}/dashboard/anc-per-month`, {
-        method: 'GET',
-        headers: this.getAuthHeaders()
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch ANC per month');
-      }
-
-      return await response.json();
-    } catch (error) {
-      throw error;
-    }
+    const response = await apiClient.get(`${this.baseURL}/dashboard/anc-per-month`);
+    if (!response.ok) throw new Error('Failed to fetch ANC per month');
+    return response.json();
   }
 
   async getImmunizationCoverage() {
-    try {
-      const response = await fetch(`${this.baseURL}/dashboard/immunization-coverage`, {
-        method: 'GET',
-        headers: this.getAuthHeaders()
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch immunization coverage');
-      }
-
-      return await response.json();
-    } catch (error) {
-      throw error;
-    }
+    const response = await apiClient.get(`${this.baseURL}/dashboard/immunization-coverage`);
+    if (!response.ok) throw new Error('Failed to fetch immunization coverage');
+    return response.json();
   }
 
   async getRiskDistribution() {
-    try {
-      const response = await fetch(`${this.baseURL}/dashboard/risk-distribution`, {
-        method: 'GET',
-        headers: this.getAuthHeaders()
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch risk distribution');
-      }
-
-      return await response.json();
-    } catch (error) {
-      throw error;
-    }
+    const response = await apiClient.get(`${this.baseURL}/dashboard/risk-distribution`);
+    if (!response.ok) throw new Error('Failed to fetch risk distribution');
+    return response.json();
   }
 
   async getNearingDueDates() {
-    try {
-      const response = await fetch(`${this.baseURL}/dashboard/nearing-due-dates`, {
-        method: 'GET',
-        headers: this.getAuthHeaders()
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch nearing due dates');
-      }
-
-      return await response.json();
-    } catch (error) {
-      throw error;
-    }
+    const response = await apiClient.get(`${this.baseURL}/dashboard/nearing-due-dates`);
+    if (!response.ok) throw new Error('Failed to fetch nearing due dates');
+    return response.json();
   }
 
   async getANCSchedule() {
-    try {
-      const response = await fetch(`${this.baseURL}/dashboard/anc-schedule`, {
-        method: 'GET',
-        headers: this.getAuthHeaders()
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch ANC schedule');
-      }
-
-      return await response.json();
-    } catch (error) {
-      throw error;
-    }
+    const response = await apiClient.get(`${this.baseURL}/dashboard/anc-schedule`);
+    if (!response.ok) throw new Error('Failed to fetch ANC schedule');
+    return response.json();
   }
 
   async getSuamiPerokokKelurahan() {
-    try {
-      const response = await fetch(`${this.baseURL}/dashboard/suami-perokok-kelurahan`, {
-        method: 'GET',
-        headers: this.getAuthHeaders()
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch suami perokok by kelurahan');
-      }
-
-      return await response.json();
-    } catch (error) {
-      throw error;
-    }
+    const response = await apiClient.get(`${this.baseURL}/dashboard/suami-perokok-kelurahan`);
+    if (!response.ok) throw new Error('Failed to fetch suami perokok by kelurahan');
+    return response.json();
   }
 
   async getImtDistributionKelurahan() {
-    try {
-      const response = await fetch(`${this.baseURL}/dashboard/imt-distribution-kelurahan`, {
-        method: 'GET',
-        headers: this.getAuthHeaders()
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch IMT distribution by kelurahan');
-      }
-
-      return await response.json();
-    } catch (error) {
-      throw error;
-    }
+    const response = await apiClient.get(`${this.baseURL}/dashboard/imt-distribution-kelurahan`);
+    if (!response.ok) throw new Error('Failed to fetch IMT distribution by kelurahan');
+    return response.json();
   }
 
   async getAtRiskMothers() {
-    try {
-      const response = await fetch(`${this.baseURL}/dashboard/at-risk-mothers`, {
-        method: 'GET',
-        headers: this.getAuthHeaders()
-      });
+    const response = await apiClient.get(`${this.baseURL}/dashboard/at-risk-mothers`);
+    if (!response.ok) throw new Error('Failed to fetch at-risk mothers');
+    return response.json();
+  }
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch at-risk mothers');
-      }
-
-      return await response.json();
-    } catch (error) {
-      throw error;
-    }
+  async getActionRecommendation(kehamilanId) {
+    const response = await apiClient.get(
+      `${this.baseURL}/dashboard/at-risk-mothers/${kehamilanId}/action-recommendation`
+    );
+    if (!response.ok) throw new Error('Failed to fetch action recommendation');
+    return response.json();
   }
 
   getUser() {

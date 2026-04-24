@@ -22,10 +22,7 @@ class PersalinanPresenter {
       this.originalData = data;
       this.callbacks.displayPersalinanData(data);
     } catch (error) {
-      if (error.message.includes('401')) {
-        this.handleLogout();
-        return;
-      }
+      if (error.status === 401) return;
       this.callbacks.setError('Gagal memuat data persalinan');
     } finally {
       this.callbacks.setLoading(false);
@@ -38,17 +35,10 @@ class PersalinanPresenter {
       this.callbacks.clearError();
 
       await this.model.deletePersalinan(id);
-
-      // Reload data after successful deletion
       await this.loadPersalinanData();
-      
-      // Show success message
       alert('Data persalinan berhasil dihapus');
     } catch (error) {
-      if (error.message.includes('401')) {
-        this.handleLogout();
-        return;
-      }
+      if (error.status === 401) return;
       this.callbacks.setError('Gagal menghapus data persalinan');
     } finally {
       this.callbacks.setLoading(false);

@@ -1,4 +1,5 @@
 import AuthModel from '../../services/AuthModel';
+import apiClient from '../../services/apiClient';
 
 class TambahNifasPresenter {
   constructor(view) {
@@ -16,26 +17,13 @@ class TambahNifasPresenter {
       this.view.setLoading(true);
       this.view.clearError();
 
-      const token = this.authModel.getToken();
-      const response = await fetch(`${this.baseURL}/nifas/delivered-mothers`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (response.status === 401) {
-        this.handleLogout();
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch delivered mothers');
-      }
+      const response = await apiClient.get(`${this.baseURL}/delivered-mothers`);
+      if (!response.ok) throw new Error('Failed to fetch delivered mothers');
 
       const data = await response.json();
       this.view.setDeliveredMothers(data);
     } catch (error) {
+      if (error.status === 401) return;
       this.view.setError('Gagal memuat data ibu nifas');
     } finally {
       this.view.setLoading(false);
@@ -44,26 +32,13 @@ class TambahNifasPresenter {
 
   async loadMotherData(pregnancyId) {
     try {
-      const token = this.authModel.getToken();
-      const response = await fetch(`${this.baseURL}/nifas/pregnancy/${pregnancyId}/mother`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (response.status === 401) {
-        this.handleLogout();
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch mother data');
-      }
+      const response = await apiClient.get(`${this.baseURL}/pregnancy/${pregnancyId}/mother`);
+      if (!response.ok) throw new Error('Failed to fetch mother data');
 
       const data = await response.json();
       this.view.setMotherData(data);
     } catch (error) {
+      if (error.status === 401) return;
       this.view.setError('Gagal memuat data ibu');
     }
   }
@@ -73,26 +48,13 @@ class TambahNifasPresenter {
       this.view.setLoading(true);
       this.view.clearError();
 
-      const token = this.authModel.getToken();
-      const response = await fetch(`${this.baseURL}/nifas/${id}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (response.status === 401) {
-        this.handleLogout();
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch nifas data');
-      }
+      const response = await apiClient.get(`${this.baseURL}/${id}`);
+      if (!response.ok) throw new Error('Failed to fetch nifas data');
 
       const data = await response.json();
       this.view.populateForm(data);
     } catch (error) {
+      if (error.status === 401) return;
       this.view.setError('Gagal memuat data kunjungan nifas');
     } finally {
       this.view.setLoading(false);
@@ -104,7 +66,6 @@ class TambahNifasPresenter {
       this.view.setLoading(true);
       this.view.clearError();
 
-      // Validation
       if (!formData.forkey_hamil) {
         this.view.setError('Pilih ibu nifas terlebih dahulu');
         return;
@@ -115,46 +76,19 @@ class TambahNifasPresenter {
         return;
       }
 
-      const token = this.authModel.getToken();
-      
-      // Check if we have complications to submit
       const hasComplications = validComplications && validComplications.length > 0;
-      
-      let url, method, requestBody;
-      
+
+      let response;
+
       if (isEdit) {
-        // For edit, use the regular endpoint (complications are handled separately)
-        url = `${this.baseURL}/nifas/${editId}`;
-        method = 'PUT';
-        requestBody = formData;
+        response = await apiClient.put(`${this.baseURL}/${editId}`, formData);
+      } else if (hasComplications) {
+        response = await apiClient.post(`${this.baseURL}/with-complications`, {
+          nifasData: formData,
+          complications: validComplications,
+        });
       } else {
-        // For create, use the with-complications endpoint if we have complications
-        if (hasComplications) {
-          url = `${this.baseURL}/nifas/with-complications`;
-          method = 'POST';
-          requestBody = {
-            nifasData: formData,
-            complications: validComplications
-          };
-        } else {
-          url = `${this.baseURL}/nifas`;
-          method = 'POST';
-          requestBody = formData;
-        }
-      }
-
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestBody)
-      });
-
-      if (response.status === 401) {
-        this.handleLogout();
-        return;
+        response = await apiClient.post(this.baseURL, formData);
       }
 
       if (!response.ok) {
@@ -163,41 +97,35 @@ class TambahNifasPresenter {
       }
 
       const result = await response.json();
-      
-      // If editing and we have complications, handle them separately
+
       if (isEdit && hasComplications) {
-        await this.handleComplicationsForEdit(validComplications, formData.forkey_hamil, token);
+        await this.handleComplicationsForEdit(validComplications, formData.forkey_hamil);
       }
-      
-      this.view.onSuccess(result.message || (isEdit ? 'Data kunjungan nifas berhasil diupdate' : 'Data kunjungan nifas berhasil disimpan'));
+
+      this.view.onSuccess(
+        result.message ||
+          (isEdit
+            ? 'Data kunjungan nifas berhasil diupdate'
+            : 'Data kunjungan nifas berhasil disimpan')
+      );
     } catch (error) {
+      if (error.status === 401) return;
       this.view.setError(error.message || 'Gagal menyimpan data kunjungan nifas');
     } finally {
       this.view.setLoading(false);
     }
   }
 
-  async handleComplicationsForEdit(complications, forkey_hamil, token) {
-    // For edit mode, create complications separately
+  async handleComplicationsForEdit(complications, forkey_hamil) {
     for (const comp of complications) {
       try {
-        const response = await fetch(`${this.baseURL}/komplikasi`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            ...comp,
-            forkey_hamil: forkey_hamil,
-            kejadian: comp.kejadian || 'Saat Nifas'
-          })
+        await apiClient.post('/api/komplikasi', {
+          ...comp,
+          forkey_hamil,
+          kejadian: comp.kejadian || 'Saat Nifas',
         });
-
-        if (!response.ok) {
-          // error logged silently
-        }
       } catch (error) {
+        // individual complication errors are non-fatal
       }
     }
   }

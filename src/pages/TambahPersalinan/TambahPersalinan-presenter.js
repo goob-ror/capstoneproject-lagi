@@ -20,10 +20,7 @@ class TambahPersalinanPresenter {
       const data = await this.model.getReadyToDeliverPregnancies();
       this.callbacks.setPregnancies(data);
     } catch (error) {
-      if (error.message.includes('401')) {
-        this.handleLogout();
-        return;
-      }
+      if (error.status === 401) return;
       this.callbacks.setError('Gagal memuat data ibu hamil yang siap melahirkan');
     } finally {
       this.callbacks.setLoading(false);
@@ -35,10 +32,7 @@ class TambahPersalinanPresenter {
       const data = await this.model.getMotherDataByPregnancy(pregnancyId);
       this.callbacks.setMotherData(data);
     } catch (error) {
-      if (error.message.includes('401')) {
-        this.handleLogout();
-        return;
-      }
+      if (error.status === 401) return;
       this.callbacks.setError('Gagal memuat data ibu');
     }
   }
@@ -51,15 +45,11 @@ class TambahPersalinanPresenter {
       const data = await this.model.getPersalinanById(id);
       this.callbacks.populateForm(data);
 
-      // Load mother data for the pregnancy
       if (data.forkey_hamil) {
         await this.loadMotherData(data.forkey_hamil);
       }
     } catch (error) {
-      if (error.message.includes('401')) {
-        this.handleLogout();
-        return;
-      }
+      if (error.status === 401) return;
       this.callbacks.setError('Gagal memuat data persalinan');
     } finally {
       this.callbacks.setLoading(false);
@@ -71,7 +61,6 @@ class TambahPersalinanPresenter {
       this.callbacks.setLoading(true);
       this.callbacks.clearError();
 
-      // Submit persalinan data
       let persalinanId;
       if (isEdit) {
         await this.model.updatePersalinan(editId, formData);
@@ -81,18 +70,15 @@ class TambahPersalinanPresenter {
         persalinanId = result.id || result.persalinanId;
       }
 
-      // Submit complications if any
       if (complications && complications.length > 0) {
         const validComplications = complications.filter(comp => comp.nama_komplikasi.trim() !== '');
 
         for (const comp of validComplications) {
-          const komplikasiData = {
+          await this.model.createKomplikasi({
             ...comp,
             forkey_hamil: formData.forkey_hamil,
-            forkey_anc: null // No ANC visit for delivery complications
-          };
-
-          await this.model.createKomplikasi(komplikasiData);
+            forkey_anc: null,
+          });
         }
       }
 
@@ -100,13 +86,9 @@ class TambahPersalinanPresenter {
         ? 'Data persalinan berhasil diperbarui'
         : 'Data persalinan berhasil disimpan';
 
-      // Pass pregnancy ID and persalinan ID for KF1 creation
       this.callbacks.onSuccess(successMessage, formData.forkey_hamil, persalinanId, isEdit);
     } catch (error) {
-      if (error.message.includes('401')) {
-        this.handleLogout();
-        return;
-      }
+      if (error.status === 401) return;
       this.callbacks.setError(error.message || 'Gagal menyimpan data persalinan');
     } finally {
       this.callbacks.setLoading(false);

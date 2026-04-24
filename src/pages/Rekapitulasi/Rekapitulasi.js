@@ -35,7 +35,7 @@ const Rekapitulasi = () => {
   useEffect(() => {
     const userData = presenter.getUser();
     setUser(userData);
-    presenter.loadSummaryData();
+    presenter.loadSummaryData(null, new Date().getFullYear().toString(), null);
   }, [presenter]);
 
   useEffect(() => {
@@ -323,7 +323,7 @@ const Rekapitulasi = () => {
                 <div className="rekap-card-content">
                   <h3>Total Ibu</h3>
                   <p className="rekap-card-value">{summaryData.totalIbu || 0}</p>
-                  <p className="rekap-card-label">Terdaftar</p>
+                  <p className="rekap-card-label">Dengan kunjungan ANC</p>
                 </div>
               </div>
 
@@ -336,7 +336,7 @@ const Rekapitulasi = () => {
                 <div className="rekap-card-content">
                   <h3>Ibu Hamil</h3>
                   <p className="rekap-card-value">{summaryData.totalHamil || 0}</p>
-                  <p className="rekap-card-label">Aktif</p>
+                  <p className="rekap-card-label">Kehamilan dengan kunjungan ANC</p>
                 </div>
               </div>
 
@@ -597,7 +597,7 @@ const Rekapitulasi = () => {
               </div>
               <div className="rekap-hb-summary-item">
                 <span className="rekap-hb-summary-label">Total Diperiksa:</span>
-                <span className="rekap-hb-summary-value">{summaryData?.hbStatistics?.total_checked || 0} kunjungan</span>
+                <span className="rekap-hb-summary-value">{summaryData?.hbStatistics?.total_checked || 0} kunjungan (dengan data Hb)</span>
               </div>
             </div>
 
@@ -640,7 +640,7 @@ const Rekapitulasi = () => {
                       </tr>
                       <tr>
                         <td><span className="rekap-status-badge rekap-badge-danger">Anemia Berat</span></td>
-                        <td>&lt; 7.9</td>
+                        <td>&lt; 8.0</td>
                         <td>{summaryData?.hbStatistics?.trimester1_berat || 0}</td>
                         <td>{summaryData?.hbStatistics?.trimester1_total > 0 ? Math.round((summaryData?.hbStatistics?.trimester1_berat || 0) * 100 / summaryData?.hbStatistics?.trimester1_total) : 0}%</td>
                       </tr>
@@ -686,7 +686,7 @@ const Rekapitulasi = () => {
                       </tr>
                       <tr>
                         <td><span className="rekap-status-badge rekap-badge-danger">Anemia Berat</span></td>
-                        <td>&lt; 7.9</td>
+                        <td>&lt; 8.0</td>
                         <td>{summaryData?.hbStatistics?.trimester2_berat || 0}</td>
                         <td>{summaryData?.hbStatistics?.trimester2_total > 0 ? Math.round((summaryData?.hbStatistics?.trimester2_berat || 0) * 100 / summaryData?.hbStatistics?.trimester2_total) : 0}%</td>
                       </tr>
@@ -732,7 +732,7 @@ const Rekapitulasi = () => {
                       </tr>
                       <tr>
                         <td><span className="rekap-status-badge rekap-badge-danger">Anemia Berat</span></td>
-                        <td>&lt; 7.9</td>
+                        <td>&lt; 8.0</td>
                         <td>{summaryData?.hbStatistics?.trimester3_berat || 0}</td>
                         <td>{summaryData?.hbStatistics?.trimester3_total > 0 ? Math.round((summaryData?.hbStatistics?.trimester3_berat || 0) * 100 / summaryData?.hbStatistics?.trimester3_total) : 0}%</td>
                       </tr>
@@ -746,30 +746,30 @@ const Rekapitulasi = () => {
 
         <div className="rekap-report-section">
           <div className="rekap-report-card full-width">
-            <h3>Distribusi Ibu per Kelurahan</h3>
+            <h3>Capaian K1 Ibu per Kelurahan</h3>
             <div className="rekap-table-responsive">
               <table className="rekap-report-table">
                 <thead>
                   <tr>
                     <th>Kelurahan</th>
-                    <th>Total Ibu</th>
-                    <th>Ibu Hamil</th>
-                    <th>Persentase</th>
+                    <th>Total Ibu Hamil</th>
+                    <th>Sudah K1</th>
+                    <th>Capaian K1</th>
                   </tr>
                 </thead>
                 <tbody>
                   {summaryData?.ibuByKelurahan?.map(item => (
                     <tr key={item.kelurahan}>
                       <td>{item.kelurahan}</td>
-                      <td>{item.total}</td>
-                      <td>{item.hamil}</td>
+                      <td>{item.total_hamil}</td>
+                      <td>{item.k1_count}</td>
                       <td>
                         <div className="rekap-progress-bar">
                           <div 
                             className="rekap-progress-fill" 
-                            style={{ width: `${item.percentage}%` }}
+                            style={{ width: `${item.k1_percentage ?? 0}%` }}
                           ></div>
-                          <span className="rekap-progress-text">{item.percentage}%</span>
+                          <span className="rekap-progress-text">{item.k1_percentage ?? 0}%</span>
                         </div>
                       </td>
                     </tr>

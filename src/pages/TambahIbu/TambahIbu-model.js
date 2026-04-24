@@ -1,69 +1,32 @@
+import apiClient from '../../services/apiClient';
+
 class TambahIbuModel {
   constructor() {
     this.baseURL = '/api/ibu';
   }
 
-  getAuthHeaders() {
-    const token = localStorage.getItem('token');
-    return {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    };
-  }
-
   async getIbuById(id) {
-    try {
-      const response = await fetch(`${this.baseURL}/${id}`, {
-        method: 'GET',
-        headers: this.getAuthHeaders()
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch ibu data');
-      }
-
-      return await response.json();
-    } catch (error) {
-      throw error;
-    }
+    const response = await apiClient.get(`${this.baseURL}/${id}`);
+    if (!response.ok) throw new Error('Failed to fetch ibu data');
+    return response.json();
   }
 
   async createIbu(ibuData) {
-    try {
-      const response = await fetch(this.baseURL, {
-        method: 'POST',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(ibuData)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to create ibu data');
-      }
-
-      return await response.json();
-    } catch (error) {
-      throw error;
+    const response = await apiClient.post(this.baseURL, ibuData);
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to create ibu data');
     }
+    return response.json();
   }
 
   async updateIbu(id, ibuData) {
-    try {
-      const response = await fetch(`${this.baseURL}/${id}`, {
-        method: 'PUT',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(ibuData)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update ibu data');
-      }
-
-      return await response.json();
-    } catch (error) {
-      throw error;
+    const response = await apiClient.put(`${this.baseURL}/${id}`, ibuData);
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to update ibu data');
     }
+    return response.json();
   }
 
   validateNIK(nik) {

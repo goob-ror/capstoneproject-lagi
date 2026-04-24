@@ -38,37 +38,37 @@ router.post('/auto-update-statuses', async (req, res) => {
 router.get('/stats', async (req, res) => {
   try {
     const currentYear = new Date().getFullYear();
-    
-    // Total Ibu Hamil (Active Pregnancies - excluding completed/miscarriage)
+
+    // Total Ibu Hamil: distinct pregnancies with at least one ANC visit this year
     const [totalIbuHamilResult] = await db.query(
-      `SELECT COUNT(*) as count FROM kehamilan 
-       WHERE status_kehamilan = 'Hamil'`
+      `SELECT COUNT(DISTINCT k.id) as count
+       FROM kehamilan k
+       INNER JOIN antenatal_care anc ON anc.forkey_hamil = k.id
+       WHERE YEAR(anc.tanggal_kunjungan) = ?`,
+      [currentYear]
     );
     const totalIbuHamil = totalIbuHamilResult[0].count;
 
-    // Ibu Hamil Dengan Risiko Tinggi
+    // Ibu Hamil Dengan Risiko Tinggi: distinct pregnancies with a risk visit this year
     const [highRiskResult] = await db.query(
       `SELECT COUNT(DISTINCT k.id) as count 
        FROM kehamilan k
        JOIN antenatal_care anc ON k.id = anc.forkey_hamil
-       WHERE k.status_kehamilan = 'Hamil' 
-       AND (YEAR(k.created_at) = ? OR YEAR(k.updated_at) = ?)
+       WHERE YEAR(anc.tanggal_kunjungan) = ?
        AND anc.status_risiko_visit IN ('Ringan', 'Sedang', 'Tinggi')`,
-      [currentYear, currentYear]
+      [currentYear]
     );
     const ibuHamilRisikoTinggi = highRiskResult[0].count;
 
-    // Cakupan Kunjungan Trimester 1 (K1 visits)
+    // Cakupan K1: pregnancies with a K1 visit this year / total pregnancies with any ANC visit this year
     const [k1CoverageResult] = await db.query(
-      `SELECT 
-        COUNT(DISTINCT anc.forkey_hamil) as k1_count,
-        (SELECT COUNT(*) FROM kehamilan WHERE status_kehamilan = 'Hamil' AND (YEAR(created_at) = ? OR YEAR(updated_at) = ?)) as total_hamil
-       FROM antenatal_care anc
-       JOIN kehamilan k ON anc.forkey_hamil = k.id
-       WHERE anc.jenis_kunjungan = 'K1' 
-       AND k.status_kehamilan = 'Hamil'
-       AND YEAR(anc.tanggal_kunjungan) = ?`,
-      [currentYear, currentYear, currentYear]
+      `SELECT
+        COUNT(DISTINCT CASE WHEN anc.jenis_kunjungan = 'K1' THEN k.id END) as k1_count,
+        COUNT(DISTINCT k.id) as total_hamil
+       FROM kehamilan k
+       INNER JOIN antenatal_care anc ON anc.forkey_hamil = k.id
+       WHERE YEAR(anc.tanggal_kunjungan) = ?`,
+      [currentYear]
     );
     const k1Count = k1CoverageResult[0].k1_count;
     const totalHamil = k1CoverageResult[0].total_hamil;
@@ -500,10 +500,11 @@ router.get('/at-risk-mothers', async (req, res) => {
     const currentYear = new Date().getFullYear();
     
     const [results] = await db.query(`
-      SELECT DISTINCT
+      SELECT
         i.id,
         i.nama_lengkap,
         i.nik_ibu,
+        i.no_hp,
         kel.nama_kelurahan,
         k.id as kehamilan_id,
         CASE 
@@ -521,7 +522,19 @@ router.get('/at-risk-mothers', async (req, res) => {
         latest_anc.tanggal_kunjungan as last_visit_date,
         DATEDIFF(CURDATE(), k.haid_terakhir) DIV 7 as usia_kehamilan_minggu
       FROM ibu i
-      JOIN kehamilan k ON i.id = k.forkey_ibu
+      -- Only the single most recent active pregnancy per mother
+      JOIN (
+        SELECT
+          forkey_ibu,
+          id,
+          haid_terakhir,
+          created_at,
+          updated_at,
+          ROW_NUMBER() OVER (PARTITION BY forkey_ibu ORDER BY created_at DESC) as rn_preg
+        FROM kehamilan
+        WHERE status_kehamilan = 'Hamil'
+          AND (YEAR(created_at) = ? OR YEAR(updated_at) = ?)
+      ) k ON i.id = k.forkey_ibu AND k.rn_preg = 1
       LEFT JOIN kelurahan kel ON i.kelurahan_id = kel.id
       LEFT JOIN (
         SELECT 
@@ -534,9 +547,7 @@ router.get('/at-risk-mothers', async (req, res) => {
         WHERE anc.lila IS NOT NULL OR anc.forkey_lab_screening IS NOT NULL
       ) latest_anc ON k.id = latest_anc.forkey_hamil AND latest_anc.rn = 1
       LEFT JOIN lab_screening latest_lab ON latest_anc.forkey_lab_screening = latest_lab.id
-      WHERE k.status_kehamilan = 'Hamil'
-        AND (YEAR(k.created_at) = ? OR YEAR(k.updated_at) = ?)
-        AND (
+      WHERE (
           (latest_lab.hasil_lab_hb IS NOT NULL AND latest_lab.hasil_lab_hb < 11.0) OR
           (latest_anc.lila IS NOT NULL AND latest_anc.lila < 23.5)
         )
@@ -554,6 +565,223 @@ router.get('/at-risk-mothers', async (req, res) => {
     res.json(results);
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch at-risk mothers data' });
+  }
+});
+
+// Get Action Recommendation for an at-risk mother
+// Analyzes ANC visit history to determine if condition is improving,
+// and flags stale/irrelevant data for auto-archiving.
+router.get('/at-risk-mothers/:kehamilanId/action-recommendation', async (req, res) => {
+  try {
+    const { kehamilanId } = req.params;
+
+    // Fetch all ANC visits with lab data for this pregnancy, ordered oldest→newest
+    const [visits] = await db.query(`
+      SELECT
+        anc.id,
+        anc.tanggal_kunjungan,
+        anc.jenis_kunjungan,
+        anc.lila,
+        anc.tekanan_darah,
+        anc.berat_badan,
+        anc.selisih_beratbadan,
+        anc.status_risiko_visit,
+        ls.hasil_lab_hb as hemoglobin,
+        ls.lab_protein_urine
+      FROM antenatal_care anc
+      LEFT JOIN lab_screening ls ON anc.forkey_lab_screening = ls.id
+      WHERE anc.forkey_hamil = ?
+      ORDER BY anc.tanggal_kunjungan ASC
+    `, [kehamilanId]);
+
+    // Fetch pregnancy info for gestational age and due date
+    const [[pregnancy]] = await db.query(`
+      SELECT
+        k.haid_terakhir,
+        k.taksiran_persalinan,
+        k.status_kehamilan,
+        DATEDIFF(CURDATE(), k.haid_terakhir) DIV 7 as usia_kehamilan_minggu
+      FROM kehamilan k
+      WHERE k.id = ?
+    `, [kehamilanId]);
+
+    if (!pregnancy) {
+      return res.status(404).json({ message: 'Pregnancy not found' });
+    }
+
+    const usiaKehamilanMinggu = pregnancy.usia_kehamilan_minggu || 0;
+    const today = new Date();
+
+    // --- Staleness check ---
+    // Data is considered stale if the last visit was more than:
+    //   - 4 weeks ago for trimester 1 (< 14 weeks)
+    //   - 4 weeks ago for trimester 2 (14–28 weeks)
+    //   - 2 weeks ago for trimester 3 (> 28 weeks)
+    // AND the pregnancy is still active
+    let staleThresholdDays = usiaKehamilanMinggu > 28 ? 14 : 28;
+    const lastVisit = visits.length > 0 ? new Date(visits[visits.length - 1].tanggal_kunjungan) : null;
+    const daysSinceLastVisit = lastVisit
+      ? Math.floor((today - lastVisit) / (1000 * 60 * 60 * 24))
+      : null;
+    const isStale = daysSinceLastVisit !== null && daysSinceLastVisit > staleThresholdDays;
+
+    // --- Trend analysis ---
+    // Look at the last 3 visits with Hb data and last 3 with LILA data
+    const hbReadings = visits
+      .filter(v => v.hemoglobin !== null && v.hemoglobin !== undefined)
+      .map(v => ({ date: v.tanggal_kunjungan, value: parseFloat(v.hemoglobin) }));
+
+    const lilaReadings = visits
+      .filter(v => v.lila !== null && v.lila !== undefined)
+      .map(v => ({ date: v.tanggal_kunjungan, value: parseFloat(v.lila) }));
+
+    // Determine trend: 'improving', 'worsening', 'stable', or 'unknown'
+    const getTrend = (readings) => {
+      if (readings.length < 2) return 'unknown';
+      const recent = readings.slice(-3);
+      const first = recent[0].value;
+      const last = recent[recent.length - 1].value;
+      const diff = last - first;
+      if (diff > 0.3) return 'improving';
+      if (diff < -0.3) return 'worsening';
+      return 'stable';
+    };
+
+    const hbTrend = getTrend(hbReadings);
+    const lilaTrend = getTrend(lilaReadings);
+
+    const latestHb = hbReadings.length > 0 ? hbReadings[hbReadings.length - 1].value : null;
+    const latestLila = lilaReadings.length > 0 ? lilaReadings[lilaReadings.length - 1].value : null;
+
+    // Is the condition now resolved (no longer at-risk)?
+    const hbResolved = latestHb !== null && latestHb >= 11.0;
+    const lilaResolved = latestLila !== null && latestLila >= 23.5;
+    const conditionResolved = (latestHb === null || hbResolved) && (latestLila === null || lilaResolved);
+
+    // --- Auto-archive logic ---
+    // Archive if: condition is resolved AND data is stale (no longer relevant)
+    // OR if: pregnancy is past due date by more than 14 days (likely delivered, status not updated)
+    const dueDate = pregnancy.taksiran_persalinan ? new Date(pregnancy.taksiran_persalinan) : null;
+    const daysPastDue = dueDate ? Math.floor((today - dueDate) / (1000 * 60 * 60 * 24)) : null;
+    const isPastDue = daysPastDue !== null && daysPastDue > 14;
+
+    const shouldAutoArchive = (conditionResolved && isStale) || isPastDue;
+
+    // --- Build recommendations ---
+    const recommendations = [];
+
+    if (isPastDue) {
+      recommendations.push({
+        type: 'archive',
+        priority: 'high',
+        message: `Taksiran persalinan telah lewat ${daysPastDue} hari. Data kemungkinan sudah tidak relevan — periksa status kehamilan dan arsipkan jika sudah bersalin.`
+      });
+    }
+
+    if (latestHb !== null && latestHb < 11.0) {
+      if (hbTrend === 'worsening') {
+        recommendations.push({
+          type: 'urgent',
+          priority: 'high',
+          message: `Kadar Hb menurun (${latestHb} g/dL). Segera rujuk ke dokter dan evaluasi pemberian suplemen zat besi.`
+        });
+      } else if (hbTrend === 'improving') {
+        recommendations.push({
+          type: 'monitor',
+          priority: 'medium',
+          message: `Kadar Hb membaik namun masih di bawah normal (${latestHb} g/dL). Lanjutkan pemberian tablet Fe dan jadwalkan kunjungan ulang dalam 2 minggu.`
+        });
+      } else if (hbTrend === 'stable') {
+        recommendations.push({
+          type: 'action',
+          priority: 'medium',
+          message: `Kadar Hb stabil namun tetap rendah (${latestHb} g/dL). Evaluasi kepatuhan konsumsi tablet Fe dan pertimbangkan konsultasi gizi.`
+        });
+      } else {
+        recommendations.push({
+          type: 'action',
+          priority: 'medium',
+          message: `Kadar Hb rendah (${latestHb} g/dL). Berikan tablet Fe dan jadwalkan pemeriksaan laboratorium ulang.`
+        });
+      }
+    } else if (hbResolved && hbReadings.length > 0) {
+      recommendations.push({
+        type: 'resolved',
+        priority: 'low',
+        message: `Kadar Hb sudah normal (${latestHb} g/dL). Pertahankan konsumsi tablet Fe.`
+      });
+    }
+
+    if (latestLila !== null && latestLila < 23.5) {
+      if (lilaTrend === 'worsening') {
+        recommendations.push({
+          type: 'urgent',
+          priority: 'high',
+          message: `LILA menurun (${latestLila} cm). Segera konsultasikan ke ahli gizi dan pertimbangkan pemberian PMT (Pemberian Makanan Tambahan).`
+        });
+      } else if (lilaTrend === 'improving') {
+        recommendations.push({
+          type: 'monitor',
+          priority: 'medium',
+          message: `LILA membaik namun masih KEK (${latestLila} cm). Lanjutkan program PMT dan pantau setiap kunjungan.`
+        });
+      } else {
+        recommendations.push({
+          type: 'action',
+          priority: 'medium',
+          message: `LILA masih di bawah normal (${latestLila} cm). Rujuk ke ahli gizi dan berikan PMT.`
+        });
+      }
+    } else if (lilaResolved && lilaReadings.length > 0) {
+      recommendations.push({
+        type: 'resolved',
+        priority: 'low',
+        message: `LILA sudah normal (${latestLila} cm). Pertahankan asupan gizi yang baik.`
+      });
+    }
+
+    if (isStale && !isPastDue) {
+      recommendations.push({
+        type: 'overdue_visit',
+        priority: 'high',
+        message: `Kunjungan terakhir ${daysSinceLastVisit} hari yang lalu. Segera jadwalkan kunjungan ANC berikutnya.`
+      });
+    }
+
+    if (conditionResolved && isStale && !isPastDue) {
+      recommendations.push({
+        type: 'archive',
+        priority: 'low',
+        message: `Kondisi sudah membaik dan data sudah lama tidak diperbarui. Data ini dapat diarsipkan jika ibu sudah tidak aktif dalam pemantauan.`
+      });
+    }
+
+    if (recommendations.length === 0) {
+      recommendations.push({
+        type: 'monitor',
+        priority: 'low',
+        message: 'Pantau kondisi pada kunjungan ANC berikutnya.'
+      });
+    }
+
+    res.json({
+      kehamilanId,
+      usiaKehamilanMinggu,
+      totalVisits: visits.length,
+      daysSinceLastVisit,
+      isStale,
+      isPastDue,
+      daysPastDue,
+      conditionResolved,
+      hbTrend,
+      lilaTrend,
+      latestHb,
+      latestLila,
+      shouldAutoArchive,
+      recommendations
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to generate action recommendation' });
   }
 });
 

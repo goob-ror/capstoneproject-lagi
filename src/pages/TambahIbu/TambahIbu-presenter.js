@@ -10,12 +10,8 @@ class TambahIbuPresenter {
     try {
       const data = await this.model.getIbuById(id);
       this.view.displayIbuData(data);
-    } catch (error) {      
-      if (error.message.includes('401') || error.message.includes('Unauthorized')) {
-        this.handleLogout();
-        return;
-      }
-      
+    } catch (error) {
+      if (error.status === 401) return;
       this.view.setError('Gagal memuat data. Silakan coba lagi.');
     }
   }
@@ -28,7 +24,6 @@ class TambahIbuPresenter {
     try {
       const isEditMode = !!formData.id;
       
-      // Validate form data
       const validation = this.model.validateFormData(formData);
       
       if (!validation.isValid) {
@@ -37,7 +32,6 @@ class TambahIbuPresenter {
         return;
       }
 
-      // Create or update ibu data
       if (isEditMode) {
         await this.model.updateIbu(formData.id, formData);
         this.view.onSuccess('Data ibu berhasil diperbarui!');
@@ -45,11 +39,8 @@ class TambahIbuPresenter {
         await this.model.createIbu(formData);
         this.view.onSuccess('Data ibu berhasil ditambahkan!');
       }
-    } catch (error) {      
-      if (error.message.includes('401') || error.message.includes('Unauthorized')) {
-        this.handleLogout();
-        return;
-      }
+    } catch (error) {
+      if (error.status === 401) return;
 
       if (error.message.includes('already exists')) {
         this.view.setError('NIK sudah terdaftar dalam sistem');

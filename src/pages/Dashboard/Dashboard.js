@@ -4,6 +4,7 @@ import { Chart as ChartJS, ArcElement, CategoryScale, LinearScale, BarElement, T
 import { Pie, Bar } from 'react-chartjs-2';
 import DashboardPresenter from './Dashboard-presenter';
 import Sidebar from '../../components/Sidebar/Sidebar';
+import apiClient from '../../services/apiClient';
 import './Dashboard.css';
 
 ChartJS.register(ArcElement, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
@@ -28,8 +29,16 @@ const Dashboard = () => {
   const [dueDatePage, setDueDatePage] = useState(1);
   const [ancSchedulePage, setANCSchedulePage] = useState(1);
   const [atRiskPage, setAtRiskPage] = useState(1);
-  const [hideDueDateOverdue, setHideDueDateOverdue] = useState(false);
-  const [hideANCOverdue, setHideANCOverdue] = useState(false);
+  const [hideDueDateOverdue, setHideDueDateOverdue] = useState(
+    () => localStorage.getItem('dashboard_hideDueDateOverdue') === 'true'
+  );
+  const [hideANCOverdue, setHideANCOverdue] = useState(
+    () => localStorage.getItem('dashboard_hideANCOverdue') === 'true'
+  );
+  // Rekomendasi Aksi state: { [kehamilanId]: { loading, data, error, expanded } }
+  const [rekomendasiState, setRekomendasiState] = useState({});
+  // Dismissed (auto-archived) mother IDs
+  const [dismissedIds, setDismissedIds] = useState([]);
   const rowsPerPage = 20;
   const atRiskRowsPerPage = 5;
 
@@ -58,16 +67,9 @@ const Dashboard = () => {
     // Auto-update pregnancy statuses on dashboard load
     const autoUpdateStatuses = async () => {
       try {
-        const token = localStorage.getItem('token');
-        await fetch('/api/dashboard/auto-update-statuses', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
+        await apiClient.post('/api/dashboard/auto-update-statuses', {});
       } catch (error) {
-        throw error;
+        // non-critical background task, ignore errors
       }
     };
     
@@ -77,10 +79,6 @@ const Dashboard = () => {
 
   const handleLogout = () => {
     presenter.handleLogout();
-  };
-
-  const handleRefresh = () => {
-    presenter.handleRefresh();
   };
 
   const formatDueDate = (daysUntilDue) => {
@@ -129,12 +127,72 @@ const Dashboard = () => {
 
   // Reset to page 1 when filter changes
   useEffect(() => {
+    localStorage.setItem('dashboard_hideDueDateOverdue', hideDueDateOverdue);
     setDueDatePage(1);
   }, [hideDueDateOverdue]);
 
   useEffect(() => {
+    localStorage.setItem('dashboard_hideANCOverdue', hideANCOverdue);
     setANCSchedulePage(1);
   }, [hideANCOverdue]);
+
+  // Fetch and toggle Rekomendasi Aksi for a given mother
+  const handleToggleRekomendasi = async (mother) => {
+    const id = mother.kehamilan_id;
+    const current = rekomendasiState[id];
+
+    // If already loaded, just toggle expanded
+    if (current && current.data) {
+      setRekomendasiState(prev => ({
+        ...prev,
+        [id]: { ...prev[id], expanded: !prev[id].expanded }
+      }));
+      return;
+    }
+
+    // Start loading
+    setRekomendasiState(prev => ({
+      ...prev,
+      [id]: { loading: true, data: null, error: null, expanded: true }
+    }));
+
+    try {
+      const data = await presenter.model.getActionRecommendation(id);
+      setRekomendasiState(prev => ({
+        ...prev,
+        [id]: { loading: false, data, error: null, expanded: true }
+      }));
+    } catch (err) {
+      setRekomendasiState(prev => ({
+        ...prev,
+        [id]: { loading: false, data: null, error: 'Gagal memuat rekomendasi.', expanded: true }
+      }));
+    }
+  };
+
+  // Dismiss (archive) a mother from the at-risk list
+  const handleDismiss = (kehamilanId) => {
+    setDismissedIds(prev => [...prev, kehamilanId]);
+    setRekomendasiState(prev => {
+      const next = { ...prev };
+      delete next[kehamilanId];
+      return next;
+    });
+  };
+
+  // Visible at-risk mothers (excluding dismissed)
+  const visibleAtRiskMothers = atRiskMothers
+    ? atRiskMothers.filter(m => !dismissedIds.includes(m.kehamilan_id))
+    : null;
+
+  const rekomendasiTypeConfig = {
+    urgent:        { color: 'rekomendasi-urgent',   icon: '🚨', label: 'Segera' },
+    action:        { color: 'rekomendasi-action',   icon: '⚡', label: 'Tindakan' },
+    monitor:       { color: 'rekomendasi-monitor',  icon: '👁️', label: 'Pantau' },
+    overdue_visit: { color: 'rekomendasi-overdue',  icon: '📅', label: 'Kunjungan Terlambat' },
+    archive:       { color: 'rekomendasi-archive',  icon: '📦', label: 'Arsipkan' },
+    resolved:      { color: 'rekomendasi-resolved', icon: '✅', label: 'Membaik' },
+  };
 
   const ibuByKelurahanChart = ibuByKelurahan ? {
     labels: ibuByKelurahan.map(item => item.kelurahan),
@@ -327,12 +385,6 @@ const Dashboard = () => {
             <h1>Dashboard</h1>
             <p>Selamat datang, <strong>{user?.nama_lengkap || user?.username}</strong></p>
           </div>
-          <button className="refresh-btn" onClick={handleRefresh}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" fill="currentColor"/>
-            </svg>
-            Refresh
-          </button>
         </div>
 
         {error && (
@@ -454,44 +506,144 @@ const Dashboard = () => {
             <div className="chart-card at-risk-card">
               <h3 className="chart-title">Ibu Berisiko - Perlu Perhatian</h3>
               <p className="at-risk-subtitle">Anemia dan/atau KEK (LILA &lt; 24 cm)</p>
-              {atRiskMothers && atRiskMothers.length > 0 ? (
+              {visibleAtRiskMothers && visibleAtRiskMothers.length > 0 ? (
                 <>
                   <div className="at-risk-list">
-                    {getPaginatedData(atRiskMothers, atRiskPage, atRiskRowsPerPage).map((mother, index) => (
-                      <div key={mother.id} className="at-risk-item">
-                        <div className="at-risk-header">
-                          <span className="at-risk-number">{((atRiskPage - 1) * atRiskRowsPerPage) + index + 1}</span>
-                          <div className="at-risk-info">
-                            <strong>{mother.nama_lengkap}</strong>
-                            <span className="at-risk-nik">{mother.nik_ibu}</span>
+                    {getPaginatedData(visibleAtRiskMothers, atRiskPage, atRiskRowsPerPage).map((mother, index) => {
+                      const rekState = rekomendasiState[mother.kehamilan_id];
+                      const isExpanded = rekState?.expanded;
+                      return (
+                        <div key={mother.id} className={`at-risk-item${rekState?.data?.shouldAutoArchive ? ' at-risk-item-archive' : ''}`}>
+                          <div className="at-risk-header">
+                            <span className="at-risk-number">{((atRiskPage - 1) * atRiskRowsPerPage) + index + 1}</span>
+                            <div className="at-risk-info">
+                              {mother.no_hp ? (
+                                <a
+                                  href={`https://wa.me/${mother.no_hp.replace(/\D/g, '').replace(/^0/, '62')}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="at-risk-name-link"
+                                >
+                                  {mother.nama_lengkap}
+                                </a>
+                              ) : (
+                                <strong>{mother.nama_lengkap}</strong>
+                              )}
+                              <span className="at-risk-nik">{mother.nik_ibu}</span>
+                            </div>
                           </div>
+                          <div className="at-risk-details">
+                            <div className="at-risk-badges">
+                              {mother.status_anemia !== 'Normal' && (
+                                <span className={`badge badge-${
+                                  mother.status_anemia === 'Anemia Berat' ? 'danger' :
+                                  mother.status_anemia === 'Anemia Sedang' ? 'warning' : 'warning-light'
+                                }`}>
+                                  {mother.status_anemia} (Hb: {mother.hemoglobin} g/dL)
+                                </span>
+                              )}
+                              {mother.status_kek === 'KEK' && (
+                                <span className="badge badge-orange">
+                                  KEK (LILA: {mother.lila} cm)
+                                </span>
+                              )}
+                            </div>
+                            <div className="at-risk-meta">
+                              <span>{mother.nama_kelurahan || 'Tidak Diketahui'}</span>
+                              <span>•</span>
+                              <span>{mother.usia_kehamilan_minggu} minggu</span>
+                            </div>
+                          </div>
+
+                          {/* Rekomendasi Aksi toggle button */}
+                          <button
+                            className={`rekomendasi-toggle-btn${isExpanded ? ' active' : ''}`}
+                            onClick={() => handleToggleRekomendasi(mother)}
+                            aria-expanded={isExpanded}
+                          >
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" fill="currentColor"/>
+                            </svg>
+                            Rekomendasi Aksi
+                            <svg
+                              width="12" height="12" viewBox="0 0 24 24" fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                              style={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}
+                            >
+                              <path d="M7 10l5 5 5-5z" fill="currentColor"/>
+                            </svg>
+                          </button>
+
+                          {/* Rekomendasi Aksi panel */}
+                          {isExpanded && (
+                            <div className="rekomendasi-panel">
+                              {rekState?.loading && (
+                                <div className="rekomendasi-loading">
+                                  <div className="rekomendasi-spinner"></div>
+                                  <span>Menganalisis data kunjungan...</span>
+                                </div>
+                              )}
+                              {rekState?.error && (
+                                <p className="rekomendasi-error">{rekState.error}</p>
+                              )}
+                              {rekState?.data && (
+                                <>
+                                  {/* Trend summary */}
+                                  <div className="rekomendasi-trend-row">
+                                    {rekState.data.latestHb !== null && (
+                                      <span className={`trend-chip trend-${rekState.data.hbTrend}`}>
+                                        Hb {rekState.data.hbTrend === 'improving' ? '↑' : rekState.data.hbTrend === 'worsening' ? '↓' : '→'} {rekState.data.hbTrend === 'improving' ? 'Membaik' : rekState.data.hbTrend === 'worsening' ? 'Memburuk' : rekState.data.hbTrend === 'stable' ? 'Stabil' : 'Belum cukup data'}
+                                      </span>
+                                    )}
+                                    {rekState.data.latestLila !== null && (
+                                      <span className={`trend-chip trend-${rekState.data.lilaTrend}`}>
+                                        LILA {rekState.data.lilaTrend === 'improving' ? '↑' : rekState.data.lilaTrend === 'worsening' ? '↓' : '→'} {rekState.data.lilaTrend === 'improving' ? 'Membaik' : rekState.data.lilaTrend === 'worsening' ? 'Memburuk' : rekState.data.lilaTrend === 'stable' ? 'Stabil' : 'Belum cukup data'}
+                                      </span>
+                                    )}
+                                    {rekState.data.daysSinceLastVisit !== null && (
+                                      <span className={`trend-chip trend-${rekState.data.isStale ? 'worsening' : 'improving'}`}>
+                                        Kunjungan {rekState.data.daysSinceLastVisit}h lalu
+                                      </span>
+                                    )}
+                                  </div>
+
+                                  {/* Recommendation items */}
+                                  <div className="rekomendasi-list">
+                                    {rekState.data.recommendations.map((rec, i) => {
+                                      const cfg = rekomendasiTypeConfig[rec.type] || rekomendasiTypeConfig.monitor;
+                                      return (
+                                        <div key={i} className={`rekomendasi-item ${cfg.color}`}>
+                                          <span className="rekomendasi-icon">{cfg.icon}</span>
+                                          <div className="rekomendasi-content">
+                                            <span className="rekomendasi-label">{cfg.label}</span>
+                                            <p className="rekomendasi-message">{rec.message}</p>
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+
+                                  {/* Auto-archive / dismiss button */}
+                                  {rekState.data.shouldAutoArchive && (
+                                    <button
+                                      className="rekomendasi-dismiss-btn"
+                                      onClick={() => handleDismiss(mother.kehamilan_id)}
+                                    >
+                                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M20 6H16V4c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v2H4v2h1l1 14h12l1-14h1V6zM10 4h4v2h-4V4zm6 16H8l-.9-12h9.8L14 20z" fill="currentColor"/>
+                                      </svg>
+                                      Arsipkan dari daftar ini
+                                    </button>
+                                  )}
+                                </>
+                              )}
+                            </div>
+                          )}
                         </div>
-                        <div className="at-risk-details">
-                          <div className="at-risk-badges">
-                            {mother.status_anemia !== 'Normal' && (
-                              <span className={`badge badge-${
-                                mother.status_anemia === 'Anemia Berat' ? 'danger' :
-                                mother.status_anemia === 'Anemia Sedang' ? 'warning' : 'warning-light'
-                              }`}>
-                                {mother.status_anemia} (Hb: {mother.hemoglobin} g/dL)
-                              </span>
-                            )}
-                            {mother.status_kek === 'KEK' && (
-                              <span className="badge badge-orange">
-                                KEK (LILA: {mother.lila} cm)
-                              </span>
-                            )}
-                          </div>
-                          <div className="at-risk-meta">
-                            <span>{mother.nama_kelurahan || 'Tidak Diketahui'}</span>
-                            <span>•</span>
-                            <span>{mother.usia_kehamilan_minggu} minggu</span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
-                  {atRiskMothers.length > atRiskRowsPerPage && (
+                  {visibleAtRiskMothers.length > atRiskRowsPerPage && (
                     <div className="pagination">
                       <button 
                         onClick={() => setAtRiskPage(Math.max(1, atRiskPage - 1))}
@@ -501,11 +653,11 @@ const Dashboard = () => {
                         ‹ Sebelumnya
                       </button>
                       <span className="pagination-info">
-                        Halaman {atRiskPage} dari {Math.ceil(atRiskMothers.length / atRiskRowsPerPage)}
+                        Halaman {atRiskPage} dari {Math.ceil(visibleAtRiskMothers.length / atRiskRowsPerPage)}
                       </span>
                       <button 
-                        onClick={() => setAtRiskPage(Math.min(Math.ceil(atRiskMothers.length / atRiskRowsPerPage), atRiskPage + 1))}
-                        disabled={atRiskPage >= Math.ceil(atRiskMothers.length / atRiskRowsPerPage)}
+                        onClick={() => setAtRiskPage(Math.min(Math.ceil(visibleAtRiskMothers.length / atRiskRowsPerPage), atRiskPage + 1))}
+                        disabled={atRiskPage >= Math.ceil(visibleAtRiskMothers.length / atRiskRowsPerPage)}
                         className="pagination-btn"
                       >
                         Selanjutnya ›

@@ -53,19 +53,26 @@ router.get('/', authMiddleware, async (req, res) => {
     }
     const dateWhereKomp = dateFilterKomp.length > 0 ? 'AND ' + dateFilterKomp.join(' AND ') : '';
 
-    // 1. Get total ibu (filtered by kelurahan only)
-    const totalIbuQuery = `SELECT COUNT(*) as count FROM ibu i 
-         LEFT JOIN kelurahan kel ON i.kelurahan_id = kel.id 
-         WHERE 1=1 ${kelurahanFilter}`;
-    const [totalIbuResult] = await pool.query(totalIbuQuery, kelurahanParams);
+    // 1. Get total ibu who had at least one ANC visit in the selected period
+    const totalIbuQuery = `
+      SELECT COUNT(DISTINCT i.id) as count
+      FROM ibu i
+      INNER JOIN kehamilan k ON k.forkey_ibu = i.id
+      INNER JOIN antenatal_care ac ON ac.forkey_hamil = k.id
+      LEFT JOIN kelurahan kel ON i.kelurahan_id = kel.id
+      WHERE 1=1 ${kelurahanFilter} ${dateWhereANC}`;
+    const [totalIbuResult] = await pool.query(totalIbuQuery, [...kelurahanParams, ...dateParamsANC]);
     const totalIbu = totalIbuResult[0].count;
 
-    // 2. Get total ibu hamil (active pregnancies, filtered by kelurahan only)
-    const totalHamilQuery = `SELECT COUNT(*) as count FROM kehamilan k 
-         INNER JOIN ibu i ON k.forkey_ibu = i.id 
-         LEFT JOIN kelurahan kel ON i.kelurahan_id = kel.id
-         WHERE k.status_kehamilan = 'Hamil' ${kelurahanFilter}`;
-    const [totalHamilResult] = await pool.query(totalHamilQuery, kelurahanParams);
+    // 2. Get total distinct pregnancies with at least one ANC visit in the selected period
+    const totalHamilQuery = `
+      SELECT COUNT(DISTINCT k.id) as count
+      FROM kehamilan k
+      INNER JOIN ibu i ON k.forkey_ibu = i.id
+      INNER JOIN antenatal_care ac ON ac.forkey_hamil = k.id
+      LEFT JOIN kelurahan kel ON i.kelurahan_id = kel.id
+      WHERE 1=1 ${kelurahanFilter} ${dateWhereANC}`;
+    const [totalHamilResult] = await pool.query(totalHamilQuery, [...kelurahanParams, ...dateParamsANC]);
     const totalHamil = totalHamilResult[0].count;
 
     // 3. Get total ANC visits
@@ -124,9 +131,7 @@ router.get('/', authMiddleware, async (req, res) => {
       ORDER BY FIELD(nf.jenis_kunjungan, 'KF1', 'KF2', 'KF3', 'KF4')`;
     const [nifasByType] = await pool.query(nifasByTypeQuery, [...kelurahanParams, ...dateParamsNifas, ...kelurahanParams, ...dateParamsNifas]);
 
-    // 7. Get risk distribution (uses yearly data, ignores month filter)
-    const yearFilterOnly = year ? 'AND YEAR(ac.tanggal_kunjungan) = ?' : '';
-    const yearParamsOnly = year ? [year] : [];
+    // 7. Get risk distribution
     const riskQuery = `
       SELECT 
         ac.status_risiko_visit,
@@ -135,16 +140,16 @@ router.get('/', authMiddleware, async (req, res) => {
           INNER JOIN kehamilan k2 ON ac2.forkey_hamil = k2.id
           INNER JOIN ibu i2 ON k2.forkey_ibu = i2.id
           LEFT JOIN kelurahan kel2 ON i2.kelurahan_id = kel2.id
-          WHERE 1=1 ${kelurahanFilter} ${yearFilterOnly}), 1) as percentage
+          WHERE 1=1 ${kelurahanFilter} ${dateWhereANC}), 1) as percentage
       FROM antenatal_care ac
       INNER JOIN kehamilan k ON ac.forkey_hamil = k.id
       INNER JOIN ibu i ON k.forkey_ibu = i.id
       LEFT JOIN kelurahan kel ON i.kelurahan_id = kel.id
-      WHERE 1=1 ${kelurahanFilter} ${yearFilterOnly}
+      WHERE 1=1 ${kelurahanFilter} ${dateWhereANC}
       GROUP BY ac.status_risiko_visit`;
-    const [riskDistribution] = await pool.query(riskQuery, [...kelurahanParams, ...yearParamsOnly, ...kelurahanParams, ...yearParamsOnly]);
+    const [riskDistribution] = await pool.query(riskQuery, [...kelurahanParams, ...dateParamsANC, ...kelurahanParams, ...dateParamsANC]);
 
-    // 8. Get TT Immunization status (uses yearly data, ignores month filter)
+    // 8. Get TT Immunization status
     const ttQuery = `
       SELECT
         ac.status_imunisasi_tt,
@@ -153,15 +158,15 @@ router.get('/', authMiddleware, async (req, res) => {
           INNER JOIN kehamilan k2 ON ac2.forkey_hamil = k2.id
           INNER JOIN ibu i2 ON k2.forkey_ibu = i2.id
           LEFT JOIN kelurahan kel2 ON i2.kelurahan_id = kel2.id
-          WHERE 1=1 ${kelurahanFilter} ${yearFilterOnly}), 1) as percentage
+          WHERE 1=1 ${kelurahanFilter} ${dateWhereANC}), 1) as percentage
       FROM antenatal_care ac
       INNER JOIN kehamilan k ON ac.forkey_hamil = k.id
       INNER JOIN ibu i ON k.forkey_ibu = i.id
       LEFT JOIN kelurahan kel ON i.kelurahan_id = kel.id
-      WHERE 1=1 ${kelurahanFilter} ${yearFilterOnly}
+      WHERE 1=1 ${kelurahanFilter} ${dateWhereANC}
       GROUP BY ac.status_imunisasi_tt
       ORDER BY ac.status_imunisasi_tt`;
-    const [ttImmunization] = await pool.query(ttQuery, [...kelurahanParams, ...yearParamsOnly, ...kelurahanParams, ...yearParamsOnly]);
+    const [ttImmunization] = await pool.query(ttQuery, [...kelurahanParams, ...dateParamsANC, ...kelurahanParams, ...dateParamsANC]);
 
     // // 9. Get Fe statistics
     // const feQuery = `
@@ -199,36 +204,41 @@ router.get('/', authMiddleware, async (req, res) => {
       percentage_kek: kekstats[0].percentage_kek || 0
     };
 
-    // 10. Get HB Statistics (yearly data, uses lab_screening table)
+    // 10. Get HB Statistics (uses lab_screening joined through ANC visit date)
+    // Hb thresholds for pregnancy (WHO):
+    //   Normal:        >= 11.0 g/dL
+    //   Anemia Ringan: 10.0 – 10.9
+    //   Anemia Sedang:  8.0 –  9.9
+    //   Anemia Berat:  <  8.0
     const hbQuery = `
       SELECT
         ROUND(AVG(ls.hasil_lab_hb), 2) as avg_hb,
         COUNT(*) as total_checked,
         -- Trimester 1 (0-13 weeks)
         SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 <= 13 THEN 1 ELSE 0 END) as trimester1_total,
-        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 <= 13 AND ls.hasil_lab_hb >= 12 THEN 1 ELSE 0 END) as trimester1_normal,
-        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 <= 13 AND ls.hasil_lab_hb >= 10 AND ls.hasil_lab_hb < 12 THEN 1 ELSE 0 END) as trimester1_ringan,
-        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 <= 13 AND ls.hasil_lab_hb >= 7 AND ls.hasil_lab_hb < 10 THEN 1 ELSE 0 END) as trimester1_sedang,
-        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 <= 13 AND ls.hasil_lab_hb < 7 THEN 1 ELSE 0 END) as trimester1_berat,
+        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 <= 13 AND ls.hasil_lab_hb >= 11.0 THEN 1 ELSE 0 END) as trimester1_normal,
+        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 <= 13 AND ls.hasil_lab_hb >= 10.0 AND ls.hasil_lab_hb < 11.0 THEN 1 ELSE 0 END) as trimester1_ringan,
+        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 <= 13 AND ls.hasil_lab_hb >= 8.0 AND ls.hasil_lab_hb < 10.0 THEN 1 ELSE 0 END) as trimester1_sedang,
+        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 <= 13 AND ls.hasil_lab_hb < 8.0 THEN 1 ELSE 0 END) as trimester1_berat,
         -- Trimester 2 (14-27 weeks)
         SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 BETWEEN 14 AND 27 THEN 1 ELSE 0 END) as trimester2_total,
-        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 BETWEEN 14 AND 27 AND ls.hasil_lab_hb >= 12 THEN 1 ELSE 0 END) as trimester2_normal,
-        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 BETWEEN 14 AND 27 AND ls.hasil_lab_hb >= 10 AND ls.hasil_lab_hb < 12 THEN 1 ELSE 0 END) as trimester2_ringan,
-        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 BETWEEN 14 AND 27 AND ls.hasil_lab_hb >= 7 AND ls.hasil_lab_hb < 10 THEN 1 ELSE 0 END) as trimester2_sedang,
-        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 BETWEEN 14 AND 27 AND ls.hasil_lab_hb < 7 THEN 1 ELSE 0 END) as trimester2_berat,
+        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 BETWEEN 14 AND 27 AND ls.hasil_lab_hb >= 11.0 THEN 1 ELSE 0 END) as trimester2_normal,
+        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 BETWEEN 14 AND 27 AND ls.hasil_lab_hb >= 10.0 AND ls.hasil_lab_hb < 11.0 THEN 1 ELSE 0 END) as trimester2_ringan,
+        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 BETWEEN 14 AND 27 AND ls.hasil_lab_hb >= 8.0 AND ls.hasil_lab_hb < 10.0 THEN 1 ELSE 0 END) as trimester2_sedang,
+        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 BETWEEN 14 AND 27 AND ls.hasil_lab_hb < 8.0 THEN 1 ELSE 0 END) as trimester2_berat,
         -- Trimester 3 (28+ weeks)
         SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 >= 28 THEN 1 ELSE 0 END) as trimester3_total,
-        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 >= 28 AND ls.hasil_lab_hb >= 12 THEN 1 ELSE 0 END) as trimester3_normal,
-        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 >= 28 AND ls.hasil_lab_hb >= 10 AND ls.hasil_lab_hb < 12 THEN 1 ELSE 0 END) as trimester3_ringan,
-        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 >= 28 AND ls.hasil_lab_hb >= 7 AND ls.hasil_lab_hb < 10 THEN 1 ELSE 0 END) as trimester3_sedang,
-        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 >= 28 AND ls.hasil_lab_hb < 7 THEN 1 ELSE 0 END) as trimester3_berat
+        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 >= 28 AND ls.hasil_lab_hb >= 11.0 THEN 1 ELSE 0 END) as trimester3_normal,
+        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 >= 28 AND ls.hasil_lab_hb >= 10.0 AND ls.hasil_lab_hb < 11.0 THEN 1 ELSE 0 END) as trimester3_ringan,
+        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 >= 28 AND ls.hasil_lab_hb >= 8.0 AND ls.hasil_lab_hb < 10.0 THEN 1 ELSE 0 END) as trimester3_sedang,
+        SUM(CASE WHEN DATEDIFF(ac.tanggal_kunjungan, k.haid_terakhir) / 7 >= 28 AND ls.hasil_lab_hb < 8.0 THEN 1 ELSE 0 END) as trimester3_berat
       FROM antenatal_care ac
       INNER JOIN kehamilan k ON ac.forkey_hamil = k.id
       INNER JOIN ibu i ON k.forkey_ibu = i.id
       LEFT JOIN kelurahan kel ON i.kelurahan_id = kel.id
       LEFT JOIN lab_screening ls ON ac.forkey_lab_screening = ls.id
-      WHERE ls.hasil_lab_hb IS NOT NULL ${kelurahanFilter} ${yearFilterOnly}`;
-    const [hbStats] = await pool.query(hbQuery, [...kelurahanParams, ...yearParamsOnly]);
+      WHERE ls.hasil_lab_hb IS NOT NULL ${kelurahanFilter} ${dateWhereANC}`;
+    const [hbStats] = await pool.query(hbQuery, [...kelurahanParams, ...dateParamsANC]);
     const hbStatistics = hbStats[0] || { avg_hb: 0, total_checked: 0 };
 
     // 11. Get Obesity Statistics (uses yearly data, requires initial weight from kehamilan)
@@ -247,7 +257,7 @@ router.get('/', authMiddleware, async (req, res) => {
     const [obesityStats] = await pool.query(obesityQuery, kelurahanParams);
     const obesityStatistics = obesityStats[0] || { total_checked: 0, obese_count: 0, obese_percentage: 0 };
 
-    // 12. Get Preeklamsia Statistics (yearly data) - from komplikasi table
+    // 12. Get Preeklamsia Statistics - from komplikasi table
     const preeklamsiaQuery = `
       SELECT
         SUM(CASE WHEN ko.nama_komplikasi LIKE '%Eklamsia%' AND ko.nama_komplikasi NOT LIKE '%Pre%' THEN 1 ELSE 0 END) as eklamsia_count,
@@ -257,8 +267,8 @@ router.get('/', authMiddleware, async (req, res) => {
       INNER JOIN kehamilan k ON ko.forkey_hamil = k.id
       INNER JOIN ibu i ON k.forkey_ibu = i.id
       LEFT JOIN kelurahan kel ON i.kelurahan_id = kel.id
-      WHERE 1=1 ${kelurahanFilter} ${year ? 'AND YEAR(ko.tanggal_diagnosis) = ?' : ''}`;
-    const [preeklamsiaStats] = await pool.query(preeklamsiaQuery, [...kelurahanParams, ...(year ? [year] : [])]);
+      WHERE 1=1 ${kelurahanFilter} ${dateWhereKomp}`;
+    const [preeklamsiaStats] = await pool.query(preeklamsiaQuery, [...kelurahanParams, ...dateParamsKomp]);
     const preeklamsiaStatistics = { 
       eklamsia_count: preeklamsiaStats[0].eklamsia_count || 0,
       preeklamsia_count: preeklamsiaStats[0].preeklamsia_count || 0,
@@ -266,47 +276,69 @@ router.get('/', authMiddleware, async (req, res) => {
       total_preeklamsia: (preeklamsiaStats[0].eklamsia_count || 0) + (preeklamsiaStats[0].preeklamsia_count || 0)
     };
 
-    // 13. Get HIV Statistics (yearly data) - from lab_screening table
+    // 13a. Get HIV Statistics - joined through ANC visit date
     const hivQuery = `
       SELECT
         COUNT(*) as total_screened,
         SUM(CASE WHEN ls.skrining_hiv = 'Reaktif' THEN 1 ELSE 0 END) as hiv_positive,
         ROUND(SUM(CASE WHEN ls.skrining_hiv = 'Reaktif' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 1) as hiv_percentage
       FROM lab_screening ls
-      INNER JOIN kehamilan k ON ls.forkey_hamil = k.id
+      INNER JOIN antenatal_care ac ON ac.forkey_lab_screening = ls.id
+      INNER JOIN kehamilan k ON ac.forkey_hamil = k.id
       INNER JOIN ibu i ON k.forkey_ibu = i.id
       LEFT JOIN kelurahan kel ON i.kelurahan_id = kel.id
-      WHERE ls.skrining_hiv IS NOT NULL ${kelurahanFilter} ${year ? 'AND YEAR(ls.created_at) = ?' : ''}`;
-    const [hivStats] = await pool.query(hivQuery, [...kelurahanParams, ...(year ? [year] : [])]);
+      WHERE ls.skrining_hiv IS NOT NULL ${kelurahanFilter} ${dateWhereANC}`;
+    const [hivStats] = await pool.query(hivQuery, [...kelurahanParams, ...dateParamsANC]);
     const hivStatistics = hivStats[0] || { total_screened: 0, hiv_positive: 0, hiv_percentage: 0 };
 
-    // 13. Get Hepatitis B Statistics (yearly data) - from lab_screening table
+    // 13b. Get Hepatitis B Statistics - joined through ANC visit date
     const hepatitisQuery = `
       SELECT
         COUNT(*) as total_screened,
         SUM(CASE WHEN ls.skrining_hbsag = 'Reaktif' THEN 1 ELSE 0 END) as hepatitis_b_positive,
         ROUND(SUM(CASE WHEN ls.skrining_hbsag = 'Reaktif' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 1) as hepatitis_percentage
       FROM lab_screening ls
-      INNER JOIN kehamilan k ON ls.forkey_hamil = k.id
+      INNER JOIN antenatal_care ac ON ac.forkey_lab_screening = ls.id
+      INNER JOIN kehamilan k ON ac.forkey_hamil = k.id
       INNER JOIN ibu i ON k.forkey_ibu = i.id
       LEFT JOIN kelurahan kel ON i.kelurahan_id = kel.id
-      WHERE ls.skrining_hbsag IS NOT NULL ${kelurahanFilter} ${year ? 'AND YEAR(ls.created_at) = ?' : ''}`;
-    const [hepatitisStats] = await pool.query(hepatitisQuery, [...kelurahanParams, ...(year ? [year] : [])]);
+      WHERE ls.skrining_hbsag IS NOT NULL ${kelurahanFilter} ${dateWhereANC}`;
+    const [hepatitisStats] = await pool.query(hepatitisQuery, [...kelurahanParams, ...dateParamsANC]);
     const hepatitisStatistics = hepatitisStats[0] || { total_screened: 0, hepatitis_b_positive: 0, hepatitis_percentage: 0 };
 
-    // 14. Get Ibu by Kelurahan (ignores kelurahan filter, always shows all)
+    // 14. Get K1 ANC coverage per Kelurahan
+    // Counts pregnancies that had a K1 visit within the selected period per kelurahan.
+    // total_hamil = all pregnancies with at least one ANC visit in the period (or all active if no date filter)
+    const k1DateFilter = [];
+    const k1DateParams = [];
+    if (year) {
+      k1DateFilter.push('YEAR(ac.tanggal_kunjungan) = ?');
+      k1DateParams.push(year);
+    }
+    if (month) {
+      k1DateFilter.push('MONTH(ac.tanggal_kunjungan) = ?');
+      k1DateParams.push(month);
+    }
+    const k1DateWhere = k1DateFilter.length > 0 ? 'AND ' + k1DateFilter.join(' AND ') : '';
+
     const ibuByKelurahanQuery = `
       SELECT
-        kel.nama_kelurahan as kelurahan,
-        COUNT(DISTINCT i.id) as total,
-        COUNT(DISTINCT CASE WHEN k.status_kehamilan = 'Hamil' THEN i.id END) as hamil,
-        ROUND(COUNT(DISTINCT CASE WHEN k.status_kehamilan = 'Hamil' THEN i.id END) * 100.0 / COUNT(DISTINCT i.id), 1) as percentage
+        kel.nama_kelurahan AS kelurahan,
+        COUNT(DISTINCT k.id) AS total_hamil,
+        COUNT(DISTINCT CASE WHEN ac.jenis_kunjungan = 'K1' THEN k.id END) AS k1_count,
+        ROUND(
+          COUNT(DISTINCT CASE WHEN ac.jenis_kunjungan = 'K1' THEN k.id END) * 100.0
+          / NULLIF(COUNT(DISTINCT k.id), 0),
+          1
+        ) AS k1_percentage
       FROM kelurahan kel
       LEFT JOIN ibu i ON i.kelurahan_id = kel.id
       LEFT JOIN kehamilan k ON k.forkey_ibu = i.id
+        AND k.status_kehamilan IN ('Hamil', 'Bersalin', 'Nifas', 'Selesai')
+      LEFT JOIN antenatal_care ac ON ac.forkey_hamil = k.id ${k1DateWhere}
       GROUP BY kel.id, kel.nama_kelurahan
       ORDER BY kel.nama_kelurahan`;
-    const [ibuByKelurahan] = await pool.query(ibuByKelurahanQuery);
+    const [ibuByKelurahan] = await pool.query(ibuByKelurahanQuery, k1DateParams);
 
     // 15. Get list of all kelurahan for filter dropdown
     const [kelurahanList] = await pool.query(`

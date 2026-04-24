@@ -12,6 +12,7 @@ import {
   getRiskPercentage
 } from '../../utils/maternalRiskScoring';
 import useFormCache, { readCache } from '../../hooks/useFormCache';
+import apiClient from '../../services/apiClient';
 import './TambahANC.css';
 
 const CACHE_KEY_ANC = 'formCache_tambahANC';
@@ -447,16 +448,9 @@ const TambahANC = () => {
             forkey_hamil: formData.forkey_hamil
           }));
 
-        const response = await fetch('/api/komplikasi/anc-with-complications', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          },
-          body: JSON.stringify({
-            ...submitData,
-            complications: complicationsData
-          })
+        const response = await apiClient.post('/api/komplikasi/anc-with-complications', {
+          ...submitData,
+          complications: complicationsData
         });
 
         if (response.ok) {
@@ -468,6 +462,7 @@ const TambahANC = () => {
           setError(errorData.message || 'Terjadi kesalahan saat menyimpan data');
         }
       } catch (error) {
+        if (error.status === 401) return;
         console.error('Error submitting ANC with complications:', error);
         setError('Terjadi kesalahan saat menyimpan data');
       } finally {
@@ -481,6 +476,106 @@ const TambahANC = () => {
 
   const handleLogout = () => {
     presenter.handleLogout();
+  };
+
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+  // Collect critical data alerts to show in the confirmation modal
+  const getCriticalAlerts = () => {
+    const alerts = [];
+
+    // Blood pressure
+    if (formData.tekanan_darah) {
+      const parts = formData.tekanan_darah.split('/');
+      if (parts.length === 2) {
+        const sys = parseInt(parts[0]);
+        const dia = parseInt(parts[1]);
+        if (!isNaN(sys) && !isNaN(dia)) {
+          if (sys >= 160 || dia >= 110) {
+            alerts.push({ level: 'danger', field: 'Tekanan Darah', value: formData.tekanan_darah, note: 'Hipertensi berat — segera rujuk' });
+          } else if (sys >= 140 || dia >= 90) {
+            alerts.push({ level: 'warning', field: 'Tekanan Darah', value: formData.tekanan_darah, note: 'Hipertensi — perlu perhatian' });
+          } else if (sys < 90 || dia < 60) {
+            alerts.push({ level: 'warning', field: 'Tekanan Darah', value: formData.tekanan_darah, note: 'Hipotensi' });
+          }
+        }
+      }
+    }
+
+    // Hemoglobin
+    if (labScreeningData.hasil_lab_hb) {
+      const hb = parseFloat(labScreeningData.hasil_lab_hb);
+      if (!isNaN(hb)) {
+        if (hb < 7) {
+          alerts.push({ level: 'danger', field: 'Hemoglobin', value: `${hb} g/dL`, note: 'Anemia berat' });
+        } else if (hb < 9) {
+          alerts.push({ level: 'warning', field: 'Hemoglobin', value: `${hb} g/dL`, note: 'Anemia sedang' });
+        } else if (hb < 11) {
+          alerts.push({ level: 'warning', field: 'Hemoglobin', value: `${hb} g/dL`, note: 'Anemia ringan' });
+        }
+      }
+    }
+
+    // LILA
+    if (formData.lila) {
+      const lila = parseFloat(formData.lila);
+      if (!isNaN(lila) && lila < 23.5) {
+        alerts.push({ level: 'warning', field: 'LILA', value: `${lila} cm`, note: 'KEK (Kekurangan Energi Kronis)' });
+      }
+    }
+
+    // Fetal heart rate
+    if (formData.denyut_jantung_janin) {
+      const djj = parseInt(formData.denyut_jantung_janin);
+      if (!isNaN(djj)) {
+        if (djj < 110 || djj > 160) {
+          alerts.push({ level: 'danger', field: 'DJJ', value: `${djj} bpm`, note: djj < 110 ? 'Bradikardia janin' : 'Takikardia janin' });
+        }
+      }
+    }
+
+    // Protein urine
+    if (labScreeningData.lab_protein_urine && labScreeningData.lab_protein_urine !== 'Negatif') {
+      const level = ['+3', '+4'].includes(labScreeningData.lab_protein_urine) ? 'danger' : 'warning';
+      alerts.push({ level, field: 'Protein Urine', value: labScreeningData.lab_protein_urine, note: 'Proteinuria terdeteksi' });
+    }
+
+    // Infectious disease screenings
+    const reactiveScreenings = [
+      { key: 'skrining_hiv', label: 'HIV' },
+      { key: 'skrining_sifilis', label: 'Sifilis' },
+      { key: 'skrining_hbsag', label: 'HBsAg' },
+    ].filter(s => labScreeningData[s.key] === 'Reaktif');
+
+    const positiveScreenings = [
+      { key: 'skrining_tb', label: 'TB' },
+    ].filter(s => ['Positif', 'Suspek'].includes(labScreeningData[s.key]));
+
+    reactiveScreenings.forEach(s => {
+      alerts.push({ level: 'danger', field: `Skrining ${s.label}`, value: 'Reaktif', note: 'Perlu penanganan segera' });
+    });
+    positiveScreenings.forEach(s => {
+      alerts.push({ level: 'warning', field: `Skrining ${s.label}`, value: labScreeningData[s.key], note: 'Perlu tindak lanjut' });
+    });
+
+    // High risk status
+    if (formData.status_risiko_visit === 'Tinggi') {
+      alerts.push({ level: 'danger', field: 'Status Risiko', value: 'Risiko Tinggi', note: 'Pertimbangkan rujukan ke dokter' });
+    } else if (formData.status_risiko_visit === 'Sedang') {
+      alerts.push({ level: 'warning', field: 'Status Risiko', value: 'Risiko Sedang', note: 'Pantau lebih ketat' });
+    }
+
+    return alerts;
+  };
+
+  // Called when user clicks Simpan Data — show modal if there are alerts, else submit directly
+  const handleSubmitClick = () => {
+    const alerts = getCriticalAlerts();
+    if (alerts.length > 0) {
+      setShowConfirmModal(true);
+    } else {
+      handleSubmit();
+    }
   };
 
   const TAB_ORDER = ['anc', 'labScreening', 'jiwaScreening', 'complications'];
@@ -1507,7 +1602,7 @@ const TambahANC = () => {
             Batal
           </button>
           {isLastTab ? (
-            <button type="button" className="btn-submit" disabled={loading} onClick={handleSubmit}>
+            <button type="button" className="btn-submit" disabled={loading} onClick={handleSubmitClick}>
               {loading ? 'Menyimpan...' : (isEdit ? 'Update Data' : 'Simpan Data')}
             </button>
           ) : (
@@ -1516,6 +1611,73 @@ const TambahANC = () => {
             </button>
           )}
         </div>
+
+        {/* Confirmation modal for critical data */}
+        {showConfirmModal && (() => {
+          const alerts = getCriticalAlerts();
+          const hasDanger = alerts.some(a => a.level === 'danger');
+          return (
+            <div className="confirm-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="confirm-modal-title">
+              <div className="confirm-modal">
+                <div className={`confirm-modal-header ${hasDanger ? 'header-danger' : 'header-warning'}`}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" fill="currentColor"/>
+                  </svg>
+                  <h2 id="confirm-modal-title">Konfirmasi Data Kritis</h2>
+                </div>
+
+                <div className="confirm-modal-body">
+                  <p className="confirm-modal-intro">
+                    Data berikut memerlukan perhatian khusus. Pastikan nilai sudah benar sebelum menyimpan.
+                  </p>
+
+                  <div className="confirm-alert-list">
+                    {alerts.map((alert, i) => (
+                      <div key={i} className={`confirm-alert-item confirm-alert-${alert.level}`}>
+                        <div className="confirm-alert-icon">
+                          {alert.level === 'danger'
+                            ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="currentColor"/></svg>
+                            : <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" fill="currentColor"/></svg>
+                          }
+                        </div>
+                        <div className="confirm-alert-content">
+                          <span className="confirm-alert-field">{alert.field}</span>
+                          <span className="confirm-alert-value">{alert.value}</span>
+                          <span className="confirm-alert-note">{alert.note}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <p className="confirm-modal-question">
+                    Apakah data sudah benar dan Anda ingin melanjutkan penyimpanan?
+                  </p>
+                </div>
+
+                <div className="confirm-modal-footer">
+                  <button
+                    type="button"
+                    className="confirm-btn-cancel"
+                    onClick={() => setShowConfirmModal(false)}
+                  >
+                    Periksa Kembali
+                  </button>
+                  <button
+                    type="button"
+                    className="confirm-btn-confirm"
+                    disabled={loading}
+                    onClick={() => {
+                      setShowConfirmModal(false);
+                      handleSubmit();
+                    }}
+                  >
+                    {loading ? 'Menyimpan...' : 'Ya, Simpan Data'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
       </main>
     </div>
   );

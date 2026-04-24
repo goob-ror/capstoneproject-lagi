@@ -13,12 +13,8 @@ class KunjunganANCPresenter {
     try {
       const data = await this.model.getAllAnc(year);
       this.view.displayAncData(data);
-    } catch (error) {      
-      if (error.message.includes('401') || error.message.includes('Unauthorized')) {
-        this.handleLogout();
-        return;
-      }
-      
+    } catch (error) {
+      if (error.status === 401) return;
       this.view.setError('Gagal memuat data kunjungan ANC. Silakan coba lagi.');
     } finally {
       this.view.setLoading(false);
@@ -29,12 +25,8 @@ class KunjunganANCPresenter {
     try {
       await this.model.deleteAnc(id);
       await this.loadAncData();
-    } catch (error) {      
-      if (error.message.includes('401') || error.message.includes('Unauthorized')) {
-        this.handleLogout();
-        return;
-      }
-      
+    } catch (error) {
+      if (error.status === 401) return;
       this.view.setError('Gagal menghapus data kunjungan ANC. Silakan coba lagi.');
     }
   }

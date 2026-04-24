@@ -13,12 +13,8 @@ class RekapitulasiPresenter {
     try {
       const data = await this.model.getSummaryData(kelurahan, year, month);
       this.view.displaySummaryData(data);
-    } catch (error) {      
-      if (error.message.includes('401') || error.message.includes('Unauthorized')) {
-        this.handleLogout();
-        return;
-      }
-      
+    } catch (error) {
+      if (error.status === 401) return;
       this.view.setError('Gagal memuat data rekapitulasi. Silakan coba lagi.');
     } finally {
       this.view.setLoading(false);

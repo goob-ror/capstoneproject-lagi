@@ -13,12 +13,8 @@ class KomplikasiPresenter {
     try {
       const data = await this.model.getAllKomplikasi(year);
       this.view.displayKomplikasiData(data);
-    } catch (error) {      
-      if (error.message.includes('401') || error.message.includes('Unauthorized')) {
-        this.handleLogout();
-        return;
-      }
-      
+    } catch (error) {
+      if (error.status === 401) return;
       this.view.setError('Gagal memuat data komplikasi. Silakan coba lagi.');
     } finally {
       this.view.setLoading(false);
@@ -29,12 +25,8 @@ class KomplikasiPresenter {
     try {
       await this.model.deleteKomplikasi(id);
       await this.loadKomplikasiData();
-    } catch (error) {      
-      if (error.message.includes('401') || error.message.includes('Unauthorized')) {
-        this.handleLogout();
-        return;
-      }
-      
+    } catch (error) {
+      if (error.status === 401) return;
       this.view.setError('Gagal menghapus data komplikasi. Silakan coba lagi.');
     }
   }

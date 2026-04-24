@@ -4,6 +4,7 @@ import Select from 'react-select';
 import TambahNifasPresenter from './TambahNifas-presenter';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import useFormCache, { readCache } from '../../hooks/useFormCache';
+import apiClient from '../../services/apiClient';
 import './TambahNifas.css';
 
 const CACHE_KEY_NIFAS = 'formCache_tambahNifas';
@@ -146,14 +147,9 @@ const TambahNifas = () => {
   const fetchLatestPersalinanForMother = async (pregnancyId) => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
       
       // Find the persalinan for this pregnancy
-      const response = await fetch(`/api/nifas/persalinan/by-pregnancy/${pregnancyId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await apiClient.get(`/api/nifas/persalinan/by-pregnancy/${pregnancyId}`);
 
       if (!response.ok) {
         // If no persalinan found, just clear baby data

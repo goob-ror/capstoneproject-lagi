@@ -13,12 +13,8 @@ class DetailIbuPresenter {
     try {
       const data = await this.model.getIbuDetail(id);
       this.view.displayIbuDetail(data);
-    } catch (error) {      
-      if (error.message.includes('401') || error.message.includes('Unauthorized')) {
-        this.handleLogout();
-        return;
-      }
-      
+    } catch (error) {
+      if (error.status === 401) return;
       this.view.setError('Gagal memuat detail ibu. Silakan coba lagi.');
     } finally {
       this.view.setLoading(false);

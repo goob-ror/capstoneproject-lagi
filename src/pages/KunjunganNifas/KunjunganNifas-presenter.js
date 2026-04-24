@@ -1,4 +1,5 @@
 import AuthModel from '../../services/AuthModel';
+import apiClient from '../../services/apiClient';
 
 class KunjunganNifasPresenter {
   constructor(view) {
@@ -16,29 +17,15 @@ class KunjunganNifasPresenter {
       this.view.setLoading(true);
       this.view.clearError();
 
-      const token = this.authModel.getToken();
       const url = year ? `${this.baseURL}/nifas?year=${year}` : `${this.baseURL}/nifas`;
-      const response = await fetch(url, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (response.status === 401) {
-        this.handleLogout();
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch nifas data');
-      }
+      const response = await apiClient.get(url);
+      if (!response.ok) throw new Error('Failed to fetch nifas data');
 
       const data = await response.json();
-      // Store original data for search filtering
       this.originalData = data;
       this.view.displayNifasData(data);
     } catch (error) {
+      if (error.status === 401) return;
       this.view.setError('Gagal memuat data kunjungan nifas');
     } finally {
       this.view.setLoading(false);
@@ -50,28 +37,13 @@ class KunjunganNifasPresenter {
       this.view.setLoading(true);
       this.view.clearError();
 
-      const token = this.authModel.getToken();
-      const response = await fetch(`${this.baseURL}/nifas/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      const response = await apiClient.delete(`${this.baseURL}/nifas/${id}`);
+      if (!response.ok) throw new Error('Failed to delete nifas data');
 
-      if (response.status === 401) {
-        this.handleLogout();
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error('Failed to delete nifas data');
-      }
-
-      // Reload data after successful deletion
       await this.loadNifasData();
       alert('Data kunjungan nifas berhasil dihapus');
     } catch (error) {
+      if (error.status === 401) return;
       this.view.setError('Gagal menghapus data kunjungan nifas');
     } finally {
       this.view.setLoading(false);
@@ -79,26 +51,21 @@ class KunjunganNifasPresenter {
   }
 
   searchNifasData(searchTerm) {
-    // Implement client-side search filtering
     if (this.view.updateTableData && this.originalData) {
       if (!searchTerm || searchTerm.trim() === '') {
-        // If no search term, show all data
         this.view.updateTableData(this.originalData);
       } else {
-        // Filter data based on search term
-        const filteredData = this.originalData.filter(item => {
-          const searchLower = searchTerm.toLowerCase();
-          return (
-            (item.nama_ibu && item.nama_ibu.toLowerCase().includes(searchLower)) ||
-            (item.nik_ibu && item.nik_ibu.toLowerCase().includes(searchLower)) ||
-            (item.jenis_kunjungan && item.jenis_kunjungan.toLowerCase().includes(searchLower)) ||
-            (item.pemeriksa && item.pemeriksa.toLowerCase().includes(searchLower)) ||
-            (item.tekanan_darah && item.tekanan_darah.toLowerCase().includes(searchLower)) ||
-            (item.involusio_uteri && item.involusio_uteri.toLowerCase().includes(searchLower)) ||
-            (item.lochea && item.lochea.toLowerCase().includes(searchLower)) ||
-            (item.payudara && item.payudara.toLowerCase().includes(searchLower))
-          );
-        });
+        const searchLower = searchTerm.toLowerCase();
+        const filteredData = this.originalData.filter(item =>
+          (item.nama_ibu && item.nama_ibu.toLowerCase().includes(searchLower)) ||
+          (item.nik_ibu && item.nik_ibu.toLowerCase().includes(searchLower)) ||
+          (item.jenis_kunjungan && item.jenis_kunjungan.toLowerCase().includes(searchLower)) ||
+          (item.pemeriksa && item.pemeriksa.toLowerCase().includes(searchLower)) ||
+          (item.tekanan_darah && item.tekanan_darah.toLowerCase().includes(searchLower)) ||
+          (item.involusio_uteri && item.involusio_uteri.toLowerCase().includes(searchLower)) ||
+          (item.lochea && item.lochea.toLowerCase().includes(searchLower)) ||
+          (item.payudara && item.payudara.toLowerCase().includes(searchLower))
+        );
         this.view.updateTableData(filteredData);
       }
     }

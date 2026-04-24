@@ -1,103 +1,44 @@
+import apiClient from '../../services/apiClient';
+
 class TambahKomplikasiModel {
   constructor() {
     this.baseURL = '/api/komplikasi';
   }
 
-  getAuthHeaders() {
-    const token = localStorage.getItem('token');
-    return {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    };
-  }
-
   async getActivePregnancies() {
-    try {
-      const response = await fetch('/api/anc/pregnancies/active', {
-        method: 'GET',
-        headers: this.getAuthHeaders()
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch pregnancies');
-      }
-
-      return await response.json();
-    } catch (error) {
-      throw error;
-    }
+    const response = await apiClient.get('/api/anc/pregnancies/active');
+    if (!response.ok) throw new Error('Failed to fetch pregnancies');
+    return response.json();
   }
 
   async getAncByPregnancy(pregnancyId) {
-    try {
-      const response = await fetch(`/api/komplikasi/anc/${pregnancyId}`, {
-        method: 'GET',
-        headers: this.getAuthHeaders()
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch ANC visits');
-      }
-
-      return await response.json();
-    } catch (error) {
-      throw error;
-    }
+    const response = await apiClient.get(`/api/komplikasi/anc/${pregnancyId}`);
+    if (!response.ok) throw new Error('Failed to fetch ANC visits');
+    return response.json();
   }
 
   async getKomplikasiById(id) {
-    try {
-      const response = await fetch(`${this.baseURL}/${id}`, {
-        method: 'GET',
-        headers: this.getAuthHeaders()
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch komplikasi');
-      }
-
-      return await response.json();
-    } catch (error) {
-      throw error;
-    }
+    const response = await apiClient.get(`${this.baseURL}/${id}`);
+    if (!response.ok) throw new Error('Failed to fetch komplikasi');
+    return response.json();
   }
 
   async createKomplikasi(data) {
-    try {
-      const response = await fetch(this.baseURL, {
-        method: 'POST',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(data)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to create komplikasi');
-      }
-
-      return await response.json();
-    } catch (error) {
-      throw error;
+    const response = await apiClient.post(this.baseURL, data);
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to create komplikasi');
     }
+    return response.json();
   }
 
   async updateKomplikasi(id, data) {
-    try {
-      const response = await fetch(`${this.baseURL}/${id}`, {
-        method: 'PUT',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(data)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update komplikasi');
-      }
-
-      return await response.json();
-    } catch (error) {
-      throw error;
+    const response = await apiClient.put(`${this.baseURL}/${id}`, data);
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to update komplikasi');
     }
+    return response.json();
   }
 
   getUser() {

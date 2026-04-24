@@ -5,6 +5,7 @@ import TambahIbuPresenter from './TambahIbu-presenter';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import { calculateBMI, getBMICategory, getBMICategoryColor } from '../../utils/bmiCalculator';
 import useFormCache, { readCache } from '../../hooks/useFormCache';
+import apiClient from '../../services/apiClient';
 import './TambahIbu.css';
 
 const CACHE_KEY_IBU = 'formCache_tambahIbu';
@@ -187,22 +188,13 @@ const TambahIbu = () => {
 
   const loadKelurahanOptions = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/kelurahan', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
+      const response = await apiClient.get('/api/kelurahan');
       if (response.ok) {
         const result = await response.json();
         setKelurahanOptions(result.data || []);
-      } else {
-        console.error('Failed to load kelurahan options');
       }
     } catch (error) {
-      throw error;
+      if (error.status === 401) return;
     }
   };
 
@@ -215,14 +207,7 @@ const TambahIbu = () => {
 
     setLoadingRT(true);
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/kelurahan/rt-options/${kelurahanId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
+      const response = await apiClient.get(`/api/kelurahan/rt-options/${kelurahanId}`);
       if (response.ok) {
         const result = await response.json();
         setRtOptions(result.data.availableRT || []);
@@ -230,6 +215,7 @@ const TambahIbu = () => {
         setRtOptions([]);
       }
     } catch (error) {
+      if (error.status === 401) return;
       setRtOptions([]);
     } finally {
       setLoadingRT(false);
@@ -243,14 +229,7 @@ const TambahIbu = () => {
     }
 
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/kelurahan/posyandu-assignment/${kelurahanId}/${rt}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
+      const response = await apiClient.get(`/api/kelurahan/posyandu-assignment/${kelurahanId}/${rt}`);
       if (response.ok) {
         const result = await response.json();
         setAssignedPosyandu(result.data);
@@ -258,6 +237,7 @@ const TambahIbu = () => {
         setAssignedPosyandu(null);
       }
     } catch (error) {
+      if (error.status === 401) return;
       setAssignedPosyandu(null);
     }
   };

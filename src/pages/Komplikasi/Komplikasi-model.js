@@ -1,52 +1,24 @@
+import apiClient from '../../services/apiClient';
+
 class KomplikasiModel {
   constructor() {
     this.baseURL = '/api/komplikasi';
     this.cachedData = [];
   }
 
-  getAuthHeaders() {
-    const token = localStorage.getItem('token');
-    return {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    };
-  }
-
   async getAllKomplikasi(year = null) {
-    try {
-      const url = year ? `${this.baseURL}?year=${year}` : this.baseURL;
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: this.getAuthHeaders()
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch komplikasi data');
-      }
-
-      const data = await response.json();
-      this.cachedData = data;
-      return data;
-    } catch (error) {
-      throw error;
-    }
+    const url = year ? `${this.baseURL}?year=${year}` : this.baseURL;
+    const response = await apiClient.get(url);
+    if (!response.ok) throw new Error('Failed to fetch komplikasi data');
+    const data = await response.json();
+    this.cachedData = data;
+    return data;
   }
 
   async deleteKomplikasi(id) {
-    try {
-      const response = await fetch(`${this.baseURL}/${id}`, {
-        method: 'DELETE',
-        headers: this.getAuthHeaders()
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete komplikasi');
-      }
-
-      return await response.json();
-    } catch (error) {
-      throw error;
-    }
+    const response = await apiClient.delete(`${this.baseURL}/${id}`);
+    if (!response.ok) throw new Error('Failed to delete komplikasi');
+    return response.json();
   }
 
   fullTextSearch(data, searchTerm) {

@@ -1,122 +1,53 @@
+import apiClient from '../../services/apiClient';
+
 class TambahPersalinanModel {
   constructor() {
     this.baseURL = '/api/persalinan';
   }
 
-  getAuthHeaders() {
-    const token = localStorage.getItem('token');
-    return {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    };
-  }
-
   async getReadyToDeliverPregnancies() {
-    try {
-      const response = await fetch(`${this.baseURL}/pregnancies/ready-to-deliver`, {
-        method: 'GET',
-        headers: this.getAuthHeaders()
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch ready to deliver pregnancies');
-      }
-
-      return await response.json();
-    } catch (error) {
-      throw error;
-    }
+    const response = await apiClient.get(`${this.baseURL}/pregnancies/ready-to-deliver`);
+    if (!response.ok) throw new Error('Failed to fetch ready to deliver pregnancies');
+    return response.json();
   }
 
   async getMotherDataByPregnancy(pregnancyId) {
-    try {
-      const response = await fetch(`${this.baseURL}/pregnancy/${pregnancyId}/mother`, {
-        method: 'GET',
-        headers: this.getAuthHeaders()
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch mother data');
-      }
-
-      return await response.json();
-    } catch (error) {
-      throw error;
-    }
+    const response = await apiClient.get(`${this.baseURL}/pregnancy/${pregnancyId}/mother`);
+    if (!response.ok) throw new Error('Failed to fetch mother data');
+    return response.json();
   }
 
   async getPersalinanById(id) {
-    try {
-      const response = await fetch(`${this.baseURL}/${id}`, {
-        method: 'GET',
-        headers: this.getAuthHeaders()
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch persalinan data');
-      }
-
-      return await response.json();
-    } catch (error) {
-      throw error;
-    }
+    const response = await apiClient.get(`${this.baseURL}/${id}`);
+    if (!response.ok) throw new Error('Failed to fetch persalinan data');
+    return response.json();
   }
 
   async createPersalinan(data) {
-    try {
-      const response = await fetch(this.baseURL, {
-        method: 'POST',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(data)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to create persalinan');
-      }
-
-      return await response.json();
-    } catch (error) {
-      throw error;
+    const response = await apiClient.post(this.baseURL, data);
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to create persalinan');
     }
+    return response.json();
   }
 
   async updatePersalinan(id, data) {
-    try {
-      const response = await fetch(`${this.baseURL}/${id}`, {
-        method: 'PUT',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(data)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update persalinan');
-      }
-
-      return await response.json();
-    } catch (error) {
-      throw error;
+    const response = await apiClient.put(`${this.baseURL}/${id}`, data);
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to update persalinan');
     }
+    return response.json();
   }
 
   async createKomplikasi(data) {
-    try {
-      const response = await fetch('/api/komplikasi', {
-        method: 'POST',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(data)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to create komplikasi');
-      }
-
-      return await response.json();
-    } catch (error) {
-      throw error;
+    const response = await apiClient.post('/api/komplikasi', data);
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to create komplikasi');
     }
+    return response.json();
   }
 
   getUser() {
