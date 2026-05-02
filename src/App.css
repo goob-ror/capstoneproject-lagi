@@ -56,18 +56,4 @@ button {
 }
 
 /* Give main content breathing room for the hamburger button on mobile */
-@media (max-width: 1024px) {
-  .main-content {
-    margin-left: 70px !important;
-    width: calc(100% - 70px) !important;
-    padding-top: 20px;
-  }
-}
-
-@media (max-width: 480px) {
-  .main-content {
-    margin-left: 0 !important;
-    width: 100% !important;
-    padding-top: 70px !important;
-  }
-}
+/* Responsive offsets are now handled by Tailwind classes in Dashboard.js and other pages */

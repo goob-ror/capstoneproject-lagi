@@ -66,35 +66,23 @@ const Sidebar = ({ user, onLogout }) => {
 
   const close = useCallback(() => setIsOpen(false), []);
 
-  // Close on route change
-  useEffect(() => {
-    close();
-  }, [location.pathname, close]);
+  useEffect(() => { close(); }, [location.pathname, close]);
 
-  // Close on outside click
   useEffect(() => {
     if (!isOpen) return;
     const handleOutside = (e) => {
-      if (!e.target.closest('.sidebar') && !e.target.closest('.hamburger-btn')) {
-        close();
-      }
+      if (!e.target.closest('.sidebar') && !e.target.closest('.hamburger-btn')) close();
     };
     document.addEventListener('mousedown', handleOutside);
     return () => document.removeEventListener('mousedown', handleOutside);
   }, [isOpen, close]);
 
-  // Lock body scroll when open on mobile
   useEffect(() => {
     const isMobile = window.innerWidth <= 480;
-    if (isOpen && isMobile) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
+    document.body.style.overflow = (isOpen && isMobile) ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
   }, [isOpen]);
 
-  // Close on Escape key
   useEffect(() => {
     if (!isOpen) return;
     const handleKey = (e) => { if (e.key === 'Escape') close(); };
@@ -104,9 +92,10 @@ const Sidebar = ({ user, onLogout }) => {
 
   return (
     <>
-      {/* Hamburger — visible on tablet & mobile */}
+      {/* ── Hamburger button — shown on tablet & mobile (≤1024px) ── */}
       <button
-        className={`hamburger-btn${isOpen ? ' is-open' : ''}`}
+        className={`hamburger-btn fixed top-[14px] z-[201] w-[42px] h-[42px] bg-white border-none rounded-lg shadow-md cursor-pointer flex-col items-center justify-center gap-[5px] p-0 hover:bg-gray-100 hidden lg:hidden max-lg:flex${isOpen ? ' is-open' : ''}`}
+        style={{ left: isOpen && window.innerWidth > 480 ? '294px' : '14px' }}
         onClick={() => setIsOpen((v) => !v)}
         aria-label={isOpen ? 'Tutup menu' : 'Buka menu'}
         aria-expanded={isOpen}
@@ -117,24 +106,48 @@ const Sidebar = ({ user, onLogout }) => {
         <span />
       </button>
 
-      {/* Overlay — always in DOM, toggled via class */}
+      {/* ── Overlay ── */}
       <div
-        className={`sidebar-overlay${isOpen ? ' overlay-visible' : ''}`}
+        className={`sidebar-overlay fixed inset-0 bg-black/45 z-[149] pointer-events-none opacity-0${isOpen ? ' overlay-visible opacity-100 pointer-events-auto' : ''}`}
         onClick={close}
         aria-hidden="true"
       />
 
+      {/* ── Sidebar ── */}
       <aside
         id="app-sidebar"
-        className={`sidebar${isOpen ? ' sidebar-open' : ''}`}
+        style={{
+          transition: 'transform 0.28s cubic-bezier(0.4,0,0.2,1), width 0.28s cubic-bezier(0.4,0,0.2,1)',
+          width: isOpen ? '280px' : undefined,
+        }}
+        className={[
+          'fixed left-0 top-0 z-[150] h-screen bg-white overflow-y-auto overflow-x-hidden flex flex-col',
+          // Desktop: always full 280px
+          'lg:w-[280px]',
+          // Tablet (481–1024px): icon-only 70px strip, expands to 280px when open
+          'max-lg:w-[70px]',
+          // Mobile (≤480px): off-canvas, slides in when open
+          'max-[480px]:w-[280px]',
+          isOpen
+            ? 'shadow-[4px_0_20px_rgba(0,0,0,0.15)] max-[480px]:translate-x-0'
+            : 'shadow-[2px_0_10px_rgba(0,0,0,0.05)] max-[480px]:-translate-x-full',
+        ].join(' ')}
         aria-label="Navigasi utama"
       >
-        <div className="sidebar-header">
-          <img src="/images/logo-withText.png" alt="iBundaCare Logo" className="sidebar-logo" />
-          <h2>iBundaCare</h2>
+        {/* Header */}
+        <div className={`border-b border-gray-200 flex items-center gap-3 flex-shrink-0
+          ${isOpen ? 'px-5 py-[25px] justify-start' : 'px-3 py-5 lg:px-5 lg:py-[25px] justify-center lg:justify-start'}
+        `}>
+          <img src="/images/logo-withText.png" alt="iBundaCare Logo" className="w-[45px] h-[45px] flex-shrink-0" />
+          <h2 className={`text-[18px] font-bold text-[#22C55E] m-0 whitespace-nowrap overflow-hidden
+            ${isOpen ? 'block' : 'hidden lg:block'}
+          `}>
+            iBundaCare
+          </h2>
         </div>
 
-        <nav className="sidebar-nav">
+        {/* Nav */}
+        <nav className="py-[15px] flex-1 overflow-y-auto overflow-x-hidden pb-5">
           {NAV_ITEMS.map((item) => {
             const isActive =
               location.pathname === item.href ||
@@ -143,33 +156,58 @@ const Sidebar = ({ user, onLogout }) => {
               <a
                 key={item.href}
                 href={item.href}
-                className={`nav-item${isActive ? ' active' : ''}`}
                 title={item.label}
+                className={`nav-item flex items-center gap-3 py-3 text-[14px] font-medium font-montserrat whitespace-nowrap overflow-hidden no-underline border-l-[3px] transition-all duration-200
+                  ${isActive
+                    ? 'active bg-[#ECFDF5] text-[#22C55E]'
+                    : 'border-l-transparent text-[#6B7280] hover:bg-gray-50 hover:text-[#22C55E]'
+                  }
+                  ${isOpen
+                    ? 'px-5 justify-start'
+                    : 'px-3 justify-center gap-0 lg:px-5 lg:justify-start lg:gap-3'
+                  }
+                `}
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0">
                   {item.icon}
                 </svg>
-                <span>{item.label}</span>
+                <span className={`overflow-hidden text-ellipsis ${isOpen ? 'block' : 'hidden lg:block'}`}>
+                  {item.label}
+                </span>
               </a>
             );
           })}
         </nav>
 
-        <div className="sidebar-footer">
-          <div className="user-info">
-            <div className="user-avatar">
+        {/* Footer */}
+        <div className="px-[15px] py-[15px] border-t border-gray-200 bg-white flex-shrink-0 overflow-hidden">
+          <div className={`flex items-center gap-[10px] mb-3 overflow-hidden
+            ${isOpen ? 'justify-start' : 'justify-center lg:justify-start'}
+          `}>
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#22C55E] to-[#16A34A] flex items-center justify-center text-white font-bold text-[16px] flex-shrink-0">
               {user?.nama_lengkap?.charAt(0)?.toUpperCase() || 'U'}
             </div>
-            <div className="user-details">
-              <p className="user-name">{user?.nama_lengkap || user?.username}</p>
-              <p className="user-role">{user?.role}</p>
+            <div className={`flex-1 min-w-0 overflow-hidden ${isOpen ? 'block' : 'hidden lg:block'}`}>
+              <p className="text-[13px] font-semibold text-gray-900 m-0 whitespace-nowrap overflow-hidden text-ellipsis">
+                {user?.nama_lengkap || user?.username}
+              </p>
+              <p className="text-[11px] text-gray-500 mt-[2px] mb-0 whitespace-nowrap overflow-hidden">
+                {user?.role}
+              </p>
             </div>
           </div>
-          <button className="logout-btn" onClick={onLogout}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <button
+            className={`w-full flex items-center justify-center bg-red-100 text-red-600 border-none rounded-md text-[13px] font-semibold cursor-pointer font-montserrat whitespace-nowrap overflow-hidden hover:bg-red-200 transition-colors duration-200
+              ${isOpen ? 'gap-2 px-3 py-2' : 'gap-0 p-2 lg:gap-2 lg:px-3 lg:py-2'}
+            `}
+            onClick={onLogout}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0">
               <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z" fill="currentColor"/>
             </svg>
-            <span>Logout</span>
+            <span className={`overflow-hidden text-ellipsis ${isOpen ? 'block' : 'hidden lg:block'}`}>
+              Logout
+            </span>
           </button>
         </div>
       </aside>

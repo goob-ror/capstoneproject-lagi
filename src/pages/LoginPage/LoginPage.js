@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ReCAPTCHA from 'react-google-recaptcha';
 import LoginPresenter from './LoginPage-presenter';
-import './LoginPage.css';
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -20,7 +19,6 @@ const LoginPage = () => {
   const lockoutTimerRef = useRef(null);
 
   const handleSetError = (msg) => {
-    // Parse "X percobaan tersisa" from error message
     const attemptsMatch = msg.match(/\((\d+) percobaan tersisa\)/);
     if (attemptsMatch) {
       setAttemptsRemaining(parseInt(attemptsMatch[1], 10));
@@ -30,7 +28,6 @@ const LoginPage = () => {
       setError(msg);
     }
 
-    // Parse cooldown minutes from lockout message
     const cooldownMatch = msg.match(/dalam (\d+) menit/);
     if (cooldownMatch) {
       const seconds = parseInt(cooldownMatch[1], 10) * 60;
@@ -47,7 +44,6 @@ const LoginPage = () => {
     navigateToRegister: () => navigate('/register')
   }));
 
-  // Countdown timer for lockout
   useEffect(() => {
     if (lockoutSeconds > 0) {
       lockoutTimerRef.current = setInterval(() => {
@@ -65,7 +61,6 @@ const LoginPage = () => {
   }, [lockoutSeconds]);
 
   useEffect(() => {
-    // Clear non-lockout errors after 5 seconds
     if (error && lockoutSeconds === 0) {
       const timer = setTimeout(() => { setError(''); setAttemptsRemaining(null); }, 5000);
       return () => clearTimeout(timer);
@@ -73,10 +68,7 @@ const LoginPage = () => {
   }, [error, lockoutSeconds]);
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleBack = () => {
@@ -85,15 +77,11 @@ const LoginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     if (!recaptchaToken) {
       setError('Silakan verifikasi bahwa Anda bukan robot.');
       return;
     }
-
     presenter.handleLogin(formData.username, formData.password, recaptchaToken);
-    
-    // Reset reCAPTCHA after submission
     if (recaptchaRef.current) {
       recaptchaRef.current.reset();
       setRecaptchaToken(null);
@@ -105,81 +93,106 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-row-one">
-        <div className="return-button">
-          <button type="button" aria-label="Go back" onClick={handleBack}>
+    <div className="bg-white rounded-[25px] w-[500px] max-w-[96vw] p-[30px] relative flex flex-col box-border">
+
+      {/* Row 1: Back button + Logo */}
+      <div className="w-full flex">
+        <div className="p-5 -ml-5">
+          <button type="button" aria-label="Go back" onClick={handleBack}
+            className="bg-transparent border-none cursor-pointer p-0 flex items-center justify-center">
             <svg width="13" height="21" viewBox="0 0 13 21" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path fillRule="evenodd" clipRule="evenodd" d="M10.3333 20.6667L0 10.3333L10.3333 1.90735e-06L12.9167 2.58334L5.16667 10.3333L12.9167 18.0833L10.3333 20.6667Z" fill="#22C55E"/>
             </svg>
           </button>
         </div>
-        <div className="login-logo">
-          <img src="/images/logo-withText.png" alt="logo" />
+        <div className="w-full -ml-[21px] flex justify-center items-center">
+          <img src="/images/logo-withText.png" alt="logo" className="w-[76px] h-[74px]" />
         </div>
       </div>
-      
-      <div className="login-row-two">
-        <div className="login-title">
-          <h1>Selamat Datang!</h1>
-        </div>
-        <div className="login-subtitle">
-          <p>Login untuk mengakses akun Anda</p>
-        </div>
+
+      {/* Row 2: Title + Subtitle */}
+      <div className="w-full flex flex-col mt-[15px] text-center">
+        <h1 className="font-montserrat font-bold text-[22px] leading-8 text-[#515151] m-0 p-0">
+          Selamat Datang!
+        </h1>
+        <p className="font-istok font-normal text-[14px] leading-5 text-[#515151] m-0 p-0 -mt-1">
+          Login untuk mengakses akun Anda
+        </p>
       </div>
-      
-      <div className="login-row-three">
-        <div className="login-form-wrapper">
+
+      {/* Row 3: Form */}
+      <div className="w-auto flex justify-center items-center mt-[15px]">
+        <div className="w-full flex flex-col">
+
+          {/* Error / Warning messages */}
           {error && (
-            <div className={error.includes('⚠️') ? 'warning-message' : 'error-message'}>
+            <div className={`px-[10px] py-[10px] rounded-md mb-[15px] text-[14px] font-montserrat border ${
+              error.includes('⚠️')
+                ? 'bg-amber-50 border-amber-300 text-amber-800'
+                : 'bg-red-100 border-red-300 text-red-800'
+            }`}>
               {error}
             </div>
           )}
+
           {attemptsRemaining !== null && attemptsRemaining > 0 && lockoutSeconds === 0 && (
-            <div className="attempts-warning">
+            <div className="bg-orange-50 border border-orange-300 text-orange-700 px-[10px] py-2 rounded-md mb-[15px] text-[13px] font-montserrat">
               ⚠️ {attemptsRemaining} percobaan tersisa sebelum akun dikunci
             </div>
           )}
+
           {lockoutSeconds > 0 && (
-            <div className="lockout-countdown">
+            <div className="bg-red-100 border border-red-300 text-red-800 px-[10px] py-[10px] rounded-md mb-[15px] text-[14px] font-montserrat text-center">
               🔒 Akun dikunci. Coba lagi dalam{' '}
-              <span className="countdown-time">
+              <span className="font-bold text-[16px] tracking-wider">
                 {Math.floor(lockoutSeconds / 60)}:{String(lockoutSeconds % 60).padStart(2, '0')}
               </span>
             </div>
           )}
+
           <form onSubmit={handleSubmit}>
-            <div className="login-form-group">
-              <label htmlFor="username">Username</label>
-              <input 
-                type="text" 
+            {/* Username */}
+            <div className="mb-[15px]">
+              <label htmlFor="username"
+                className="font-montserrat font-semibold text-[#515151] text-[14px] leading-[10px] block">
+                Username
+              </label>
+              <input
+                type="text"
                 id="username"
-                name="username" 
-                placeholder="Masukkan username Anda" 
+                name="username"
+                placeholder="Masukkan username Anda"
                 value={formData.username}
                 onChange={handleChange}
                 autoComplete="username"
-                required 
+                required
+                className="w-full h-10 rounded-md border border-[#D4D4D4] px-3 font-montserrat font-normal text-[14px] leading-6 text-[#515151] mt-[6px] box-border focus:border-[#22C55E] focus:outline-none"
               />
             </div>
-            <div className="login-form-group password-group">
-              <label htmlFor="password">Password</label>
-              <div className="password-input-wrapper">
-                <input 
+
+            {/* Password */}
+            <div className="relative mb-0">
+              <label htmlFor="password"
+                className="font-montserrat font-semibold text-[#515151] text-[14px] leading-[10px] block">
+                Password
+              </label>
+              <div className="relative flex items-center">
+                <input
                   type={showPassword ? "text" : "password"}
                   id="password"
-                  name="password" 
-                  placeholder="Masukkan password Anda" 
+                  name="password"
+                  placeholder="Masukkan password Anda"
                   value={formData.password}
                   onChange={handleChange}
                   autoComplete="current-password"
-                  required 
+                  required
+                  className="w-full h-10 rounded-md border border-[#D4D4D4] pl-3 pr-11 font-montserrat font-normal text-[14px] leading-6 text-[#515151] mt-[6px] box-border focus:border-[#22C55E] focus:outline-none"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="password-toggle"
                   aria-label={showPassword ? "Hide password" : "Show password"}
+                  className="absolute right-3 bg-transparent border-none cursor-pointer p-[5px] flex items-center justify-center text-[#919191] hover:text-[#22C55E] mt-[6px]"
                 >
                   {showPassword ? (
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -193,23 +206,38 @@ const LoginPage = () => {
                   )}
                 </button>
               </div>
-              <button type="button" onClick={(e) => e.preventDefault()} className="forgot-password-link">
+              <button
+                type="button"
+                onClick={(e) => e.preventDefault()}
+                className="font-istok font-normal text-[12px] leading-[18px] text-[#919191] bg-transparent border-none p-0 cursor-pointer inline-block mt-[5px] hover:text-[#515151] hover:underline"
+              >
                 Lupa password?
               </button>
             </div>
-            <div className="login-form-group recaptcha-group">
+
+            {/* reCAPTCHA */}
+            <div className="my-[15px] flex justify-center scale-95 origin-center">
               <ReCAPTCHA
                 ref={recaptchaRef}
                 sitekey="6Les9mgsAAAAAPDK4yPVWyjHxHl19Eq4IKpmqjB9"
                 onChange={onRecaptchaChange}
               />
             </div>
-            <div className="login-button-wrapper">
-              <button type="submit" className="login-button" disabled={loading || lockoutSeconds > 0}>
+
+            {/* Submit */}
+            <div className="w-full flex flex-col justify-center items-center">
+              <button
+                type="submit"
+                disabled={loading || lockoutSeconds > 0}
+                className="w-[250px] h-[35px] rounded-[10px] -mb-[10px] bg-[#22C55E] border-none cursor-pointer font-istok font-bold text-[16px] leading-6 text-white transition-colors duration-200 hover:bg-[#16A34A] disabled:opacity-60 disabled:cursor-not-allowed"
+              >
                 {loading ? 'LOADING...' : 'LOGIN'}
               </button>
-              <p className="register-text">
-                Belum punya akun? <a href="/register" className="register-link">Register!</a>
+              <p className="font-montserrat font-medium text-[#515151] text-[14px] mt-[15px] mb-0">
+                Belum punya akun?{' '}
+                <a href="/register" className="text-[#22C55E] no-underline font-montserrat font-medium hover:underline">
+                  Register!
+                </a>
               </p>
             </div>
           </form>

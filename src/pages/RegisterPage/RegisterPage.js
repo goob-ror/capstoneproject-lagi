@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ReCAPTCHA from 'react-google-recaptcha';
 import RegisterPresenter from './RegisterPage-presenter';
-import './RegisterPage.css';
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -32,23 +31,16 @@ const RegisterPage = () => {
   }, [error]);
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     if (!recaptchaToken) {
       setError('Silakan verifikasi bahwa Anda bukan robot.');
       return;
     }
-
     presenter.handleRegister({ ...formData, recaptchaToken });
-    
-    // Reset reCAPTCHA after submission
     if (recaptchaRef.current) {
       recaptchaRef.current.reset();
       setRecaptchaToken(null);
@@ -64,53 +56,104 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="register-page-container">
-      <div className="register-image-container">
-        <button className="register-back-button" type="button" aria-label="Go back" onClick={handleBack}>
+    <div className="flex flex-row items-center justify-center w-[900px] max-w-[96vw] min-h-[600px] rounded-[25px] bg-white box-border">
+
+      {/* Left: Image panel — hidden on small screens */}
+      <div
+        className="hidden md:block w-[400px] min-h-[600px] h-full rounded-[25px_0_0_25px] relative bg-cover bg-[60%_50%] flex-shrink-0"
+        style={{ backgroundImage: "url('/images/mothers-health.png')" }}
+      >
+        <button
+          className="p-5 bg-transparent border-none cursor-pointer flex items-center justify-center"
+          type="button"
+          aria-label="Go back"
+          onClick={handleBack}
+        >
           <svg width="13" height="21" viewBox="0 0 13 21" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path fillRule="evenodd" clipRule="evenodd" d="M10.3333 20.6667L0 10.3333L10.3333 1.90735e-06L12.9167 2.58334L5.16667 10.3333L12.9167 18.0833L10.3333 20.6667Z" fill="#22C55E"/>
           </svg>
         </button>
       </div>
-      <div className="register-form-container">
-        <div className="register-logo">
-          <img src="/images/logo-withText.png" alt="iBundaCare Logo" />
-          <h1>Selamat Datang!</h1>
-          <p>Buat akun untuk mulai mendata pasien di Puskesmas Palaran</p>
+
+      {/* Right: Form panel */}
+      <div className="flex flex-col justify-center items-center w-full md:w-[500px] h-full px-5 py-[30px] box-border">
+
+        {/* Back button visible only on mobile */}
+        <div className="md:hidden w-full mb-2">
+          <button
+            className="p-5 -ml-5 bg-transparent border-none cursor-pointer flex items-center justify-center"
+            type="button"
+            aria-label="Go back"
+            onClick={handleBack}
+          >
+            <svg width="13" height="21" viewBox="0 0 13 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path fillRule="evenodd" clipRule="evenodd" d="M10.3333 20.6667L0 10.3333L10.3333 1.90735e-06L12.9167 2.58334L5.16667 10.3333L12.9167 18.0833L10.3333 20.6667Z" fill="#22C55E"/>
+            </svg>
+          </button>
         </div>
-        <form onSubmit={handleSubmit} className="register-form">
-          {error && <div className="register-error-message">{error}</div>}
-          <div className="register-form-group">
-            <label htmlFor="username">Username</label>
-            <input 
-              type="text" 
+
+        {/* Logo + heading */}
+        <div className="w-full flex flex-col items-center text-center">
+          <img src="/images/logo-withText.png" alt="iBundaCare Logo" className="w-[70px] h-[74px]" />
+          <h1 className="font-montserrat font-bold text-[20px] text-[#515151] mt-[15px] mb-[5px]">
+            Selamat Datang!
+          </h1>
+          <p className="font-istok font-normal text-[13px] text-[#515151] m-0 leading-[18px]">
+            Buat akun untuk mulai mendata pasien di Puskesmas Palaran
+          </p>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="w-full mt-5">
+
+          {error && (
+            <div className="bg-red-100 border border-red-300 text-red-800 px-[10px] py-[10px] rounded-md mb-[15px] text-[14px] font-montserrat">
+              {error}
+            </div>
+          )}
+
+          {/* Username */}
+          <div className="mb-[15px]">
+            <label htmlFor="username"
+              className="font-montserrat font-semibold text-[#515151] text-[14px] leading-[10px] block">
+              Username
+            </label>
+            <input
+              type="text"
               id="username"
-              name="username" 
-              placeholder="Masukkan username Anda" 
+              name="username"
+              placeholder="Masukkan username Anda"
               value={formData.username}
               onChange={handleChange}
               autoComplete="username"
-              required 
+              required
+              className="w-full h-10 rounded-md border border-[#D4D4D4] px-3 font-montserrat font-normal text-[14px] leading-6 text-[#515151] mt-[6px] box-border focus:border-[#22C55E] focus:outline-none"
             />
           </div>
-          <div className="register-form-group">
-            <label htmlFor="password">Password</label>
-            <div className="register-password-wrapper">
-              <input 
+
+          {/* Password */}
+          <div className="mb-[15px]">
+            <label htmlFor="password"
+              className="font-montserrat font-semibold text-[#515151] text-[14px] leading-[10px] block">
+              Password
+            </label>
+            <div className="relative flex items-center">
+              <input
                 type={showPassword ? "text" : "password"}
                 id="password"
-                name="password" 
-                placeholder="Masukkan password Anda (min. 6 karakter)" 
+                name="password"
+                placeholder="Masukkan password Anda (min. 6 karakter)"
                 value={formData.password}
                 onChange={handleChange}
                 autoComplete="new-password"
-                required 
+                required
+                className="w-full h-10 rounded-md border border-[#D4D4D4] pl-3 pr-11 font-montserrat font-normal text-[14px] leading-6 text-[#515151] mt-[6px] box-border focus:border-[#22C55E] focus:outline-none"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="register-password-toggle"
                 aria-label={showPassword ? "Hide password" : "Show password"}
+                className="absolute right-3 bg-transparent border-none cursor-pointer p-[5px] flex items-center justify-center text-[#919191] hover:text-[#515151] mt-[6px]"
               >
                 {showPassword ? (
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -125,19 +168,30 @@ const RegisterPage = () => {
               </button>
             </div>
           </div>
-          <div className="register-recaptcha-group">
+
+          {/* reCAPTCHA */}
+          <div className="my-[15px] flex justify-center scale-95 origin-center">
             <ReCAPTCHA
               ref={recaptchaRef}
               sitekey="6Les9mgsAAAAAPDK4yPVWyjHxHl19Eq4IKpmqjB9"
               onChange={onRecaptchaChange}
             />
           </div>
-          <div className="register-button-wrapper">
-            <button type="submit" className="register-submit-button" disabled={loading}>
+
+          {/* Submit */}
+          <div className="w-full flex flex-col justify-center items-center mt-[10px]">
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-[250px] h-[35px] rounded-[10px] bg-[#22C55E] border-none cursor-pointer font-istok font-bold text-[16px] leading-6 text-white transition-colors duration-200 hover:bg-[#16A34A] disabled:opacity-60 disabled:cursor-not-allowed"
+            >
               {loading ? 'LOADING...' : 'REGISTER'}
             </button>
-            <p className="register-login-text">
-              Sudah punya akun? <a href="/login" className="register-login-link">Login!</a>
+            <p className="font-montserrat font-medium text-[#515151] text-[14px] mt-[15px] mb-0">
+              Sudah punya akun?{' '}
+              <a href="/login" className="text-[#22C55E] no-underline font-montserrat font-medium hover:underline">
+                Login!
+              </a>
             </p>
           </div>
         </form>
